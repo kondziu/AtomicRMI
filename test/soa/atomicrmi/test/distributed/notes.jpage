@@ -1,0 +1,125 @@
+Nie wiem czy Wojtek umiescil jakis przyklad z odtwarzaniem stanu w svn?
+Ponizej fragmenty kodu z retry.
+
+Jesli napotkasz na jakies problemy w tym wzgledzie ktore wymagalyby
+konsultacji z Wojtkiem to trudno. Wtedy test funkcjonalny moglby zostac 
+zrobiony w poniedzialek. Lepiej jednak zrobic pomiary jesli bedzie
+widodomo ze bilbioteka dziala prawidlowo. Taka kolejnosc wydaje sie
+byc bardziej naturalna.
+
+Pawel
+
+---------- Forwarded message ----------
+Date: Sun, 27 Jun 2010 00:03:45 +0200
+From: Wojtek Mruczkiewicz <caancel@gazeta.pl>
+To: Pawel.T.Wojciechowski@cs.put.poznan.pl
+Subject: Re: [ITSOA] soa.atomicrmi.TransactionException: Unexpected exception
+     obtaining global transactions lock.
+
+
+On Jun 26, 2010, at 19:13 , Pawel T. Wojciechowski wrote:
+
+> 
+>> Tak. W przypadku błędnego wykrycia awarii możliwe jest jeszcze (poza brakiem 
+>> zachowania własności izolacji i atomowości) również zakleszczenie.
+> 
+> to chcialbym omowic w detalach, ale jesli mozliwe to po konferencji.
+> Mozliwe ze w przyszlosci bedzie trzeba zastosowac jakies rozwiaznie
+> systemowe i np. nadbudowac Atomic RMI na JPaxos lub w inny sposob
+> rozwiazac problem awarii. Poki co jest ok.
+> 
+>>>>>> Zakldam ze obecne nasze API wygląda tak, ze mamy rozdzielone
+>>>>>> 'retry' i 'rollback'. Ta ostatnia operacja nie startujetransakcji
+>>>>>> ponownie tylko odtwarza stam, a ta druga jedynie wykonuje transkacje
+>>>>>> ponownie i stanu wczesniej nie odtwarza. Correct?
+>>>>> Nie, w tej chwili nie zaimplementowałem jeszcze 'retry'. Ale to jest 
+>>>>> proste. Testowałem wszystko na operacji 'rollback' i 'commit'.
+> 
+> Czy zgadza sie co wyzej napisalem, tj. 'rollback' tylko
+> odtwarza stan sprzed transakcji?
+
+Tak.
+
+> A czy planowane 'restart' to to samo co 'retry'? A moze lepiej
+> niech 'retry' to będzie macro ktore kompilator rozwinie do:
+> 
+> 'rollback'
+> 'restart'
+> 
+> gdzie 'restart' po prostu wykonuje transakcje jeszcze raz, wywolując
+> start'. Co o tym myslisz? Jesli miales inną propozycję to napisz.
+
+Planowane restart to to samo co retry. Może być tak jak powyżej. Nie myślałem 
+zbyt długo nad nazewnictwem tych operacji i propzycja jest dobra.
+
+> 
+>> Co do API są dokładnie trzy metody sterujące transakcją:
+>> Transaction t;
+>> t.start();
+>> t.commit();
+>> t.rollback();
+> 
+> Brakuje mi jeszcze listy najwazniejszych wyjątków.
+
+RollbackForcedException - używany do poinformowania o przeprowadzonej operacji 
+rollback.
+TransactionException - informacja o stanie błędnym podczas wykonywania obsługi 
+transakcji. Wyjątek ten w wersji stabilnej biblioteki powinien być rzucany 
+tylko gdy podczas przetwarzania systemowego transakcji ulegnie awarii zdalny 
+węzeł. W większości przypadku jest to opakownie RmiException + dodatkowa 
+informacja o błędzie.
+
+
+>> A teraz co nie jest zaimplementowane:
+>> - metoda public void start(Method m, Object obj, Object... args) klasy 
+>> Transaction. I jest to niezbędny sposób obsługi transakcji w przypadku 
+>> dodania operacji t.restart();
+> 
+> Metoda 'start' juz jest - rozumiem ze chodzi o jej nową implementację (?)
+
+No tak - podobmie jest metoda commit() która odpowiada starej endTask(). 
+Implementacja jest jednak nowa. Z semantyki nowy jest tylko rollback(), cała 
+reszta jest taka sama.
+
+> A w przyszlosci
+>
+>       t.start();
+>       a.setName("Changed");
+>       t.retry();
+> 
+> Albo lepiej bardziej praktyczny przyklad:
+>
+>       t.start();
+>       a.setName("Changed");
+>       if (a.getSomeValue = 0)
+>           t.retry();  // czyli 'rollback' and 'restart'
+>        t.commit();
+> 
+> 
+> czy powyzszy przyklad odpowiada przyszlej implementacji?
+
+No własnie nie bardzo - użycie retry() wymaga wywoływania transakcji przy 
+pomocy refleksji, mniej więcej:
+
+class SomeObject
+{
+        private A a;
+
+        public void run() {
+                Method m = SomeObject.class.getMethod("transaction", new 
+Class<?>[]{Transaction.class});
+                t.start(m, this, t);
+        }
+
+        public void transaction(Transaction t) {
+                a.setName("Changed")
+                if (a.getSomeValue == 0)
+                        t.retry();
+                t.commit();
+        }
+}
+
++ wiele kodu zaciemniającego związanego z obsługą wyjątków
+
+-- 
+Wojtek

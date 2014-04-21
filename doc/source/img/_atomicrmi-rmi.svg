@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="906.79376"
+   height="487.87323"
+   id="svg6363"
+   version="1.1"
+   inkscape:version="0.47 r22583"
+   sodipodi:docname="_atomicrmi-rmi.svg"
+   inkscape:export-filename="/home/joe/Workspace/AtomicRMIRollback/doc/source/img/atomicrmi-rmi.png"
+   inkscape:export-xdpi="203.2352"
+   inkscape:export-ydpi="203.2352">
+  <defs
+     id="defs6365">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 526.18109 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="744.09448 : 526.18109 : 1"
+       inkscape:persp3d-origin="372.04724 : 350.78739 : 1"
+       id="perspective6371" />
+    <inkscape:perspective
+       id="perspective6309"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow1Mend-3"
+       style="overflow:visible">
+      <path
+         id="path4150-5"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker6315"
+       style="overflow:visible">
+      <path
+         id="path6317"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker6319"
+       style="overflow:visible">
+      <path
+         id="path6321"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)" />
+    </marker>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3942"
+       id="linearGradient3948"
+       x1="180.32996"
+       y1="178.50801"
+       x2="540.43164"
+       y2="178.50801"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-133.53475,348.9962)" />
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient3942">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop3944" />
+      <stop
+         style="stop-color:#000000;stop-opacity:0;"
+         offset="1"
+         id="stop3946" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3942"
+       id="linearGradient6327"
+       x1="180.32996"
+       y1="178.50801"
+       x2="540.43164"
+       y2="178.50801"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-2.0203051,-32.324881)" />
+    <inkscape:perspective
+       id="perspective2883"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.7"
+     inkscape:cx="371.33558"
+     inkscape:cy="256.0058"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1440"
+     inkscape:window-height="824"
+     inkscape:window-x="0"
+     inkscape:window-y="24"
+     inkscape:window-maximized="1"
+     showguides="true"
+     inkscape:guide-bbox="true" />
+  <metadata
+     id="metadata6368">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(119.88246,-375.13983)">
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:3;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="rect2816"
+       width="248.49751"
+       height="361.63461"
+       x="-118.38246"
+       y="446.25916"
+       ry="39.395947"
+       inkscape:export-filename="/home/joe/Workspace/Sphinx/source/en/resp/atomicrmi/img/_atomicrmi-rmi.png"
+       inkscape:export-xdpi="130.05536"
+       inkscape:export-ydpi="130.05536" />
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:3;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="rect2816-73"
+       width="163.64473"
+       height="197.98991"
+       x="-75.95607"
+       y="499.39624"
+       ry="39.395947"
+       inkscape:export-filename="/home/joe/Workspace/Sphinx/source/en/resp/atomicrmi/img/_atomicrmi-rmi.png"
+       inkscape:export-xdpi="130.05536"
+       inkscape:export-ydpi="130.05536" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:2;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m -38.832967,499.39625 89.398519,0 c 20.5662,0 37.12311,16.5569 37.12311,37.1231 l 0,11.61676 c 0,0 -163.644733,0 -163.644733,0 l 0,-11.61676 c 0,-20.5662 16.556905,-37.1231 37.123104,-37.1231 z"
+       id="rect2816-73-5"
+       sodipodi:nodetypes="ccccccc"
+       inkscape:export-filename="/home/joe/Workspace/Sphinx/source/en/resp/atomicrmi/img/_atomicrmi-rmi.png"
+       inkscape:export-xdpi="130.05536"
+       inkscape:export-ydpi="130.05536" />
+    <text
+       xml:space="preserve"
+       style="font-size:36px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:url(#linearGradient3948);fill-opacity:1;stroke:none;font-family:Nimbus Mono L;-inkscape-font-specification:Nimbus Mono L Bold"
+       x="-36.574596"
+       y="535.29822"
+       id="text3685"
+       sodipodi:linespacing="100%"
+       inkscape:export-filename="/home/joe/Workspace/Sphinx/source/en/resp/atomicrmi/img/_atomicrmi-rmi.png"
+       inkscape:export-xdpi="130.05536"
+       inkscape:export-ydpi="130.05536"><tspan
+         sodipodi:role="line"
+         id="tspan3687"
+         x="-36.574596"
+         y="535.29822"
+         style="fill:url(#linearGradient3948);fill-opacity:1">obj0</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:36px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;font-family:Nimbus Mono L;-inkscape-font-specification:Nimbus Mono L Bold"
+       x="-37.924603"
+       y="768.44934"
+       id="text3685-7"
+       sodipodi:linespacing="100%"
+       inkscape:export-filename="/home/joe/Workspace/Sphinx/source/en/resp/atomicrmi/img/_atomicrmi-rmi.png"
+       inkscape:export-xdpi="130.05536"
+       inkscape:export-ydpi="130.05536"><tspan
+         sodipodi:role="line"
+         id="tspan3687-3"
+         x="-37.924603"
+         y="768.44934">jvm0</tspan></text>
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:3;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="rect2816-9-6-5"
+       width="300.58746"
+       height="484.87323"
+       x="484.82382"
+       y="376.63983"
+       ry="39.395947"
+       inkscape:export-filename="/home/joe/Workspace/Sphinx/source/en/resp/atomicrmi/img/_atomicrmi-rmi.png"
+       inkscape:export-xdpi="130.05536"
+       inkscape:export-ydpi="130.05536" />
+    <text
+       xml:space="preserve"
+       style="font-size:36px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;font-family:Nimbus Mono L;-inkscape-font-specification:Nimbus Mono L Bold"
+       x="591.32666"
+       y="822.49243"
+       id="text3685-7-6"
+       sodipodi:linespacing="100%"
+       inkscape:export-filename="/home/joe/Workspace/Sphinx/source/en/resp/atomicrmi/img/_atomicrmi-rmi.png"
+       inkscape:export-xdpi="130.05536"
+       inkscape:export-ydpi="130.05536"><tspan
+         sodipodi:role="line"
+         id="tspan3687-3-4"
+         x="591.32666"
+         y="822.49243">jvm1</tspan></text>
+    <g
+       id="g5810"
+       transform="translate(32.721842,348.9962)"
+       inkscape:export-filename="/home/joe/Workspace/Sphinx/source/en/resp/atomicrmi/img/_atomicrmi-rmi.png"
+       inkscape:export-xdpi="130.05536"
+       inkscape:export-ydpi="130.05536">
+      <g
+         transform="translate(64,0)"
+         id="g5804">
+        <rect
+           style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:3;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+           id="rect2816-73-6"
+           width="163.64473"
+           height="197.98991"
+           x="493.48392"
+           y="169.08786"
+           ry="39.395947" />
+        <path
+           style="fill:none;stroke:#000000;stroke-width:2;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+           d="m 530.60703,169.08787 89.39852,0 c 20.5662,0 37.12311,16.5569 37.12311,37.1231 l 0,11.61676 c 0,0 -163.64474,0 -163.64474,0 l 0,-11.61676 c 0,-20.5662 16.55691,-37.1231 37.12311,-37.1231 z"
+           id="rect2816-73-5-1"
+           sodipodi:nodetypes="ccccccc" />
+        <text
+           xml:space="preserve"
+           style="font-size:36px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;font-family:Nimbus Mono L;-inkscape-font-specification:Nimbus Mono L Bold"
+           x="532.86542"
+           y="204.98984"
+           id="text3685-6"
+           sodipodi:linespacing="100%"><tspan
+             sodipodi:role="line"
+             id="tspan3687-8"
+             x="532.86542"
+             y="204.98984">obj1</tspan></text>
+      </g>
+      <g
+         transform="translate(-64,0)"
+         id="g5798">
+        <rect
+           style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:3;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+           id="rect2816-73-6-8"
+           width="163.64473"
+           height="197.98991"
+           x="557.12354"
+           y="236.15892"
+           ry="39.395947" />
+        <path
+           style="fill:none;stroke:#000000;stroke-width:2;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+           d="m 594.24664,236.15892 89.39852,0 c 20.5662,0 37.12311,16.5569 37.12311,37.1231 l 0,11.61676 c 0,0 -163.64474,0 -163.64474,0 l 0,-11.61676 c 0,-20.5662 16.55691,-37.1231 37.12311,-37.1231 z"
+           id="rect2816-73-5-1-6"
+           sodipodi:nodetypes="ccccccc" />
+        <text
+           xml:space="preserve"
+           style="font-size:36px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;font-family:Nimbus Mono L;-inkscape-font-specification:Nimbus Mono L Bold"
+           x="596.505"
+           y="272.06088"
+           id="text3685-6-3"
+           sodipodi:linespacing="100%"><tspan
+             sodipodi:role="line"
+             id="tspan3687-8-1"
+             x="596.505"
+             y="272.06088">obj2</tspan></text>
+      </g>
+    </g>
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:3;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="rect2816-6"
+       width="248.49753"
+       height="100.00506"
+       x="515.59918"
+       y="390.216"
+       ry="39.395947"
+       inkscape:export-filename="/home/joe/Workspace/Sphinx/source/en/resp/atomicrmi/img/_atomicrmi-rmi.png"
+       inkscape:export-xdpi="130.05536"
+       inkscape:export-ydpi="130.05536" />
+    <text
+       xml:space="preserve"
+       style="font-size:36px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;font-family:Nimbus Mono L;-inkscape-font-specification:Nimbus Mono L Bold"
+       x="553.04718"
+       y="447.74252"
+       id="text3685-7-8"
+       sodipodi:linespacing="100%"
+       inkscape:export-filename="/home/joe/Workspace/Sphinx/source/en/resp/atomicrmi/img/_atomicrmi-rmi.png"
+       inkscape:export-xdpi="130.05536"
+       inkscape:export-ydpi="130.05536"><tspan
+         sodipodi:role="line"
+         x="553.04718"
+         y="447.74252"
+         id="tspan2852">registry</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-mid:none;marker-end:url(#Arrow1Mend-3)"
+       d="M 88.695202,574.64749 C 191.55799,499.65404 410.86895,448.91145 510.28235,439.96801"
+       id="path5380"
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/home/joe/Workspace/Sphinx/source/en/resp/atomicrmi/img/_atomicrmi-rmi.png"
+       inkscape:export-xdpi="130.05536"
+       inkscape:export-ydpi="130.05536" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-mid:none;marker-end:url(#Arrow1Mend-3)"
+       d="M 90.378572,601.59371 C 359.07914,474.3145 597.771,531.77064 597.771,531.77064"
+       id="path5380-3"
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/home/joe/Workspace/Sphinx/source/en/resp/atomicrmi/img/_atomicrmi-rmi.png"
+       inkscape:export-xdpi="130.05536"
+       inkscape:export-ydpi="130.05536" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-mid:none;marker-end:url(#Arrow1Mend-3)"
+       d="M 88.314052,631.99981 C 263.22783,546.53168 537.68836,594.29856 537.68836,594.29856"
+       id="path5380-3-4"
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/home/joe/Workspace/Sphinx/source/en/resp/atomicrmi/img/_atomicrmi-rmi.png"
+       inkscape:export-xdpi="130.05536"
+       inkscape:export-ydpi="130.05536" />
+  </g>
+</svg>

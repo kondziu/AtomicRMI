@@ -1,0 +1,10 @@
+This version of Atomic RMI has been developed by:
+
+Wojciech Mruczkiewicz <Wojciech.Mruczkiewicz@cs.put.poznan.pl> (runtime system)
+Konrad Siek <Konrad.Siek@cs.put.poznan.pl> (precompiler, packaging and documentation)
+Pawel T. Wojciechowski <Pawel.T.Wojciechowski@cs.put.poznan.pl> (project leader)
+
+Past contributors include:
+
+Piotr Kryger <piotr.kryger@gmail.com> (runtime support)
+Mariusz Mamoński <mamonski@gmail.com> (discontinued code of runtime system)

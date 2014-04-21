@@ -1,0 +1,13 @@
+Package: [[name]]
+Version: [[version]]
+Depends: default-jre-headless, libcglib-java (>= [[cglib.version]])
+Section: java
+Priority: optional
+Architecture: all
+Maintainer: Konrad Siek <konrad.siek@cs.put.poznan.pl>
+Homepage: https://www.soa.edu.pl/
+Description: an extension of Java RMI with Distributed Transactions
+ provides constructs allowing the programmer to declare a series of method calls
+ on remote objects as a distributed transaction, executed in isolation with 
+ respect to other transactions.
+ .

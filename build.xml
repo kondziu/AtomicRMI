@@ -1,0 +1,364 @@
+<project name="atomicrmi" default="dist" basedir=".">
+	<description>
+        Atomic RMI project build file. 
+    </description>
+
+	<property file="build.properties" />
+	<property file="default.properties" />
+
+	<path id="project.class.path">
+		<pathelement location="." />
+		<pathelement location="${dir.build}" />
+		<pathelement location="${dir.lib}/${cglib.file}" />
+	</path>
+
+	<path id="project.class.path.all">
+		<pathelement location="." />
+		<pathelement location="${dir.build}" />
+		<pathelement location="${dir.lib}/${cglib.file}" />
+		<pathelement location="${dir.lib}/${soot.file}" />
+		<pathelement location="${dir.lib}/${polyglot.file}" />
+		<pathelement location="${dir.lib}/${jasmin.file}" />
+	</path>
+
+	<path id="project.class.path.precompiler">
+		<pathelement location="." />
+		<pathelement location="${dir.build}" />
+		<pathelement location="${dir.lib}/${soot.file}" />
+		<pathelement location="${dir.lib}/${polyglot.file}" />
+		<pathelement location="${dir.lib}/${jasmin.file}" />
+	</path>
+
+	<filterset begintoken="[[" endtoken="]]" id="packaging.filter">
+		<filter token="version" value="${version}" />
+		<filter token="name" value="${ant.project.name}" />
+		<!--filter token="manual" value="${dir.manual}" /-->
+		<filter token="doc" value="${dir.javadoc}" />
+		<filter token="dir.system.jar" value="${dir.system.jar}" />
+		<filter token="dir.system.doc" value="${dir.system.doc}" />
+		<filter token="cglib.version" value="${cglib.version}" />
+	</filterset>
+
+	<target name="all" depends="init,javadoc,html,tar,compile,jar,dist,deb,rpm" />
+	<target name="all-all" depends="init,javadoc-all,html,tar-all,compile-all,jar-all,dist-all,deb,rpm" />
+	<target name="all-precompiler" depends="init,javadoc-precompiler,html,tar-precompiler,compile-precompiler,jar-precompiler,dist-precompiler,deb,rpm" />
+
+	<target name="init">
+		<!-- Create the time stamp -->
+		<tstamp />
+		<!-- Create the build directory structure used by compile and jar -->
+	</target>
+
+	<target name="compile" depends="init" description="compile the source for Atomic RMI">
+		<!-- Compile the java code from ${src} into ${build} -->
+		<mkdir dir="${dir.build}" />
+		<javac destdir="${dir.build}" classpathref="project.class.path">
+			<src path="${dir.src}" />
+			<src path="${dir.test}" />
+		</javac>
+	</target>
+
+	<target name="compile-all" depends="init" description="compile the source for Atomic RMI with precompiler support">
+		<!-- Compile the java code from ${src} into ${build} -->
+		<mkdir dir="${dir.build}" />
+		<javac destdir="${dir.build}" classpathref="project.class.path.all">
+			<src path="${dir.src}" />
+			<src path="${dir.test}" />
+			<src path="${dir.precompiler.src}" />
+		</javac>
+	</target>
+
+	<target name="compile-precompiler" depends="init" description="compile the source for just the precompiler">
+		<!-- Compile the java code from ${src} into ${build} -->
+		<mkdir dir="${dir.build}" />
+		<javac destdir="${dir.build}" classpathref="project.class.path.precompiler">
+			<src path="${dir.precompiler.src}" />
+		</javac>
+	</target>
+
+	<target name="html" depends="javadoc" description="prepare html documentation using sphinx">
+		<exec dir="${dir.doc}" command="make html">
+		</exec>
+	</target>
+
+	<target name="dist" depends="tar,compile,jar,javadoc,html" description="generate the distribution">
+		<copy todir="${dir.dist}">
+			<fileset dir="lib" />
+		</copy>
+	</target>
+
+	<target name="dist-all" depends="tar-all,compile-all,jar-all,javadoc-all,html" description="generate the distribution for both Atomic RMI and the precompiler">
+		<copy todir="${dir.dist}">
+			<fileset dir="lib" />
+		</copy>
+	</target>
+
+	<target name="dist-precompiler" depends="tar-precompiler,compile-precompiler,jar-precompiler,javadoc-precompiler,html" description="generate the distribution for just the precompiler">
+		<copy todir="${dir.dist}">
+			<fileset dir="lib" />
+		</copy>
+	</target>
+
+	<target name="jar" depends="compile" description="generate a jar file">
+		<jar jarfile="${dir.dist}/${ant.project.name}-${version}.jar" basedir="${dir.build}" />
+	</target>
+
+	<target name="jar-all" depends="compile-all" description="generate a jar file for both Atomic RMI and the precompiler">
+		<jar jarfile="${dir.dist}/${ant.project.name}-all-${version}.jar" basedir="${dir.build}" />
+	</target>
+
+	<target name="jar-precompiler" depends="compile-precompiler" description="generate a jar file for just the precompiler">
+		<jar jarfile="${dir.dist}/${ant.project.name}-precompiler-${version}.jar" basedir="${dir.build}" />
+	</target>
+
+	<target name="tar" depends="init, javadoc" description="package sources for Atomic RMI">
+		<mkdir dir="${dir.dist}" />
+		<delete file="${dir.dist}/${ant.project.name}-${version}.tar.gz" />
+		<tar destfile="${dir.dist}/${ant.project.name}-${version}.tar.gz" compression="gzip">
+			<tarfileset dir="${dir.src}" prefix="${dir.src}" />
+			<tarfileset dir="${dir.test}" prefix="${dir.test}" />
+			<tarfileset dir="${dir.lib}" prefix="${dir.lib}" />
+			<!--tarfileset dir="${dir.scripts}" prefix="${dir.scripts}" /-->
+			<tarfileset dir="${dir.javadoc}" prefix="${dir.javadoc}" />
+			<tarfileset dir="${dir.packaging}" prefix="${dir.packaging}" />
+			<tarfileset dir="${dir.doc}" prefix="${dir.doc}" />
+			<!--tarfileset file="${dir.manual}/*.pdf" prefix="${dir.manual}" /-->
+			<tarfileset file="*.xml" />
+			<tarfileset file="*.policy" />
+			<tarfileset file="LICENSE" />
+			<tarfileset file="AUTHORS" />
+		</tar>
+	</target>
+
+	<target name="tar-all" depends="init, javadoc-all" description="package sources for both Atomic RMI and the precompiler">
+		<mkdir dir="${dir.dist}" />
+		<delete file="${dir.dist}/${ant.project.name}-all-${version}.tar.gz" />
+		<tar destfile="${dir.dist}/${ant.project.name}-all-${version}.tar.gz" compression="gzip">
+			<tarfileset dir="${dir.src}" prefix="${dir.src}" />
+			<tarfileset dir="${dir.test}" prefix="${dir.test}" />
+			<tarfileset dir="${dir.precompiler.src}" prefix="${dir.precompiler.src}" />
+			<tarfileset dir="${dir.lib}" prefix="${dir.lib}" />
+			<!--tarfileset dir="${dir.scripts}" prefix="${dir.scripts}" /-->
+			<tarfileset dir="${dir.javadoc}" prefix="${dir.javadoc}" />
+			<tarfileset dir="${dir.packaging}" prefix="${dir.packaging}" />
+			<tarfileset dir="${dir.doc}" prefix="${dir.doc}" />
+			<!--tarfileset file="${dir.manual}/*.pdf" prefix="${dir.manual}" /-->
+			<tarfileset file="*.xml" />
+			<tarfileset file="*.policy" />
+			<tarfileset file="LICENSE" />
+			<tarfileset file="AUTHORS" />
+		</tar>
+	</target>
+
+	<target name="tar-precompiler" depends="init, javadoc-precompiler" description="package sources only for the precompiler">
+		<mkdir dir="${dir.dist}" />
+		<delete file="${dir.dist}/${ant.project.name}-precompiler-${version}.tar.gz" />
+		<tar destfile="${dir.dist}/${ant.project.name}-precompiler-${version}.tar.gz" compression="gzip">
+			<tarfileset dir="${dir.precompiler.src}" prefix="${dir.precompiler.src}" />
+			<tarfileset dir="${dir.lib}" prefix="${dir.lib}" />
+			<!--tarfileset dir="${dir.scripts}" prefix="${dir.scripts}" /-->
+			<tarfileset dir="${dir.javadoc}" prefix="${dir.javadoc}" />
+			<!--tarfileset dir="${dir.packaging}" prefix="${dir.packaging}" /-->
+			<tarfileset dir="${dir.doc}" prefix="${dir.doc}" />
+			<!--tarfileset file="${dir.manual}/*.pdf" prefix="${dir.manual}" /-->
+			<tarfileset file="*.xml" />
+			<tarfileset file="LICENSE" />
+			<tarfileset file="AUTHORS" />
+		</tar>
+	</target>
+
+	<target name="clean" description="clean up">
+		<delete dir="${dir.build}" />
+		<delete dir="${dir.dist}" />
+		<delete dir="${dir.javadoc}" />
+		<delete dir="${dir.deb}" />
+		<delete dir="${dir.rpm}" />
+		<exec dir="${dir.doc}" command="make clean">
+		</exec>
+	</target>
+
+	<target name="start-example-server" depends="compile" description="start server for the Bank example">
+		<echo>RMI Registry must be started at host ${example.host}:${example.port}</echo>
+		<java classpathref="project.class.path" classname="soa.atomicrmi.test.bank.Server" fork="true">
+			<jvmarg value="-Djava.rmi.server.hostname=${example.host}" />
+			<jvmarg value="-Djava.rmi.server.hostname=${example.host}" />
+			<jvmarg value="-Djava.rmi.server.codebase=file://${build}/" />
+			<jvmarg value="-Djava.security.policy=server.policy" />
+			<arg value="${example.host}" />
+			<arg value="${example.port}" />
+		</java>
+	</target>
+
+	<target name="start-example-client-audit" depends="compile" description="start client for the Bank example - client reads balance of accounts">
+		<java classpathref="project.class.path" classname="soa.atomicrmi.test.bank.Audit" fork="true">
+			<jvmarg value="-Djava.security.policy=client.policy" />
+			<arg value="${example.host}" />
+			<arg value="${example.port}" />
+		</java>
+	</target>
+
+	<target name="start-example-client-transfer" depends="compile" description="start client for the Bank example - client moves assets from one account to another">
+		<java classpathref="project.class.path" classname="soa.atomicrmi.test.bank.Transfer" fork="true">
+			<jvmarg value="-Djava.security.policy=client.policy" />
+			<arg value="${example.host}" />
+			<arg value="${example.port}" />
+		</java>
+	</target>
+
+	<target name="start-example-client-transfer-retry" depends="compile" description="start client for the Bank example - client moves assets from one account to another with retry option">
+		<java classpathref="project.class.path" classname="soa.atomicrmi.test.bank.TransferRetry" fork="true">
+			<jvmarg value="-Djava.security.policy=client.policy" />
+			<arg value="${example.host}" />
+			<arg value="${example.port}" />
+		</java>
+	</target>
+
+	<target name="deb" depends="dist" description="create a deb package">
+		<taskdef name="deb" classname="org.vafer.jdeb.ant.DebAntTask" classpath="${dir.lib}/${jdeb.file}" />
+
+		<copy todir="${dir.deb}/control">
+			<fileset file="${dir.packaging}/control" />
+			<filterset refid="packaging.filter" />
+		</copy>
+
+		<deb destfile="${dir.dist}/${ant.project.name}_${version}.deb" control="${dir.deb}/control">
+			<tarfileset file="${dir.dist}/${ant.project.name}-${version}.jar" prefix="${dir.system.jar}/${ant.project.name}" />
+			<!--tarfileset file="${dir.manual}/manual.pdf" prefix="${dir.system.doc}/${ant.project.name}/${dir.manual}" /-->
+			<tarfileset dir="${dir.javadoc}/" prefix="${dir.system.doc}/${ant.project.name}" />
+		</deb>
+	</target>
+
+	<target name="rpm" depends="dist" description="create an rpm package">
+		<!-- Copy binaries and other resources to build directory (no point re-compiling) -->
+		<copy todir="${dir.rpm}/BUILD">
+			<fileset file="${dir.dist}/${ant.project.name}-${version}.jar" />
+		</copy>
+		<!--copy todir="${dir.rpm}/BUILD/${dir.manual}">
+			<fileset dir="${dir.manual}">
+				<include name="*.pdf" />
+			</fileset>
+		</copy-->
+		<copy todir="${dir.rpm}/BUILD/${dir.javadoc}">
+			<fileset dir="${dir.javadoc}" />
+		</copy>
+
+		<!-- Copy sources, just in case. -->
+		<copy todir="${dir.rpm}/SOURCES">
+			<fileset file="${dir.dist}/${ant.project.name}-${version}.tar.gz" />
+		</copy>
+
+		<!-- Prepare a spec file from a template. -->
+		<copy todir="${dir.rpm}/SPECS">
+			<fileset file="${dir.packaging}/${ant.project.name}.spec" />
+			<filterset refid="packaging.filter" />
+		</copy>
+
+		<!-- Run the packager. -->
+		<rpm specFile="${ant.project.name}.spec" topDir="${dir.rpm}" failOnError="true" />
+
+		<!-- Place the package in the distribution directory. -->
+		<copy todir="${dir.dist}" flatten="true">
+			<fileset dir="${dir.rpm}/RPMS/">
+				<include name="**/*.rpm" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="javadoc-pdf" description="generate API documentation for Atomic RMI as PDF">
+		<javadoc doclet="com.tarsec.javadoc.pdfdoclet.PDFDoclet" docletpath="${dir.lib}/pdfdoclet-1.0.2-all.jar" additionalparam="-pdf ${dir.javadoc}/atomicrmi-javadoc-${version}.pdf -config ./pdf.properties" private="no" author="true" version="true">
+			<packageset dir="${dir.src}" defaultexcludes="yes">
+				<include name="soa/atomicrmi/**" />
+			</packageset>
+			<packageset dir="${dir.test}" defaultexcludes="yes">
+				<include name="soa/atomicrmi/test/**" />
+			</packageset>
+			<group title="Core" packages="soa.atomicrmi" />
+			<group title="Examples" packages="soa.atomicrmi.test:soa.atomicrmi.test.*:crash:crash.*" />
+		</javadoc>
+	</target>
+	
+	<target name="javadoc-pdf-all" description="generate API documentation for Atomic RMI and precompiler as PDF">
+		<javadoc doclet="com.tarsec.javadoc.pdfdoclet.PDFDoclet" docletpath="${dir.lib}/pdfdoclet-1.0.2-all.jar" additionalparam="-pdf ${dir.javadoc}/atomicrmi-javadoc-${version}.pdf -config ./pdf.properties" private="no" author="true" version="true">
+			<packageset dir="${dir.src}" defaultexcludes="yes">
+				<include name="soa/atomicrmi/**" />
+			</packageset>
+			<packageset dir="${dir.test}" defaultexcludes="yes">
+				<include name="soa/atomicrmi/test/**" />
+			</packageset>
+			<packageset dir="${dir.precompiler.src}" defaultexcludes="yes">
+				<include name="soa/atomicrmi/precompiler/**" />
+			</packageset>
+			<group title="Core" packages="soa.atomicrmi" />
+			<group title="Examples" packages="soa.atomicrmi.test:soa.atomicrmi.test.*:crash:crash.*" />
+			<group title="Precompiler" packages="soa.atomicrmi.precompiler:soa.atomicrmi.precompiler.*" />
+		</javadoc>
+	</target>
+	
+	<target name="javadoc-pdf-precompiler" description="generate API documentation for the precompiler alone as PDF">
+		<javadoc doclet="com.tarsec.javadoc.pdfdoclet.PDFDoclet" docletpath="${dir.lib}/pdfdoclet-1.0.2-all.jar" additionalparam="-pdf ${dir.javadoc}/atomicrmi-javadoc-${version}.pdf -config ./pdf.properties" private="no" author="true" version="true">
+			<packageset dir="${dir.precompiler.src}" defaultexcludes="yes">
+				<include name="soa/atomicrmi/precompiler/**" />
+			</packageset>
+			<group title="Precompiler" packages="soa.atomicrmi.precompiler" />
+			<group title="Remote Object Call Count Analysis" packages="soa.atomicrmi.precompiler.rocca*" />
+			<group title="Value Propagation Analysis" packages="soa.atomicrmi.precompiler.vpa*" />
+			<group title="Region Finder Analysis" packages="soa.atomicrmi.precompiler.rfa*" />
+			<group title="Transaction Finder Analysis" packages="soa.atomicrmi.precompiler.tfa*" />
+			<group title="Last Use Analysis" packages="soa.atomicrmi.precompiler.lua*" />
+			<group title="Generator" packages="soa.atomicrmi.precompiler.generator*" />
+			<group title="Tools" packages="soa.atomicrmi.precompiler.graphing*:soa.atomicrmi.precompiler.tools*:soa.atomicrmi.precompiler.generic*:flowmap*:scripts*" />
+		</javadoc>
+	</target>
+	
+	<target name="javadoc" description="generate API documentation for Atomic RMI">
+		<javadoc destdir="${dir.javadoc}" author="true" version="true" use="true" windowtitle="${javadoc.title.window}" classpathref="project.class.path">
+			<packageset dir="${dir.src}" defaultexcludes="yes">
+				<include name="soa/atomicrmi/**" />
+			</packageset>
+			<packageset dir="${dir.test}" defaultexcludes="yes">
+				<include name="soa/atomicrmi/test/**" />
+			</packageset>
+			<doctitle>${javadoc.title.document}</doctitle>
+			<bottom>${javadoc.bottom}</bottom>
+			<group title="Core" packages="soa.atomicrmi" />
+			<group title="Examples" packages="soa.atomicrmi.test:soa.atomicrmi.test.*:crash:crash.*" />
+		</javadoc>
+	</target>
+
+	<target name="javadoc-all" description="generate API documentation and include the precompiler">
+		<javadoc destdir="${dir.javadoc}" author="true" version="true" use="true" windowtitle="${javadoc.title.window}" classpathref="project.class.path">
+			<packageset dir="${dir.src}" defaultexcludes="yes">
+				<include name="soa/atomicrmi/**" />
+			</packageset>
+			<packageset dir="${dir.test}" defaultexcludes="yes">
+				<include name="soa/atomicrmi/test/**" />
+			</packageset>
+			<packageset dir="${dir.precompiler.src}" defaultexcludes="yes">
+				<include name="soa/atomicrmi/precompiler/**" />
+			</packageset>
+			<doctitle>${javadoc.title.document}</doctitle>
+			<bottom>${javadoc.bottom}</bottom>
+			<group title="Core" packages="soa.atomicrmi" />
+			<group title="Examples" packages="soa.atomicrmi.test:soa.atomicrmi.test.*:crash:crash.*" />
+			<group title="Precompiler" packages="soa.atomicrmi.precompiler:soa.atomicrmi.precompiler.*" />
+		</javadoc>
+	</target>
+
+	<target name="javadoc-precompiler" description="generate API documentation for the precompiler alone">
+		<javadoc destdir="${dir.javadoc}" author="true" version="true" use="true" windowtitle="${javadoc.title.window}" classpathref="project.class.path">
+			<packageset dir="${dir.precompiler.src}" defaultexcludes="yes">
+				<include name="soa/atomicrmi/precompiler/**" />
+			</packageset>
+			<doctitle>${javadoc.title.document}</doctitle>
+			<bottom>${javadoc.bottom}</bottom>
+			<group title="Precompiler" packages="soa.atomicrmi.precompiler" />
+			<group title="Remote Object Call Count Analysis" packages="soa.atomicrmi.precompiler.rocca*" />
+			<group title="Value Propagation Analysis" packages="soa.atomicrmi.precompiler.vpa*" />
+			<group title="Region Finder Analysis" packages="soa.atomicrmi.precompiler.rfa*" />
+			<group title="Transaction Finder Analysis" packages="soa.atomicrmi.precompiler.tfa*" />
+			<group title="Last Use Analysis" packages="soa.atomicrmi.precompiler.lua*" />
+			<group title="Generator" packages="soa.atomicrmi.precompiler.generator*" />
+			<group title="Tools" packages="soa.atomicrmi.precompiler.graphing*:soa.atomicrmi.precompiler.tools*:soa.atomicrmi.precompiler.generic*:flowmap*:scripts*" />
+		</javadoc>
+	</target>
+</project>

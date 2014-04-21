@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="898.11829"
+   height="487.87323"
+   id="svg4210"
+   version="1.1"
+   inkscape:version="0.47 r22583"
+   sodipodi:docname="_atomicrmi-architecture.svg"
+   inkscape:export-filename="/home/joe/Workspace/Sphinx/source/en/resp/atomicrmi/img/_atomicrmi-architecture.png"
+   inkscape:export-xdpi="130.05536"
+   inkscape:export-ydpi="130.05536">
+  <defs
+     id="defs4212">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 526.18109 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="744.09448 : 526.18109 : 1"
+       inkscape:persp3d-origin="372.04724 : 350.78739 : 1"
+       id="perspective4218" />
+    <inkscape:perspective
+       id="perspective4139"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow1Mend-3"
+       style="overflow:visible">
+      <path
+         id="path4150-5"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4145"
+       style="overflow:visible">
+      <path
+         id="path4147"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4149"
+       style="overflow:visible">
+      <path
+         id="path4151"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4153"
+       style="overflow:visible">
+      <path
+         id="path4155"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4157"
+       style="overflow:visible">
+      <path
+         id="path4159"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)" />
+    </marker>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3942-9-6"
+       id="linearGradient3948-6-9"
+       x1="180.32996"
+       y1="178.50801"
+       x2="540.43164"
+       y2="178.50801"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-626.56387,224.03025)" />
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient3942-9-6">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop3944-9-2" />
+      <stop
+         style="stop-color:#000000;stop-opacity:0;"
+         offset="1"
+         id="stop3946-0-1" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3942-9-6"
+       id="linearGradient4165"
+       x1="180.32996"
+       y1="178.50801"
+       x2="540.43164"
+       y2="178.50801"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-11.158034,1095.6518)" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.49497475"
+     inkscape:cx="440.21085"
+     inkscape:cy="190.71722"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="697"
+     inkscape:window-height="504"
+     inkscape:window-x="741"
+     inkscape:window-y="24"
+     inkscape:window-maximized="0" />
+  <metadata
+     id="metadata4215">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(612.91156,-250.59772)">
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:3;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="rect2816-1-7"
+       width="248.49751"
+       height="361.63461"
+       x="-611.41156"
+       y="313.71704"
+       ry="39.395947"
+       inkscape:export-filename="/home/joe/Workspace/AtomicRMIRollback/doc/source/img/_atomicrmi-architecture.pdf.png"
+       inkscape:export-xdpi="130.05536"
+       inkscape:export-ydpi="130.05536" />
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:3;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="rect2816-73-66-8"
+       width="163.64473"
+       height="197.98991"
+       x="-568.98523"
+       y="374.43021"
+       ry="39.395947"
+       inkscape:export-filename="/home/joe/Workspace/AtomicRMIRollback/doc/source/img/_atomicrmi-architecture.pdf.png"
+       inkscape:export-xdpi="130.05536"
+       inkscape:export-ydpi="130.05536" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:2;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m -531.86209,374.43035 89.39852,0 c 20.5662,0 37.12311,16.5569 37.12311,37.1231 l 0,11.6167 c 0,0 -163.64473,0 -163.64473,0 l 0,-11.6167 c 0,-20.5662 16.55691,-37.1231 37.1231,-37.1231 z"
+       id="rect2816-73-5-6-5"
+       sodipodi:nodetypes="ccccccc"
+       inkscape:export-filename="/home/joe/Workspace/AtomicRMIRollback/doc/source/img/_atomicrmi-architecture.pdf.png"
+       inkscape:export-xdpi="130.05536"
+       inkscape:export-ydpi="130.05536" />
+    <text
+       xml:space="preserve"
+       style="font-size:36px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:url(#linearGradient3948-6-9);fill-opacity:1;stroke:none;font-family:Nimbus Mono L;-inkscape-font-specification:Nimbus Mono L Bold"
+       x="-529.6037"
+       y="410.33231"
+       id="text3685-0-7"
+       sodipodi:linespacing="100%"
+       inkscape:export-filename="/home/joe/Workspace/AtomicRMIRollback/doc/source/img/_atomicrmi-architecture.pdf.png"
+       inkscape:export-xdpi="130.05536"
+       inkscape:export-ydpi="130.05536"><tspan
+         sodipodi:role="line"
+         id="tspan3687-6-4"
+         x="-529.6037"
+         y="410.33231"
+         style="fill:url(#linearGradient3948-6-9);fill-opacity:1">obj0</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:36px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;font-family:Nimbus Mono L;-inkscape-font-specification:Nimbus Mono L Bold"
+       x="-530.95374"
+       y="643.48346"
+       id="text3685-7-0-1"
+       sodipodi:linespacing="100%"
+       inkscape:export-filename="/home/joe/Workspace/AtomicRMIRollback/doc/source/img/_atomicrmi-architecture.pdf.png"
+       inkscape:export-xdpi="130.05536"
+       inkscape:export-ydpi="130.05536"><tspan
+         sodipodi:role="line"
+         id="tspan3687-3-45-8"
+         x="-530.95374"
+         y="643.48346">jvm0</tspan></text>
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:3;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="rect2816-9-6-5"
+       width="484.8732"
+       height="484.87323"
+       x="-201.16647"
+       y="252.09772"
+       ry="39.395947"
+       inkscape:export-filename="/home/joe/Workspace/AtomicRMIRollback/doc/source/img/_atomicrmi-architecture.pdf.png"
+       inkscape:export-xdpi="130.05536"
+       inkscape:export-ydpi="130.05536" />
+    <text
+       xml:space="preserve"
+       style="font-size:36px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;font-family:Nimbus Mono L;-inkscape-font-specification:Nimbus Mono L Bold"
+       x="-2.5207798"
+       y="697.52643"
+       id="text3685-7-6-0-9"
+       sodipodi:linespacing="100%"
+       inkscape:export-filename="/home/joe/Workspace/AtomicRMIRollback/doc/source/img/_atomicrmi-architecture.pdf.png"
+       inkscape:export-xdpi="130.05536"
+       inkscape:export-ydpi="130.05536"><tspan
+         sodipodi:role="line"
+         id="tspan3687-3-4-4-7"
+         x="-2.5207798"
+         y="697.52643">jvm1</tspan></text>
+    <g
+       id="g5804-6-3"
+       transform="translate(-398.82045,224.03027)">
+      <rect
+         ry="39.395947"
+         y="169.08786"
+         x="493.48392"
+         height="197.98991"
+         width="163.64473"
+         id="rect2816-73-6-1-8"
+         style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:3;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      <path
+         sodipodi:nodetypes="ccccccc"
+         id="rect2816-73-5-1-8-8"
+         d="m 530.60703,169.08787 89.39852,0 c 20.5662,0 37.12311,16.5569 37.12311,37.1231 l 0,11.61676 c 0,0 -163.64474,0 -163.64474,0 l 0,-11.61676 c 0,-20.5662 16.55691,-37.1231 37.12311,-37.1231 z"
+         style="fill:none;stroke:#000000;stroke-width:2;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      <text
+         sodipodi:linespacing="100%"
+         id="text3685-6-2-3"
+         y="204.98984"
+         x="532.86542"
+         style="font-size:36px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;font-family:Nimbus Mono L;-inkscape-font-specification:Nimbus Mono L Bold"
+         xml:space="preserve"><tspan
+           y="204.98984"
+           x="532.86542"
+           id="tspan3687-8-4-1"
+           sodipodi:role="line">obj1</tspan></text>
+    </g>
+    <g
+       id="g5798-8-8"
+       transform="translate(-508.82045,224.03027)">
+      <rect
+         ry="39.395947"
+         y="236.15892"
+         x="557.12354"
+         height="197.98991"
+         width="163.64473"
+         id="rect2816-73-6-8-4-9"
+         style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:3;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      <path
+         sodipodi:nodetypes="ccccccc"
+         id="rect2816-73-5-1-6-7-6"
+         d="m 594.24664,236.15892 89.39852,0 c 20.5662,0 37.12311,16.5569 37.12311,37.1231 l 0,11.61676 c 0,0 -163.64474,0 -163.64474,0 l 0,-11.61676 c 0,-20.5662 16.55691,-37.1231 37.12311,-37.1231 z"
+         style="fill:none;stroke:#000000;stroke-width:2;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      <text
+         sodipodi:linespacing="100%"
+         id="text3685-6-3-9-4"
+         y="272.06088"
+         x="596.505"
+         style="font-size:36px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;font-family:Nimbus Mono L;-inkscape-font-specification:Nimbus Mono L Bold"
+         xml:space="preserve"><tspan
+           y="272.06088"
+           x="596.505"
+           id="tspan3687-8-1-3-3"
+           sodipodi:role="line">obj2</tspan></text>
+    </g>
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:3;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="rect2816-6-0-3"
+       width="248.49753"
+       height="100.00506"
+       x="20.056864"
+       y="264.89627"
+       ry="39.395947"
+       inkscape:export-filename="/home/joe/Workspace/AtomicRMIRollback/doc/source/img/_atomicrmi-architecture.pdf.png"
+       inkscape:export-xdpi="130.05536"
+       inkscape:export-ydpi="130.05536" />
+    <text
+       xml:space="preserve"
+       style="font-size:36px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;font-family:Nimbus Mono L;-inkscape-font-specification:Nimbus Mono L Bold"
+       x="57.504864"
+       y="322.42276"
+       id="text3685-7-8-9-8"
+       sodipodi:linespacing="100%"
+       inkscape:export-filename="/home/joe/Workspace/AtomicRMIRollback/doc/source/img/_atomicrmi-architecture.pdf.png"
+       inkscape:export-xdpi="130.05536"
+       inkscape:export-ydpi="130.05536"><tspan
+         sodipodi:role="line"
+         x="57.504864"
+         y="322.42276"
+         id="tspan2864">registry</tspan></text>
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:3;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="rect2816-6-0-9-4-6"
+       width="192.78328"
+       height="100.00507"
+       x="-177.58614"
+       y="370.32339"
+       ry="39.395947"
+       inkscape:export-filename="/home/joe/Workspace/AtomicRMIRollback/doc/source/img/_atomicrmi-architecture.pdf.png"
+       inkscape:export-xdpi="130.05536"
+       inkscape:export-ydpi="130.05536" />
+    <text
+       xml:space="preserve"
+       style="font-size:36px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;line-height:100%;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Nimbus Mono L;-inkscape-font-specification:Nimbus Mono L Bold"
+       x="-82.995293"
+       y="410.70694"
+       id="text3685-7-8-9-4-0-4"
+       sodipodi:linespacing="100%"
+       inkscape:export-filename="/home/joe/Workspace/AtomicRMIRollback/doc/source/img/_atomicrmi-architecture.pdf.png"
+       inkscape:export-xdpi="130.05536"
+       inkscape:export-ydpi="130.05536"><tspan
+         sodipodi:role="line"
+         x="-82.995293"
+         y="410.70694"
+         id="tspan6042-1-3">obj1</tspan><tspan
+         id="tspan6183-0"
+         sodipodi:role="line"
+         x="-82.995293"
+         y="446.70694">proxy</tspan></text>
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:3;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="rect2816-6-0-9-7-0"
+       width="192.78328"
+       height="100.00507"
+       x="-177.58614"
+       y="475.75052"
+       ry="39.395947"
+       inkscape:export-filename="/home/joe/Workspace/AtomicRMIRollback/doc/source/img/_atomicrmi-architecture.pdf.png"
+       inkscape:export-xdpi="130.05536"
+       inkscape:export-ydpi="130.05536" />
+    <text
+       xml:space="preserve"
+       style="font-size:36px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;line-height:100%;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Nimbus Mono L;-inkscape-font-specification:Nimbus Mono L Bold"
+       x="-82.995293"
+       y="516.13409"
+       id="text3685-7-8-9-4-2-9"
+       sodipodi:linespacing="100%"
+       inkscape:export-filename="/home/joe/Workspace/AtomicRMIRollback/doc/source/img/_atomicrmi-architecture.pdf.png"
+       inkscape:export-xdpi="130.05536"
+       inkscape:export-ydpi="130.05536"><tspan
+         sodipodi:role="line"
+         x="-82.995293"
+         y="516.13409"
+         id="tspan6042-7-2">obj2</tspan><tspan
+         id="tspan6187-5"
+         sodipodi:role="line"
+         x="-82.995293"
+         y="552.13409">proxy</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-mid:none;marker-end:url(#Arrow1Mend-3)"
+       d="m -404.81896,476.34405 c 30.28201,-48.919 157.68853,-56.15158 222.79165,-59.23498"
+       id="path5380-6-8-4"
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/home/joe/Workspace/AtomicRMIRollback/doc/source/img/_atomicrmi-architecture.pdf.png"
+       inkscape:export-xdpi="130.05536"
+       inkscape:export-ydpi="130.05536" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-mid:none;marker-end:url(#Arrow1Mend-3)"
+       d="m 14.852342,420.62055 c 44.47571,-1.0441 15.132097,0.4679 78.289077,-0.4735"
+       id="path5380-6-2-9-0"
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/home/joe/Workspace/AtomicRMIRollback/doc/source/img/_atomicrmi-architecture.pdf.png"
+       inkscape:export-xdpi="130.05536"
+       inkscape:export-ydpi="130.05536" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-mid:none;marker-end:url(#Arrow1Mend-3)"
+       d="m 15.342904,526.55283 c 44.47571,-1.0442 -32.991172,0.4679 30.165808,-0.4735"
+       id="path5380-6-2-9-4-5"
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/home/joe/Workspace/AtomicRMIRollback/doc/source/img/_atomicrmi-architecture.pdf.png"
+       inkscape:export-xdpi="130.05536"
+       inkscape:export-ydpi="130.05536" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-mid:none;marker-end:url(#Arrow1Mend-3)"
+       d="m -403.81557,504.63985 c 40.38354,22.8019 156.67838,27.18605 221.7815,24.10265"
+       id="path5380-6-8-0-9"
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/home/joe/Workspace/AtomicRMIRollback/doc/source/img/_atomicrmi-architecture.pdf.png"
+       inkscape:export-xdpi="130.05536"
+       inkscape:export-ydpi="130.05536" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-mid:none;marker-end:url(#Arrow1Mend-3)"
+       d="m -405.19148,441.18835 c 0.5044,-151.7623 308.657109,-135.8736 421.587149,-134.6795"
+       id="path5380-7"
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/home/joe/Workspace/AtomicRMIRollback/doc/source/img/_atomicrmi-architecture.pdf.png"
+       inkscape:export-xdpi="130.05536"
+       inkscape:export-ydpi="130.05536" />
+  </g>
+</svg>
