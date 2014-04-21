@@ -27,7 +27,7 @@ import java.rmi.RemoteException;
  * Interface specifies transaction method required for retry operation support.
  * If retry operation is necessary then class implementing this interfaces
  * contains main transaction method. Transaction is started using
- * {@link Transaction#start(Transactable)} method and must be commited or
+ * {@link Transaction#start(DTransactable)} method and must be commited or
  * rolled-back at the end.
  * 
  * @author Wojciech Mruczkiewicz

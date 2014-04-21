@@ -21,11 +21,11 @@
  */
 package soa.atomicrmi;
 
-import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -36,7 +36,12 @@ import java.util.UUID;
  * start and terminate the transaction. Contains the heartbeater implementation
  * required for failure detection mechanism.
  * 
- * @author Wojciech Mruczkiewicz
+ * This class operates under the assumption that more than one registry is
+ * present and therefore more than one "global" lock needs to be acquired to
+ * properly initialize this transaction.
+ * 
+ * @author Wojciech Mruczkiewicz, Konrad Siek
+ * 
  */
 public class Transaction extends UnicastRemoteObject implements ITransaction {
 
@@ -151,7 +156,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	/**
 	 * Reference to remote global lock used only for transaction startup.
 	 */
-	private ITransactionsLock globalLock;
+	private ITransactionsLock[] globalLocks;
 
 	/**
 	 * List of proxies of the accessed remote objects.
@@ -172,17 +177,23 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 * Creates new transaction. The required argument is a JavaRMI registry
 	 * instance. It is used to obtain global lock instance.
 	 * 
-	 * @param registry
-	 *            a reference to remote registry.
+	 * @param registries
+	 *            a references to remote registries.
 	 * @throws RemoteException
 	 *             when remote exception occurs during retrieval of remote
 	 *             global lock.
+	 * 
 	 */
-	public Transaction(Registry registry) throws RemoteException {
+	public Transaction(Registry... registries) throws RemoteException {
 		state = STATE_PREPARING;
 		id = UUID.randomUUID();
 
-		globalLock = TransactionsLock.getOrCreate(registry);
+		for (int i = 0; i < registries.length; i++) {
+			globalLocks[i] = TransactionsLock.getOrCreate(registries[i]);
+		}
+
+		// Sorting prevents deadlocks.
+		Arrays.sort(globalLocks);
 
 		proxies = new ArrayList<IObjectProxy>();
 		heartbeat = new Heartbeat();
@@ -218,7 +229,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 *             when remote exception occurs during initialization of object
 	 *             proxy.
 	 */
-	public <T> T accesses(T obj) throws TransactionException {
+	public Object accesses(Object obj) throws TransactionException {
 		return accesses(obj, INF);
 	}
 
@@ -330,11 +341,17 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 			heartbeatThread = new Thread(heartbeat);
 			heartbeatThread.start();
 
-			globalLock.lock();
+			for (ITransactionsLock globalLock : this.globalLocks) {
+				globalLock.lock();
+			}
+
 			for (IObjectProxy proxy : proxies) {
 				proxy.startTransaction();
 			}
-			globalLock.unlock();
+
+			for (ITransactionsLock globalLock : this.globalLocks) {
+				globalLock.unlock();
+			}
 		} catch (RemoteException e) {
 			throw new TransactionException("Unable to initialize transaction.", e);
 		}
@@ -416,6 +433,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 				commit = false;
 			}
 		}
+
 		return commit;
 	}
 
@@ -462,30 +480,5 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 		}
 
 		state = newState;
-	}
-
-	/**
-	 * Declare that an object will no longer be used by the current transaction
-	 * and allow it to be used by other transactions.
-	 * 
-	 * <p>
-	 * This method should never be used on an object unless there is absolute
-	 * certainty that this object will not be used by the current transaction.
-	 * Otherwise the system will generate errors.
-	 * 
-	 * @param remote
-	 * @author K. Siek
-	 * @throws RemoteException
-	 */
-	public <T extends Remote> void free(T remote) throws TransactionException {
-		if (!(remote instanceof IObjectProxy)) {
-			throw new TransactionException("Attempting to free a non-transactional object.");
-		}
-		IObjectProxy proxy = (IObjectProxy) remote;
-		try {
-			proxy.free();
-		} catch (RemoteException e) {
-			throw new TransactionException("Remote exception", e);
-		}
 	}
 }
