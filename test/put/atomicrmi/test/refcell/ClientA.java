@@ -1,4 +1,4 @@
-package soa.atomicrmi.test.refcell;
+package put.atomicrmi.test.refcell;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -6,8 +6,8 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
 import put.atomicrmi.opt.Transaction;
-import soa.atomicrmi.test.tools.User;
-import soa.atomicrmi.test.tools.User.Choice;
+import put.atomicrmi.test.tools.User;
+import put.atomicrmi.test.tools.User.Choice;
 
 public class ClientA {
 

@@ -7,7 +7,7 @@ then
 fi
 echo $$ > PIDm
 
-PACKAGE=soa.atomicrmi.test.distributedtransaction
+PACKAGE=put.atomicrmi.test.distributedtransaction
 export CLASSPATH=\
 `pwd`:\
 `pwd`/bin:\

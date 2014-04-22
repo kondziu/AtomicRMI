@@ -1,4 +1,4 @@
-package soa.atomicrmi.test.distributed;
+package put.atomicrmi.test.distributed;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;

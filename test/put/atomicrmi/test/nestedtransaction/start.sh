@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PACKAGE=soa.atomicrmi.test.nestedtransaction
+PACKAGE=put.atomicrmi.test.nestedtransaction
 export CLASSPATH=\
 `pwd`:\
 `pwd`/bin:\

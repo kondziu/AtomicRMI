@@ -1,4 +1,4 @@
-package soa.atomicrmi.test.proxy;
+package put.atomicrmi.test.proxy;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;

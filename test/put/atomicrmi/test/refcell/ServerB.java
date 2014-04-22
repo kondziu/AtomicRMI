@@ -1,4 +1,4 @@
-package soa.atomicrmi.test.refcell;
+package put.atomicrmi.test.refcell;
 
 import java.rmi.AccessException;
 import java.rmi.RMISecurityManager;

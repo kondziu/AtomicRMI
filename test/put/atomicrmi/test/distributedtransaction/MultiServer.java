@@ -1,4 +1,4 @@
-package soa.atomicrmi.test.distributedtransaction;
+package put.atomicrmi.test.distributedtransaction;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;

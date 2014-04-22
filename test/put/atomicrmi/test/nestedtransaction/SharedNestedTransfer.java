@@ -1,4 +1,4 @@
-package soa.atomicrmi.test.nestedtransaction;
+package put.atomicrmi.test.nestedtransaction;
 
 import java.io.IOException;
 import java.rmi.NotBoundException;
@@ -8,8 +8,8 @@ import java.rmi.registry.Registry;
 
 import put.atomicrmi.opt.Transactional;
 import put.atomicrmi.opt.Transaction;
-import soa.atomicrmi.test.tools.User;
-import soa.atomicrmi.test.tools.User.Choice;
+import put.atomicrmi.test.tools.User;
+import put.atomicrmi.test.tools.User.Choice;
 
 public class SharedNestedTransfer {
 	public static void main(String[] args) throws NotBoundException, IOException {

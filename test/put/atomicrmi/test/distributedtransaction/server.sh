@@ -7,7 +7,7 @@ then
 fi
 echo $$ > PID
 
-PACKAGE=soa.atomicrmi.test.distributedtransaction
+PACKAGE=put.atomicrmi.test.distributedtransaction
 export CLASSPATH=\
 `pwd`:\
 `pwd`/bin:\

@@ -1,4 +1,4 @@
-package soa.atomicrmi.opt.test.bank;
+package put.atomicrmi.opt.test.bank;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;

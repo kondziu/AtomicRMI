@@ -1,4 +1,4 @@
-package soa.atomicrmi.test.refcell;
+package put.atomicrmi.test.refcell;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -7,8 +7,8 @@ import java.rmi.registry.Registry;
 
 import put.atomicrmi.opt.Transaction;
 import put.atomicrmi.opt.TransactionalUnicastRemoteObject;
-import soa.atomicrmi.test.tools.User;
-import soa.atomicrmi.test.tools.User.Choice;
+import put.atomicrmi.test.tools.User;
+import put.atomicrmi.test.tools.User.Choice;
 
 public class ClientD extends TransactionalUnicastRemoteObject implements ReferrenceCellClient {
 

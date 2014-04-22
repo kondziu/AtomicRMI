@@ -1,4 +1,4 @@
-package soa.atomicrmi.test.distributed;
+package put.atomicrmi.test.distributed;
 
 import java.io.IOException;
 import java.rmi.AlreadyBoundException;
@@ -9,7 +9,7 @@ import java.rmi.registry.Registry;
 
 import put.atomicrmi.opt.Transactional;
 import put.atomicrmi.opt.Transaction;
-import soa.atomicrmi.test.distributed.Tools.Ending;
+import put.atomicrmi.test.distributed.Tools.Ending;
 
 public class Client {
 	private A object;

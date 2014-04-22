@@ -4,7 +4,7 @@
 killall rmiregistry 2>/dev/null
 
 # Constants.
-PACKAGE=soa.atomicrmi.test.refcell
+PACKAGE=put.atomicrmi.test.refcell
 CLASS=Server$1; shift
 
 CODEBASE=http://sirius.cs.put.poznan.pl/~ksiek/refcell

@@ -1,4 +1,4 @@
-package soa.atomicrmi.test.distributedtransaction;
+package put.atomicrmi.test.distributedtransaction;
 
 import java.io.IOException;
 import java.rmi.NotBoundException;
@@ -8,8 +8,8 @@ import java.rmi.registry.Registry;
 
 import put.atomicrmi.opt.Transactional;
 import put.atomicrmi.opt.Transaction;
-import soa.atomicrmi.test.tools.User;
-import soa.atomicrmi.test.tools.User.Choice;
+import put.atomicrmi.test.tools.User;
+import put.atomicrmi.test.tools.User.Choice;
 
 public class TransferMulti1 {
 	public static void main(String[] args) throws NotBoundException, IOException {

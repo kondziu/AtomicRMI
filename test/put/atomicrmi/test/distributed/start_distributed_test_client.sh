@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PACKAGE=soa.atomicrmi.test.distributed
+PACKAGE=put.atomicrmi.test.distributed
 export CLASSPATH=\
 `pwd`:\
 `pwd`/bin:\

@@ -1,8 +1,9 @@
-package put.atomicrmi.opt.test.bank;
+package put.atomicrmi.opt.test.search;
 
 import java.rmi.RemoteException;
 
 import put.atomicrmi.opt.TransactionalUnicastRemoteObject;
+import put.atomicrmi.opt.ops.Read;
 
 public class AccountImpl extends TransactionalUnicastRemoteObject implements Account {
 
@@ -10,20 +11,33 @@ public class AccountImpl extends TransactionalUnicastRemoteObject implements Acc
 
 	int balance;
 
-	protected AccountImpl(int balance) throws RemoteException {
+	private String name;
+
+	protected AccountImpl(String name, int balance) throws RemoteException {
 		super();
+		this.name = name;
 		this.balance = balance;
 	}
 
 	public void deposit(int sum) throws RemoteException {
 		balance += sum;
+		System.out.println(name + ": " + "deposit: " + sum + " balance: " + balance);
 	}
 
 	public void withdraw(int sum) throws RemoteException {
 		balance -= sum;
+		System.out.println(name + ": " + "withdraw: " + sum + " balance: " + balance);
+
 	}
 
 	public int getBalance() throws RemoteException {
+		System.out.println(name + ": " + "balance: " + balance);
 		return balance;
+	}
+	
+	@Override
+	@Read
+	public String getName() throws RemoteException {
+		return name;		
 	}
 }

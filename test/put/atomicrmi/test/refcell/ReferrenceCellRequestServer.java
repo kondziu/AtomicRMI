@@ -1,4 +1,4 @@
-package soa.atomicrmi.test.refcell;
+package put.atomicrmi.test.refcell;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;

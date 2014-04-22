@@ -1,4 +1,4 @@
-package soa.atomicrmi.test.nestedtransaction;
+package put.atomicrmi.test.nestedtransaction;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;

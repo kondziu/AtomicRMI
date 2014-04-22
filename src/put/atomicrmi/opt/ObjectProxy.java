@@ -247,13 +247,19 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	 * @throws RemoteException
 	 */
 	public void free() throws RemoteException {
+		if (mv == 0) {
+			object.waitForCounter(px - 1);
+			object.transactionLock(tid);
+			snapshot = object.snapshot();
+		} else
+			object.transactionLock(tid);
+		
 		object.setCurrentVersion(px);
 		releaseTransaction();
 
 		object.transactionUnlock(tid);
 
-		// FIXME ???
-		//over = true;
+		over = true;
 		//snapshot = null;
 	}
 

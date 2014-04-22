@@ -1,4 +1,4 @@
-package soa.atomicrmi.test.distributed;
+package put.atomicrmi.test.distributed;
 
 import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;

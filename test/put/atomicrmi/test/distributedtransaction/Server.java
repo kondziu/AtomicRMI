@@ -1,4 +1,4 @@
-package soa.atomicrmi.test.distributedtransaction;
+package put.atomicrmi.test.distributedtransaction;
 
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;

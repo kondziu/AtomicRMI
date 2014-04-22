@@ -1,4 +1,4 @@
-package soa.atomicrmi.test.transaction;
+package put.atomicrmi.test.transaction;
 
 import java.io.IOException;
 import java.rmi.AlreadyBoundException;

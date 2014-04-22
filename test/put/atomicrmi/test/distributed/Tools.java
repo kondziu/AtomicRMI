@@ -1,4 +1,4 @@
-package soa.atomicrmi.test.distributed;
+package put.atomicrmi.test.distributed;
 
 import java.io.IOException;
 import java.util.InputMismatchException;

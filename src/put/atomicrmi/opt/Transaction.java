@@ -44,8 +44,10 @@ import java.util.UUID;
  * 
  */
 public class Transaction extends UnicastRemoteObject implements ITransaction {
-	
-	enum AccessType {READ, WRITE, ANY}
+
+	enum AccessType {
+		READ, WRITE, ANY
+	}
 
 	/**
 	 * Implementation of a heartbeater thread that is a part of failure
@@ -222,25 +224,57 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	public <T> T accesses(T obj) throws TransactionException {
 		return accesses(obj, INF, AccessType.ANY);
 	}
-	
+
 	public <T> T accesses(T obj, int calls) throws TransactionException {
 		return accesses(obj, calls, AccessType.ANY);
 	}
-	
+
+	public <T> List<T> accesses(List<T> list) throws TransactionException {
+		return accesses(list, INF, AccessType.ANY);
+	}
+
+	public <T> List<T> accesses(List<T> list, int calls) throws TransactionException {
+		return accesses(list, calls, AccessType.ANY);
+	}
+
 	public <T> T reads(T obj) throws TransactionException {
 		return accesses(obj, INF, AccessType.READ);
 	}
-	
+
 	public <T> T reads(T obj, int calls) throws TransactionException {
 		return accesses(obj, calls, AccessType.READ);
 	}
-	
+
+	public <T> List<T> reads(List<T> list) throws TransactionException {
+		return accesses(list, INF, AccessType.READ);
+	}
+
+	public <T> List<T> reads(List<T> list, int calls) throws TransactionException {
+		return accesses(list, calls, AccessType.READ);
+	}
+
 	public <T> T writes(T obj) throws TransactionException {
 		return accesses(obj, INF, AccessType.WRITE);
 	}
-	
+
 	public <T> T writes(T obj, int calls) throws TransactionException {
 		return accesses(obj, calls, AccessType.WRITE);
+	}
+
+	public <T> List<T> writes(List<T> list) throws TransactionException {
+		return accesses(list, INF, AccessType.WRITE);
+	}
+
+	public <T> List<T> writes(List<T> list, int calls) throws TransactionException {
+		return accesses(list, calls, AccessType.WRITE);
+	}
+
+	public <T> List<T> accesses(List<T> list, int calls, AccessType type) throws TransactionException {
+		List<T> tlist = new ArrayList<>();
+		for (T e : list) {
+			tlist.add(accesses(e, calls, type));
+		}
+		return tlist;
 	}
 
 	/**
@@ -451,6 +485,15 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 		}
 
 		return commit;
+	}
+
+	public <T> void release(T object) throws TransactionException, RemoteException {
+		if (object instanceof IObjectProxy) {
+			IObjectProxy proxy = (IObjectProxy) object;
+			proxy.free();
+		} else {
+			throw new TransactionException("Not a transactional object: " + object);
+		}
 	}
 
 	/**

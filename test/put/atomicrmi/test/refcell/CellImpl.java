@@ -1,4 +1,4 @@
-package soa.atomicrmi.test.refcell;
+package put.atomicrmi.test.refcell;
 
 public class CellImpl implements Cell {
 

@@ -179,7 +179,7 @@
 
 	<target name="start-example-server" depends="compile" description="start server for the Bank example">
 		<echo>RMI Registry must be started at host ${example.host}:${example.port}</echo>
-		<java classpathref="project.class.path" classname="soa.atomicrmi.test.bank.Server" fork="true">
+		<java classpathref="project.class.path" classname="put.atomicrmi.test.bank.Server" fork="true">
 			<jvmarg value="-Djava.rmi.server.hostname=${example.host}" />
 			<jvmarg value="-Djava.rmi.server.hostname=${example.host}" />
 			<jvmarg value="-Djava.rmi.server.codebase=file://${build}/" />
@@ -190,7 +190,7 @@
 	</target>
 
 	<target name="start-example-client-audit" depends="compile" description="start client for the Bank example - client reads balance of accounts">
-		<java classpathref="project.class.path" classname="soa.atomicrmi.test.bank.Audit" fork="true">
+		<java classpathref="project.class.path" classname="put.atomicrmi.test.bank.Audit" fork="true">
 			<jvmarg value="-Djava.security.policy=client.policy" />
 			<arg value="${example.host}" />
 			<arg value="${example.port}" />
@@ -198,7 +198,7 @@
 	</target>
 
 	<target name="start-example-client-transfer" depends="compile" description="start client for the Bank example - client moves assets from one account to another">
-		<java classpathref="project.class.path" classname="soa.atomicrmi.test.bank.Transfer" fork="true">
+		<java classpathref="project.class.path" classname="put.atomicrmi.test.bank.Transfer" fork="true">
 			<jvmarg value="-Djava.security.policy=client.policy" />
 			<arg value="${example.host}" />
 			<arg value="${example.port}" />
@@ -206,7 +206,7 @@
 	</target>
 
 	<target name="start-example-client-transfer-retry" depends="compile" description="start client for the Bank example - client moves assets from one account to another with retry option">
-		<java classpathref="project.class.path" classname="soa.atomicrmi.test.bank.TransferRetry" fork="true">
+		<java classpathref="project.class.path" classname="put.atomicrmi.test.bank.TransferRetry" fork="true">
 			<jvmarg value="-Djava.security.policy=client.policy" />
 			<arg value="${example.host}" />
 			<arg value="${example.port}" />
@@ -273,7 +273,7 @@
 				<include name="soa/atomicrmi/test/**" />
 			</packageset>
 			<group title="Core" packages="soa.atomicrmi" />
-			<group title="Examples" packages="soa.atomicrmi.test:soa.atomicrmi.test.*:crash:crash.*" />
+			<group title="Examples" packages="soa.atomicrmi.test:put.atomicrmi.test.*:crash:crash.*" />
 		</javadoc>
 	</target>
 	
@@ -289,7 +289,7 @@
 				<include name="soa/atomicrmi/precompiler/**" />
 			</packageset>
 			<group title="Core" packages="soa.atomicrmi" />
-			<group title="Examples" packages="soa.atomicrmi.test:soa.atomicrmi.test.*:crash:crash.*" />
+			<group title="Examples" packages="soa.atomicrmi.test:put.atomicrmi.test.*:crash:crash.*" />
 			<group title="Precompiler" packages="soa.atomicrmi.precompiler:soa.atomicrmi.precompiler.*" />
 		</javadoc>
 	</target>
@@ -321,7 +321,7 @@
 			<doctitle>${javadoc.title.document}</doctitle>
 			<bottom>${javadoc.bottom}</bottom>
 			<group title="Core" packages="soa.atomicrmi" />
-			<group title="Examples" packages="soa.atomicrmi.test:soa.atomicrmi.test.*:crash:crash.*" />
+			<group title="Examples" packages="soa.atomicrmi.test:put.atomicrmi.test.*:crash:crash.*" />
 		</javadoc>
 	</target>
 
@@ -339,7 +339,7 @@
 			<doctitle>${javadoc.title.document}</doctitle>
 			<bottom>${javadoc.bottom}</bottom>
 			<group title="Core" packages="soa.atomicrmi" />
-			<group title="Examples" packages="soa.atomicrmi.test:soa.atomicrmi.test.*:crash:crash.*" />
+			<group title="Examples" packages="soa.atomicrmi.test:put.atomicrmi.test.*:crash:crash.*" />
 			<group title="Precompiler" packages="soa.atomicrmi.precompiler:soa.atomicrmi.precompiler.*" />
 		</javadoc>
 	</target>

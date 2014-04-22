@@ -1,4 +1,4 @@
-package soa.atomicrmi.opt.test.init;
+package put.atomicrmi.opt.test.init;
 
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;

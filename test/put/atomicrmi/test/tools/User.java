@@ -1,4 +1,4 @@
-package soa.atomicrmi.test.tools;
+package put.atomicrmi.test.tools;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;

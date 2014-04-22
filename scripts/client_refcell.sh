@@ -3,7 +3,7 @@
 #Usage: ./client_refcell (A|B|C) [[host] port] value
 
 # Constants.
-PACKAGE=soa.atomicrmi.test.refcell
+PACKAGE=put.atomicrmi.test.refcell
 CLASS=Client$1; shift
 
 DEFAULT_PROPERTIES="default.properties"
