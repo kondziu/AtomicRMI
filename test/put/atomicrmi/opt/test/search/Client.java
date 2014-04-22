@@ -12,20 +12,20 @@ import put.sync.Barrier;
 import put.sync.DistributedBarrier;
 
 public class Client extends Thread {
-	
+
 	static final int N = 5;
-    static final Barrier barrier;
-    
-    static {
-    	Barrier temp = null;
-    	try {
-		    temp = new DistributedBarrier(N);
+	static final Barrier barrier;
+
+	static {
+		Barrier temp = null;
+		try {
+			temp = new DistributedBarrier(N);
 		} catch (RemoteException | IllegalArgumentException e) {
 			e.printStackTrace();
 			System.exit(1);
 		}
-    	barrier = temp;
-    }
+		barrier = temp;
+	}
 
 	private int id;
 
@@ -40,11 +40,11 @@ public class Client extends Thread {
 		for (int i = 0; i < N; i++) {
 			clients[i] = new Client(i);
 		}
-		
+
 		for (int i = 0; i < N; i++) {
 			clients[i].start();
 		}
-		
+
 		for (int i = 0; i < N; i++) {
 			clients[i].join();
 		}
@@ -56,12 +56,12 @@ public class Client extends Thread {
 			List<Account> accounts = new ArrayList<>(3);
 
 			Registry registry = LocateRegistry.getRegistry("localhost", Server.RMI_PORT);
-			
+
 			// Get references to remote objects.
 			accounts.add((Account) registry.lookup("A"));
 			accounts.add((Account) registry.lookup("B"));
 			accounts.add((Account) registry.lookup("C"));
-			//Collections.shuffle(accounts);
+			// Collections.shuffle(accounts);
 
 			// Wait for the user.
 			System.out.println(id + " about to run transactional code.");
@@ -73,8 +73,8 @@ public class Client extends Thread {
 			barrier.enter();
 			System.out.println(id + " past the barrier");
 			transaction.start();
-			
-			for(Account account : accounts) {
+
+			for (Account account : accounts) {
 				if (account.getName().equals("C")) {
 					System.out.println(id + " " + account.getName() + ": " + account.getBalance());
 					Thread.sleep(5000);
@@ -82,17 +82,14 @@ public class Client extends Thread {
 				} else {
 					System.out.println(id + " releasing " + account.getName());
 					transaction.release(account);
-					System.err.println(account.getName());
+					//System.err.println(account.getName());
 				}
 			}
 
 			System.out.println(id + " committing");
 			transaction.commit();
 			System.out.println(id + " committed");
-			
-			System.err.println(accounts.get(0).getName());
 
-			
 			barrier.enter();
 
 		} catch (Exception e) {
