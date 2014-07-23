@@ -88,7 +88,9 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 	private AccessType accessType;
 
-	private Object buffer;
+	private Object buffer = null;
+
+	private Semaphore readSemaphore = new Semaphore(0);
 
 	/**
 	 * Creates the object proxy for given remote object.
@@ -136,34 +138,36 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		// Read-only optimization: this in a separate thread "store"
 		// TODO should this be moved to the client-side? Or at least the
 		// threading?
-		//if (accessType == AccessType.READ) {
-			object.waitForCounter(px - 1);
-			object.transactionLock(tid);
-			// buffer = magic(object.snapshot());
-			try {
-				buffer = object.clone();
-			} catch (CloneNotSupportedException e) {
-				e.printStackTrace();
-				throw new RemoteException(e.getMessage(), e.getCause());
-			}
+		// if (accessType == AccessType.READ) {
+		object.waitForCounter(px - 1);
+		object.transactionLock(tid);
+		// buffer = magic(object.snapshot());
+		try {
+			buffer = object.clone();
+		} catch (CloneNotSupportedException e) {
+			e.printStackTrace();
+			throw new RemoteException(e.getMessage(), e.getCause());
+		}
 
-			object.setCurrentVersion(px);
-			releaseTransaction();
+		object.setCurrentVersion(px);
+		releaseTransaction();
 
-			object.transactionUnlock(tid);
-		//}
+		object.transactionUnlock(tid);
+		readSemaphore.release(1);
+		// }
 	}
 
 	@Override
 	public void releaseAfterBuferring() throws RemoteException {
 		object.transactionLock(tid);
-		
+
 		object.setCurrentVersion(px);
 		releaseTransaction();
-		
+
 		object.transactionUnlock(tid);
 
 		over = true;
+		readSemaphore.release(1);
 	}
 
 	public void startTransaction() throws RemoteException {
@@ -175,7 +179,16 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		over = false;
 	}
 
+	public void preRead() throws RemoteException {
+		try {
+			readSemaphore.acquire(1);
+		} catch (InterruptedException e) {
+			throw new RemoteException(e.getMessage(), e.getCause());
+		}
+	}
+
 	public void preSync() throws RemoteException {
+
 		if (over)
 			throw new TransactionException("Attempting to access transactional object after release.");
 
@@ -195,7 +208,6 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		}
 
 		mv++;
-
 	}
 
 	public void postSync() throws RemoteException {

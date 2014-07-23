@@ -26,6 +26,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -163,7 +164,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 */
 	private List<IObjectProxy> proxies;
 
-	private Map<IObjectProxy, Thread> readThreads;
+	private Map<IObjectProxy, Semaphore> readConditions;
 
 	/**
 	 * Heartbeater's thread reference.
@@ -191,15 +192,15 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 */
 	public Transaction() throws RemoteException {
 		state = STATE_PREPARING;
-		id = UUID.randomUUID();	
+		id = UUID.randomUUID();
 
 		proxies = new ArrayList<IObjectProxy>();
 		heartbeat = new Heartbeat();
 
 		reads = new HashSet<>();
 		writes = new HashSet<>();
-		
-		Object o =new Object();
+
+		readConditions = new HashMap<>();
 	}
 
 	/**
@@ -329,6 +330,10 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 			case WRITE:
 				writes.add(proxy);
 				break;
+			case ANY:
+				reads.add(proxy);
+				writes.add(proxy);
+				break;
 			}
 
 			heartbeat.addFailureMonitor(remote.getFailureMonitor());
@@ -433,22 +438,24 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 			for (IObjectProxy proxy : proxies) {
 				proxy.unlock();
 			}
-			
+
 			for (final IObjectProxy proxy : getReadOnlyProxies()) {
-				new Thread(){
+				final Semaphore semaphore = new Semaphore(0);
+				new Thread() {
 					@Override
 					public void run() {
-					    try {
+						try {
 							proxy.bufferForReading();
-						    proxy.notify();
 							proxy.releaseAfterBuferring();
-					    } catch (RemoteException e) {
-					    	// TODO Auto-generated catch block
-					    	e.printStackTrace();
-					    	throw new RuntimeException(e.getMessage(), e.getCause());
-					    }
+							semaphore.release(1);
+						} catch (RemoteException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							throw new RuntimeException(e.getMessage(), e.getCause());
+						}
 					}
 				}.start();
+				readConditions.put(proxy, semaphore);
 			}
 
 		} catch (RemoteException e) {
