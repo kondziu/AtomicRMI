@@ -14,7 +14,7 @@ public class ClientC {
 	public static void main(String[] args) throws AlreadyBoundException, NotBoundException, IOException {
 		Registry registry = LocateRegistry.getRegistry(1099);
 
-		Transaction t = new Transaction(registry);
+		Transaction t = new Transaction();
 		final A a = (A) t.accesses(registry.lookup("A"));
 
 		t.start(new Transactable() {

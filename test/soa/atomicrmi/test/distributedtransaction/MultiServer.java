@@ -5,8 +5,6 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
-import soa.atomicrmi.TransactionsLock;
-
 public class MultiServer {
 	public static void main(String[] args) throws RemoteException, NotBoundException {
 		// Parse the commandline arguments to figure out the hostname and port
@@ -47,8 +45,5 @@ public class MultiServer {
 		registry.rebind("M2", m2);
 		registry.rebind("AB", ab);
 		registry.rebind("CD", cd);
-
-		// Initialize synchronization mechanisms for transactions.
-		TransactionsLock.initialize(registry);
 	}
 }

@@ -29,7 +29,7 @@ public class ClientD extends TransactionalUnicastRemoteObject implements Referre
 		ReferrenceCellPubSubServer server = (ReferrenceCellPubSubServer) registry.lookup("ServerD");
 		ReferrenceCellClient client = new ClientD();
 
-		Transaction transaction = new Transaction(registry);
+		Transaction transaction = new Transaction();
 		server = (ReferrenceCellPubSubServer) transaction.accesses(server, 2);
 
 		System.out.println("Starting transaction at " + ClientD.class);

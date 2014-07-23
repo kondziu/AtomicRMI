@@ -23,12 +23,13 @@ package soa.atomicrmi;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.UUID;
 
 /**
  * An interface for remote object proxy. This allows to access remote object
  * proxy remotely and control the wrapped remote object invocation.
  * 
- * @author Wojciech Mruczkiewicz
+ * @author Wojciech Mruczkiewicz, Konrad Siek
  */
 public interface IObjectProxy extends Remote {
 
@@ -113,10 +114,31 @@ public interface IObjectProxy extends Remote {
 	 * Declare that the object will no longer be used by the current transaction
 	 * and allow it to be used by other transactions.
 	 * 
-	 * XXX This method is only a proposal and requires extensive testing.
+	 * This method is only a proposal and requires extensive testing.
 	 * 
 	 * @author K. Siek
 	 * @throws RemoteException
 	 */
 	void free() throws RemoteException;
+	
+	/**
+	 * TODO
+	 * 
+	 * @throws RemoteException
+	 */
+	void lock() throws RemoteException;
+	
+	/**
+	 * TODO
+	 * 
+	 * @throws RemoteException
+	 */
+	void unlock() throws RemoteException;
+	
+	/**
+	 * TODO
+	 * 
+	 * @throws RemoteException
+	 */
+	UUID getSortingKey() throws RemoteException;
 }

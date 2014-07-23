@@ -37,7 +37,7 @@ public class NestedTransfer {
 		User.waitUp();
 
 		// Transaction header.
-		Transaction transaction = new Transaction(registry);
+		Transaction transaction = new Transaction();
 		final Account ta = (Account) transaction.accesses(a, 3);
 		final Account tb = (Account) transaction.accesses(b, 3);
 		final Account tc = (Account) transaction.accesses(c, 3);
@@ -52,7 +52,7 @@ public class NestedTransfer {
 
 				System.out.println("About to run transactional code " + "for inner transaction.");
 
-				Transaction inner = new Transaction(registry);
+				Transaction inner = new Transaction();
 				final Account tc = (Account) inner.accesses(c, 3);
 				final Account td = (Account) inner.accesses(d, 3);
 

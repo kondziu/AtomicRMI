@@ -34,7 +34,7 @@ public class TransferRetry {
 		User.waitUp();
 
 		// Transaction header.
-		Transaction transaction = new Transaction(registry);
+		Transaction transaction = new Transaction();
 		final Account ta = (Account) transaction.accesses(a, 3);
 		final Account tb = (Account) transaction.accesses(b, 3);
 

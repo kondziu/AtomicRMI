@@ -31,7 +31,7 @@ public class Audit {
 		User.waitUp();
 
 		// Transaction header.
-		Transaction transaction = new Transaction(registry);
+		Transaction transaction = new Transaction();
 		Account ta = transaction.accesses(a, 1);
 		Account tb = transaction.accesses(b, 1);
 

@@ -8,7 +8,6 @@ import java.rmi.registry.Registry;
 import java.util.Calendar;
 
 import soa.atomicrmi.TransactionalUnicastRemoteObject;
-import soa.atomicrmi.TransactionsLock;
 
 public class ServerC extends TransactionalUnicastRemoteObject implements ReferrenceCellRequestServer {
 
@@ -20,7 +19,7 @@ public class ServerC extends TransactionalUnicastRemoteObject implements Referre
 
 	private static void run(String host, int port) throws RemoteException, AccessException {
 		Registry registry = LocateRegistry.getRegistry(host, port);
-		TransactionsLock.initialize(registry);
+		//TransactionsLock.initialize(registry);
 
 		ReferrenceCellRequestServer cell = new ServerC();
 		registry.rebind("ServerC", cell);

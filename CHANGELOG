@@ -1,0 +1,14 @@
+Change Log
+==========
+
+Version 2.2
+-----------
+
+ - Bugfix: proxy object unlocks object when calling method and forced to roll
+   back.
+ - Increased granularity of locking at transaction start. Previously locks 
+   were per registry, now they are per object.
+ - API change: Transaction constructor no longer takes registries as arguments.
+ - API change: No need to initialize TransactionsLock when starting up.
+ 
+ **Version 2.2 is currently in flux, so this list can change.** 

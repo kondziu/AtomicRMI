@@ -22,10 +22,10 @@
 package soa.atomicrmi;
 
 import java.rmi.RemoteException;
-import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -153,10 +153,10 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 */
 	private UUID id;
 
-	/**
-	 * Reference to remote global lock used only for transaction startup.
-	 */
-	private ITransactionsLock[] globalLocks;
+	// /**
+	// * Reference to remote global lock used only for transaction startup.
+	// */
+	// private ITransactionsLock[] globalLocks;
 
 	/**
 	 * List of proxies of the accessed remote objects.
@@ -184,16 +184,16 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 *             global lock.
 	 * 
 	 */
-	public Transaction(Registry... registries) throws RemoteException {
+	public Transaction() throws RemoteException {
 		state = STATE_PREPARING;
 		id = UUID.randomUUID();
 
-		for (int i = 0; i < registries.length; i++) {
-			globalLocks[i] = TransactionsLock.getOrCreate(registries[i]);
-		}
-
-		// Sorting prevents deadlocks.
-		Arrays.sort(globalLocks);
+		// for (int i = 0; i < registries.length; i++) {
+		// globalLocks[i] = TransactionsLock.getOrCreate(registries[i]);
+		// }
+		//
+		// // Sorting prevents deadlocks.
+		// Arrays.sort(globalLocks);
 
 		proxies = new ArrayList<IObjectProxy>();
 		heartbeat = new Heartbeat();
@@ -341,17 +341,22 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 			heartbeatThread = new Thread(heartbeat);
 			heartbeatThread.start();
 
-			for (ITransactionsLock globalLock : this.globalLocks) {
-				globalLock.lock();
+			// Arrays.sort(proxies);
+
+			Collections.sort(proxies, comparator);
+
+			for (IObjectProxy proxy : proxies) {
+				proxy.lock();
 			}
 
 			for (IObjectProxy proxy : proxies) {
 				proxy.startTransaction();
 			}
 
-			for (ITransactionsLock globalLock : this.globalLocks) {
-				globalLock.unlock();
+			for (IObjectProxy proxy : proxies) {
+				proxy.unlock();
 			}
+
 		} catch (RemoteException e) {
 			throw new TransactionException("Unable to initialize transaction.", e);
 		}
@@ -481,4 +486,16 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 
 		state = newState;
 	}
+
+	private Comparator<IObjectProxy> comparator = new Comparator<IObjectProxy>() {
+		public int compare(IObjectProxy a, IObjectProxy b) {
+			try {
+				return a.getSortingKey().compareTo(b.getSortingKey());
+			} catch (RemoteException e) {
+				// Nasty hack
+				throw new RuntimeException(e.getMessage(), e.getCause());
+			}
+		}
+
+	};
 }

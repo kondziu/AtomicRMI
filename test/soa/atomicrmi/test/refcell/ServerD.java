@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Set;
 
 import soa.atomicrmi.TransactionalUnicastRemoteObject;
-import soa.atomicrmi.TransactionsLock;
 
 public class ServerD extends TransactionalUnicastRemoteObject implements ReferrenceCellPubSubServer {
 
@@ -24,7 +23,7 @@ public class ServerD extends TransactionalUnicastRemoteObject implements Referre
 
 	private static void run(String host, int port) throws RemoteException, AccessException {
 		Registry registry = LocateRegistry.getRegistry(host, port);
-		TransactionsLock.initialize(registry);
+		//TransactionsLock.initialize(registry);
 
 		ReferrenceCellPubSubServer cell = new ServerD();
 		registry.rebind("ServerD", cell);

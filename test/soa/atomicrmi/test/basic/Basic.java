@@ -24,7 +24,7 @@ public class Basic {
 
 		System.out.println(((UnicastRemoteObject) a).getRef().remoteToString());
 
-		Transaction t = new Transaction(registry);
+		Transaction t = new Transaction();
 		t.accesses(a);
 	}
 
@@ -60,7 +60,7 @@ public class Basic {
 		for (Class<?> c : a.getClass().getInterfaces())
 			System.out.println(c);
 
-		Transaction t = new Transaction(registry);
+		Transaction t = new Transaction();
 		t.accesses(a);
 	}
 

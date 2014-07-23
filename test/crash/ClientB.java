@@ -12,7 +12,7 @@ public class ClientB {
 	public static void main(String[] args) throws AlreadyBoundException, NotBoundException, IOException {
 		Registry registry = LocateRegistry.getRegistry(1099);
 
-		Transaction t = new Transaction(registry);
+		Transaction t = new Transaction();
 		A a = (A) t.accesses(registry.lookup("A"));
 
 		System.out.println("start()");

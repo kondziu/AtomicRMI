@@ -15,7 +15,7 @@ public class ClientA {
 		// registry.bind("B", new ImplA());
 		// /A a = (A) registry.lookup("A");
 
-		Transaction t = new Transaction(registry);
+		Transaction t = new Transaction();
 		A a = (A) t.accesses(registry.lookup("A"));
 
 		t.start();

@@ -23,7 +23,7 @@ public class Server {
 
 		System.out.println(((UnicastRemoteObject) a).getRef().remoteToString());
 
-		Transaction t = new Transaction(registry);
+		Transaction t = new Transaction();
 		A aa = (A) t.accesses(a);
 
 		System.out.println(Enhancer.isEnhanced(aa.getClass()));

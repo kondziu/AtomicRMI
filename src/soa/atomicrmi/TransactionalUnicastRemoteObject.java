@@ -133,6 +133,11 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 */
 	private transient UUID lockedId;
 
+	/**
+	 * Unique identifier of this object.
+	 */
+	private UUID id = UUID.randomUUID();
+
 	protected TransactionalUnicastRemoteObject() throws RemoteException {
 	}
 
@@ -408,5 +413,9 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 		} catch (IOException e) {
 			throw new TransactionException("Unable to restore snapshot.", e);
 		}
+	}
+	
+	public UUID getSortingKey() throws RemoteException {
+		return id;
 	}
 }

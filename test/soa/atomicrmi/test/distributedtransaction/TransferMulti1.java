@@ -39,7 +39,7 @@ public class TransferMulti1 {
 		User.waitUp();
 
 		// Transaction header.
-		Transaction transaction = new Transaction(registry);
+		Transaction transaction = new Transaction();
 		final Account tm1 = (Account) transaction.accesses(m1, 3);
 		final Account td = (Account) transaction.accesses(d, 3);
 

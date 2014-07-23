@@ -8,7 +8,7 @@ import soa.atomicrmi.Transaction;
 
 public class Retry {
 	public void test(Registry rmiRegistry, A remoteA) throws RemoteException {
-		Transaction t = new Transaction(rmiRegistry);
+		Transaction t = new Transaction();
 		final A a = (A) t.accesses(remoteA, 2);
 
 		t.start(new Transactable() {

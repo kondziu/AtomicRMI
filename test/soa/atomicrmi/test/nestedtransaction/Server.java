@@ -4,8 +4,6 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
-import soa.atomicrmi.TransactionsLock;
-
 public class Server {
 	public static void main(String[] args) throws RemoteException {
 		// Parse the commandline arguments to figure out the hostname and port
@@ -31,8 +29,5 @@ public class Server {
 		registry.rebind("B", b);
 		registry.rebind("C", c);
 		registry.rebind("D", d);
-
-		// Initialize synchronization mechanisms for transactions.
-		TransactionsLock.initialize(registry);
 	}
 }

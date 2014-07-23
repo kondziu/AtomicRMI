@@ -35,7 +35,7 @@ public class TransferCDtoAB {
 		User.waitUp();
 
 		// Transaction header.
-		Transaction transaction = new Transaction(registry);
+		Transaction transaction = new Transaction();
 		final Account tcd = (Account) transaction.accesses(cd, 3);
 		final Account tab = (Account) transaction.accesses(ab, 3);
 

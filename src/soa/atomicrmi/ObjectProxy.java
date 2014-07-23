@@ -29,7 +29,7 @@ import java.util.UUID;
  * An implementation of {@link IObjectProxy} interface. It is required to
  * control remote method invocations and implement versioning algorithm.
  * 
- * @author Wojciech Mruczkiewicz
+ * @author Wojciech Mruczkiewicz, Konrad Siek
  */
 class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
@@ -225,7 +225,20 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 		object.transactionUnlock(tid);
 
-		over = true;
-		snapshot = null;
+		// FIXME ???
+		// over = true;
+		// snapshot = null;
+	}
+
+	public void lock() throws RemoteException {
+		object.transactionLock(tid);
+	}
+
+	public void unlock() throws RemoteException {
+		object.transactionUnlock(tid);
+	}
+
+	public UUID getSortingKey() throws RemoteException {
+		return object.getSortingKey();
 	}
 }

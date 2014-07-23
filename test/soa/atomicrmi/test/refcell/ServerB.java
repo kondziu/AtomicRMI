@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import soa.atomicrmi.TransactionalUnicastRemoteObject;
-import soa.atomicrmi.TransactionsLock;
 
 public class ServerB extends TransactionalUnicastRemoteObject implements ReferrenceCellServer {
 
@@ -22,7 +21,7 @@ public class ServerB extends TransactionalUnicastRemoteObject implements Referre
 
 	private static void run(String host, int port) throws RemoteException, AccessException {
 		Registry registry = LocateRegistry.getRegistry(host, port);
-		TransactionsLock.initialize(registry);
+		//TransactionsLock.initialize(registry);
 
 		ReferrenceCellServer cell = new ServerB();
 		registry.rebind("ServerB", cell);

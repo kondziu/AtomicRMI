@@ -13,7 +13,7 @@ public class ClientA {
 			InterruptedException {
 		Registry registry = LocateRegistry.getRegistry(1099);
 
-		Transaction t = new Transaction(registry);
+		Transaction t = new Transaction();
 		A a = (A) t.accesses(registry.lookup("A"), 3);
 
 		System.out.println("start()");

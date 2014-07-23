@@ -7,7 +7,6 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
 import soa.atomicrmi.TransactionalUnicastRemoteObject;
-import soa.atomicrmi.TransactionsLock;
 
 public class ServerA extends TransactionalUnicastRemoteObject implements ReferrenceCell {
 
@@ -21,7 +20,7 @@ public class ServerA extends TransactionalUnicastRemoteObject implements Referre
 
 	private static void run(String host, int port) throws RemoteException, AccessException {
 		Registry registry = LocateRegistry.getRegistry(host, port);
-		TransactionsLock.initialize(registry);
+		//TransactionsLock.initialize(registry);
 
 		ReferrenceCell cell = new ServerA();
 		registry.rebind("ServerA", cell);

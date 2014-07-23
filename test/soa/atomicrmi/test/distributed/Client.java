@@ -54,7 +54,7 @@ public class Client {
 	}
 
 	private void executeWriting(final String name, final Ending ending) throws IOException {
-		Transaction transaction = new Transaction(registry);
+		Transaction transaction = new Transaction();
 		final A object = (A) transaction.accesses(this.object, 1);
 
 		transaction.start(new Transactable() {
@@ -93,7 +93,7 @@ public class Client {
 
 	@SuppressWarnings("unused")
 	private Ending executeWritingOld(String name, Ending ending) throws IOException {
-		Transaction transaction = new Transaction(registry);
+		Transaction transaction = new Transaction();
 		A object = (A) transaction.accesses(this.object, 1);
 
 		transaction.start();
@@ -122,7 +122,7 @@ public class Client {
 	}
 
 	private void executeReading(String name) throws RemoteException {
-		Transaction transaction = new Transaction(registry);
+		Transaction transaction = new Transaction();
 		A object = (A) transaction.accesses(this.object, 1);
 
 		transaction.start();

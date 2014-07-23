@@ -32,7 +32,7 @@ public class Transfer {
 		User.waitUp();
 
 		// Transaction header.
-		Transaction transaction = new Transaction(registry);
+		Transaction transaction = new Transaction();
 		Account ta = (Account) transaction.accesses(a, 3);
 		Account tb = (Account) transaction.accesses(b, 3);
 

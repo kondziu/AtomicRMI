@@ -20,7 +20,7 @@ public class ProxyTest {
 
 		a.getB2().foo();
 
-		Transaction t = new Transaction(registry);
+		Transaction t = new Transaction();
 		A aa = (A) t.accesses(a);
 
 		t.start();

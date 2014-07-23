@@ -16,7 +16,7 @@ public class ClientA {
 		Registry registry = LocateRegistry.getRegistry(host, port);
 		ReferrenceCell cell = (ReferrenceCell) registry.lookup("ServerA");
 
-		Transaction transaction = new Transaction(registry);
+		Transaction transaction = new Transaction();
 		cell = (ReferrenceCell) transaction.accesses(cell, 3);
 
 		System.out.println("Starting transaction at " + ClientA.class);

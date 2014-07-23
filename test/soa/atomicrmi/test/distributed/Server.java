@@ -7,7 +7,6 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
 import soa.atomicrmi.TransactionException;
-import soa.atomicrmi.TransactionsLock;
 
 public class Server {
 	// private String host;
@@ -26,7 +25,7 @@ public class Server {
 		Registry registry = LocateRegistry.createRegistry(port);
 		registry.bind("A", a);
 
-		TransactionsLock.initialize(registry);
+		//TransactionsLock.initialize(registry);
 		// System.out.println("A: " + a.getName());
 	}
 

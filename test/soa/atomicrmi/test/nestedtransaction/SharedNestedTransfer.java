@@ -37,7 +37,7 @@ public class SharedNestedTransfer {
 		User.waitUp();
 
 		// Transaction header.
-		Transaction transaction = new Transaction(registry);
+		Transaction transaction = new Transaction();
 		final Account ta = (Account) transaction.accesses(a, 3 + 3);
 		final Account tb = (Account) transaction.accesses(b, 3 + 3);
 
@@ -50,7 +50,7 @@ public class SharedNestedTransfer {
 
 				System.out.println("About to run transactional code " + "for inner transaction.");
 
-				Transaction inner = new Transaction(registry);
+				Transaction inner = new Transaction();
 				final Account ta = (Account) inner.accesses(a, 3);
 				final Account tb = (Account) inner.accesses(b, 3);
 
