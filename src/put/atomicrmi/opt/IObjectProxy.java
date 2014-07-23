@@ -140,5 +140,9 @@ public interface IObjectProxy extends Remote {
 	 * 
 	 * @throws RemoteException
 	 */
-	UUID getSortingKey() throws RemoteException;
+	UUID getID() throws RemoteException;
+
+	void bufferForReading() throws RemoteException;
+
+	void releaseAfterBuferring() throws RemoteException;
 }

@@ -88,6 +88,8 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 	private AccessType accessType;
 
+	private Object buffer;
+
 	/**
 	 * Creates the object proxy for given remote object.
 	 * 
@@ -130,6 +132,40 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		return object;
 	}
 
+	public void bufferForReading() throws RemoteException {
+		// Read-only optimization: this in a separate thread "store"
+		// TODO should this be moved to the client-side? Or at least the
+		// threading?
+		//if (accessType == AccessType.READ) {
+			object.waitForCounter(px - 1);
+			object.transactionLock(tid);
+			// buffer = magic(object.snapshot());
+			try {
+				buffer = object.clone();
+			} catch (CloneNotSupportedException e) {
+				e.printStackTrace();
+				throw new RemoteException(e.getMessage(), e.getCause());
+			}
+
+			object.setCurrentVersion(px);
+			releaseTransaction();
+
+			object.transactionUnlock(tid);
+		//}
+	}
+
+	@Override
+	public void releaseAfterBuferring() throws RemoteException {
+		object.transactionLock(tid);
+		
+		object.setCurrentVersion(px);
+		releaseTransaction();
+		
+		object.transactionUnlock(tid);
+
+		over = true;
+	}
+
 	public void startTransaction() throws RemoteException {
 		TransactionFailureMonitor.getInstance().startMonitoring(this);
 		px = object.startTransaction(tid);
@@ -137,28 +173,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		mv = 0;
 
 		over = false;
-		
-		// Read-only optimization: this in a separate thread "store"
-//		if (accessType == AccessType.READ) {
-//			object.waitForCounter(px - 1);
-//			object.transactionLock(tid);
-//			buffer = magic(object.snapshot());
-//
-//			if (over)
-//				return;
-//
-//			object.setCurrentVersion(px);
-//			releaseTransaction();
-//
-//			object.transactionUnlock(tid);
-//			
-//			stored.notify();
-//					
-//			/* TODO like on commit */
-//		}
 	}
-	
-	
 
 	public void preSync() throws RemoteException {
 		if (over)
@@ -186,7 +201,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	public void postSync() throws RemoteException {
 		if (over)
 			throw new TransactionException("Attempting to access transactional object after release.");
-			//return;
+		// return;
 
 		if (mv == ub) {
 			object.setCurrentVersion(px);
@@ -254,14 +269,14 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			snapshot = object.snapshot();
 		} else
 			object.transactionLock(tid);
-		
+
 		object.setCurrentVersion(px);
 		releaseTransaction();
 
 		object.transactionUnlock(tid);
 
 		over = true;
-		//snapshot = null;
+		// snapshot = null;
 	}
 
 	@Override
@@ -275,7 +290,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	}
 
 	@Override
-	public UUID getSortingKey() throws RemoteException {
+	public UUID getID() throws RemoteException {
 		return object.getSortingKey();
 	}
 
