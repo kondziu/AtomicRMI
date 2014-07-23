@@ -229,8 +229,8 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 *             when remote exception occurs during initialization of object
 	 *             proxy.
 	 */
-	public Object accesses(Object obj) throws TransactionException {
-		return accesses(obj, INF);
+	public <T> T accesses(T obj) throws TransactionException {
+		return (T) accesses(obj, INF);
 	}
 
 	/**
@@ -440,6 +440,22 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 		}
 
 		return commit;
+	}
+		
+	/**
+	 * Release object early.
+	 * 
+	 * @param object
+	 * @throws TransactionException
+	 * @throws RemoteException
+	 */
+	public <T> void release(T object) throws TransactionException, RemoteException {
+		if (object instanceof IObjectProxy) {
+			IObjectProxy proxy = (IObjectProxy) object;
+			proxy.free();
+		} else {
+			throw new TransactionException("Not a transactional object: " + object);
+		}
 	}
 
 	/**
