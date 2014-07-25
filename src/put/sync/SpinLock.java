@@ -15,12 +15,10 @@ public class SpinLock extends UnicastRemoteObject  implements Lock {
 		
 	private CasObject<Object> owner = new CasObject<Object>(NULL);
 
-	@Override
 	public void lock(Object id) throws RemoteException {
 		while (!owner.compareAndSwap(NULL, id));
 	}
 
-	@Override
 	public void release(Object id) throws RemoteException {
 		if (!owner.compareAndSwap(id, NULL)) {
 			throw new RemoteException(

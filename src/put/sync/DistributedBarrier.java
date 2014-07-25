@@ -17,7 +17,6 @@ public class DistributedBarrier extends UnicastRemoteObject implements Barrier {
 		barrier = new CyclicBarrier(parties);
 	}
 
-	@Override
 	public int enter() throws InterruptedException, BrokenBarrierException,
 			RemoteException {
 		return barrier.await();
