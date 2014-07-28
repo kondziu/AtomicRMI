@@ -388,6 +388,8 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 		synchronized (heartbeat) {
 			heartbeat.notify();
 		}
+		
+		//heartbeatThread.stop();
 	}
 
 	/**
@@ -408,6 +410,8 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 		synchronized (heartbeat) {
 			heartbeat.notify();
 		}
+		
+		//heartbeatThread.stop();
 	}
 
 	/**
