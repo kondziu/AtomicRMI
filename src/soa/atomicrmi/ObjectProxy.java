@@ -148,6 +148,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			object.transactionLock(tid);
 
 		if (snapshot.getReadVersion() != object.getCurrentVersion()) {
+			object.transactionUnlockForce(tid);
 			transaction.rollback();
 			throw new RollbackForcedException("Rollback forced during invocation.");
 		}
