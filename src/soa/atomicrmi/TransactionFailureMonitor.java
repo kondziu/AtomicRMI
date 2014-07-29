@@ -37,7 +37,7 @@ import java.util.UUID;
  * 
  * @author Wojciech Mruczkiewicz
  */
-class TransactionFailureMonitor extends UnicastRemoteObject implements Runnable, ITransactionFailureMonitor {
+public class TransactionFailureMonitor extends UnicastRemoteObject implements Runnable, ITransactionFailureMonitor {
 
 	/**
 	 * Time between checking for failed transactions.
@@ -74,6 +74,8 @@ class TransactionFailureMonitor extends UnicastRemoteObject implements Runnable,
 	 */
 	private UUID id = UUID.randomUUID();
 
+	private boolean shutdown;
+
 	/**
 	 * Gives the instance to transaction failures monitor. Returned value is
 	 * unique for a node in distributed system.
@@ -81,7 +83,7 @@ class TransactionFailureMonitor extends UnicastRemoteObject implements Runnable,
 	 * @return an instance of a transaction failure monitor.
 	 * @throws RemoteException
 	 */
-	static TransactionFailureMonitor getInstance() throws RemoteException {
+	synchronized public static TransactionFailureMonitor getInstance() throws RemoteException {
 		if (monitor == null)
 			monitor = new TransactionFailureMonitor();
 		return monitor;
@@ -149,6 +151,22 @@ class TransactionFailureMonitor extends UnicastRemoteObject implements Runnable,
 				alive.remove(tid);
 			}
 		}
+
+		monitorThread.interrupt();
+	}
+
+	/**
+	 * Stop the failure detector due to an emergency: interrupt the monitor
+	 * thread and make it exit.
+	 * 
+	 * @author Konrad Siek
+	 */
+	synchronized public void emergencyStop() {
+		if (!monitorThread.isAlive()) {
+			return;
+		}
+		shutdown = true;
+		monitorThread.interrupt();
 	}
 
 	/**
@@ -174,7 +192,10 @@ class TransactionFailureMonitor extends UnicastRemoteObject implements Runnable,
 				for (ObjectProxy proxy : failures)
 					proxy.OnFailure();
 			} catch (InterruptedException e) {
-				// Do nothing.
+				if (shutdown) {
+					shutdown = false;
+					return;
+				}
 			} catch (RemoteException e) {
 				throw new RuntimeException("Unexpected error in failure detector.");
 			}
