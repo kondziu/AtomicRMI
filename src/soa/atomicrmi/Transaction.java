@@ -74,6 +74,8 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 		 */
 		private List<ITransactionFailureMonitor> monitors = new ArrayList<ITransactionFailureMonitor>();
 
+		private boolean shutdown = false;
+
 		public void run() {
 			while (state != STATE_COMMITED && state != STATE_ROLLEDBACK) {
 				try {
@@ -88,7 +90,10 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 						}
 					}
 				} catch (InterruptedException e) {
-					// Do nothing.
+					if (shutdown) {
+						shutdown = false;
+						return;
+					}
 				}
 			}
 		}
@@ -388,8 +393,8 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 		synchronized (heartbeat) {
 			heartbeat.notify();
 		}
-		
-		//heartbeatThread.stop();
+
+		// heartbeatThread.stop();
 	}
 
 	/**
@@ -410,8 +415,8 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 		synchronized (heartbeat) {
 			heartbeat.notify();
 		}
-		
-		//heartbeatThread.stop();
+
+		// heartbeatThread.stop();
 	}
 
 	/**
@@ -445,7 +450,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 
 		return commit;
 	}
-		
+
 	/**
 	 * Release object early.
 	 * 
@@ -518,4 +523,15 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 		}
 
 	};
+
+	/**
+	 * Stop heartbeat monitor due to an emergency.
+	 */
+	public void stopHeartbeat() {
+		if (!heartbeatThread.isAlive()) {
+			return;
+		}
+		heartbeat.shutdown = true;
+		heartbeatThread.interrupt();
+	}
 }
