@@ -151,8 +151,6 @@ public class TransactionFailureMonitor extends UnicastRemoteObject implements Ru
 				alive.remove(tid);
 			}
 		}
-
-		monitorThread.interrupt();
 	}
 
 	/**
