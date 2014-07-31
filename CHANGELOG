@@ -14,5 +14,6 @@ Version 2.2
  - API change: No need to initialize TransactionsLock when starting up.
  - API change: "accesses" method is now generic.
  - API change: transaction.release(object) is now available (and should work). 
+ - Concurrent unit tests.
  
  **Version 2.2 is currently in flux, so this list can change.** 
