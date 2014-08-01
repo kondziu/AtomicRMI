@@ -19,37 +19,26 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package soa.atomicrmi;
+package put.atomicrmi;
 
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-import java.util.UUID;
+import java.io.Serializable;
 
 /**
- * Internal interface for transaction failure detector mechanism. Provides
- * methods for {@link Transaction} that allows to signal transaction liveness.
+ * Interface for object proxy serialization replacement. This is necessary in
+ * order to properly serialize and deserialize object proxy. During
+ * serialization only object proxy instance without {@link ObjectProxyHandler}
+ * is written. During deserialization a {@link ObjectProxyHandler} wrapper is
+ * created and invocations of {@link ObjectProxy} methods are monitored.
  * 
  * @author Wojciech Mruczkiewicz
  */
-public interface ITransactionFailureMonitor extends Remote {
+public interface IObjectProxySerializer extends Serializable {
 
 	/**
-	 * Gives the unique identifier of particular transaction failure monitor.
+	 * Write method replacement. Provides class with a special implementation of
+	 * serialization for {@link ObjectProxyHandler}.
 	 * 
-	 * @return an unique identifier
-	 * @throws RemoteException
-	 *             when remote execution failed.
+	 * @return an instance of {@link ObjectProxySerializer}.
 	 */
-	UUID getId() throws RemoteException;
-
-	/**
-	 * Sends a signal to transaction failure monitor with information that
-	 * transaction is still alive.
-	 * 
-	 * @param tid
-	 *            identifier of transaction that signals liveness.
-	 * @throws RemoteException
-	 *             when remote execution failed.
-	 */
-	void heartbeat(UUID tid) throws RemoteException;
+	Object writeReplace();
 }

@@ -19,40 +19,44 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package soa.atomicrmi;
+package put.atomicrmi;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.UUID;
 
 /**
- * Remote interface for transaction execution control. This is a public
- * interface that provides methods to terminate transaction remotely in various
- * ways.
- * 
- * This interface does not provides remote startup of a transaction. Transaction
- * can only be started on node where they were created on.
+ * Internal transactional mechanism of {@link TransactionalUnicastRemoteObject}
+ * class. Specifies methods required to initiate remote transaction.
  * 
  * @author Wojciech Mruczkiewicz
  */
-public interface ITransaction extends Remote {
+public interface ITransactionalRemoteObject extends Remote {
 
 	/**
-	 * Terminates remote transaction and commits all the changes made. It is
-	 * however possible that transaction was forcibly rolled back during
-	 * execution of this method.
+	 * Creates and gives a remote object proxy. Object proxy wraps an instance
+	 * of particular remote object and provides mechanism to monitor
+	 * invocations.
 	 * 
-	 * @throws RemoteException
-	 *             when remote execution failed.
-	 * @throws RollbackForcedException
-	 *             when changes were forcibly restored.
-	 */
-	void commit() throws RemoteException;
-
-	/**
-	 * Terminates remote transaction and restores all the changes made.
-	 * 
+	 * @param transaction
+	 *            a transaction remote object.
+	 * @param tid
+	 *            transaction unique identifier.
+	 * @param calls
+	 *            upper bound on number of remote object invocations.
+	 * @return an instance of object proxy that wraps this remote object.
 	 * @throws RemoteException
 	 *             when remote execution failed.
 	 */
-	void rollback() throws RemoteException;
+	IObjectProxy createProxy(ITransaction transaction, UUID tid, long calls) throws RemoteException;
+
+	/**
+	 * Gives a transaction failure monitor used at specific node where this
+	 * remote object is placed.
+	 * 
+	 * @return a remote handle to transaction failure detector.
+	 * @throws RemoteException
+	 *             when remote execution failed.
+	 */
+	ITransactionFailureMonitor getFailureMonitor() throws RemoteException;
 }

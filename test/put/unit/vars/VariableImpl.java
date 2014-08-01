@@ -1,9 +1,9 @@
-package unit.vars;
+package put.unit.vars;
 
 import java.rmi.RemoteException;
 import java.util.List;
 
-import soa.atomicrmi.TransactionalUnicastRemoteObject;
+import put.atomicrmi.TransactionalUnicastRemoteObject;
 
 public class VariableImpl extends TransactionalUnicastRemoteObject implements Variable {
 

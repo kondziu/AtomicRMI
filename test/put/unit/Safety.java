@@ -1,4 +1,4 @@
-package unit;
+package put.unit;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -12,12 +12,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import soa.atomicrmi.RollbackForcedException;
-import soa.atomicrmi.Transaction;
-import soa.atomicrmi.TransactionException;
-import soa.atomicrmi.TransactionFailureMonitor;
-import unit.vars.Variable;
-import unit.vars.VariableImpl;
+import put.atomicrmi.RollbackForcedException;
+import put.atomicrmi.Transaction;
+import put.atomicrmi.TransactionException;
+import put.atomicrmi.TransactionFailureMonitor;
+import put.unit.vars.Variable;
+import put.unit.vars.VariableImpl;
 import edu.umd.cs.mtc.MultithreadedTest;
 import edu.umd.cs.mtc.TestFramework;
 

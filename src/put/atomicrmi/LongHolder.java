@@ -19,31 +19,27 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package soa.atomicrmi;
-
-import java.rmi.RemoteException;
+package put.atomicrmi;
 
 /**
- * This exception is thrown when rollback action was forced during method
- * invocation or commit when running a transaction.
+ * Wrapper for a single long value.
  * 
  * @author Wojciech Mruczkiewicz
  */
-public class RollbackForcedException extends RemoteException {
+public class LongHolder {
 
 	/**
-	 * Randomly generated serialization UID.
+	 * Stored long value.
 	 */
-	private static final long serialVersionUID = -399169557402245639L;
+	public long value;
 
-	public RollbackForcedException() {
-	}
-
-	public RollbackForcedException(String message) {
-		super(message);
-	}
-
-	public RollbackForcedException(String message, Throwable cause) {
-		super(message, cause);
+	/**
+	 * Initializes new long wrapper.
+	 * 
+	 * @param value
+	 *            initial value stored.
+	 */
+	public LongHolder(long value) {
+		this.value = value;
 	}
 }

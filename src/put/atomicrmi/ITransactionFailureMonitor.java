@@ -19,44 +19,37 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package soa.atomicrmi;
+package put.atomicrmi;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.UUID;
 
 /**
- * Internal transactional mechanism of {@link TransactionalUnicastRemoteObject}
- * class. Specifies methods required to initiate remote transaction.
+ * Internal interface for transaction failure detector mechanism. Provides
+ * methods for {@link Transaction} that allows to signal transaction liveness.
  * 
  * @author Wojciech Mruczkiewicz
  */
-public interface ITransactionalRemoteObject extends Remote {
+public interface ITransactionFailureMonitor extends Remote {
 
 	/**
-	 * Creates and gives a remote object proxy. Object proxy wraps an instance
-	 * of particular remote object and provides mechanism to monitor
-	 * invocations.
+	 * Gives the unique identifier of particular transaction failure monitor.
 	 * 
-	 * @param transaction
-	 *            a transaction remote object.
+	 * @return an unique identifier
+	 * @throws RemoteException
+	 *             when remote execution failed.
+	 */
+	UUID getId() throws RemoteException;
+
+	/**
+	 * Sends a signal to transaction failure monitor with information that
+	 * transaction is still alive.
+	 * 
 	 * @param tid
-	 *            transaction unique identifier.
-	 * @param calls
-	 *            upper bound on number of remote object invocations.
-	 * @return an instance of object proxy that wraps this remote object.
+	 *            identifier of transaction that signals liveness.
 	 * @throws RemoteException
 	 *             when remote execution failed.
 	 */
-	IObjectProxy createProxy(ITransaction transaction, UUID tid, long calls) throws RemoteException;
-
-	/**
-	 * Gives a transaction failure monitor used at specific node where this
-	 * remote object is placed.
-	 * 
-	 * @return a remote handle to transaction failure detector.
-	 * @throws RemoteException
-	 *             when remote execution failed.
-	 */
-	ITransactionFailureMonitor getFailureMonitor() throws RemoteException;
+	void heartbeat(UUID tid) throws RemoteException;
 }

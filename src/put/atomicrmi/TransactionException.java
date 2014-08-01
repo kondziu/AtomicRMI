@@ -19,27 +19,32 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package soa.atomicrmi;
+package put.atomicrmi;
+
+import java.rmi.RemoteException;
 
 /**
- * Wrapper for a single long value.
+ * This exception is thrown when a serious problem during transaction execution
+ * is detected. In most of the cases a {@link RemoteException} is wrapped by
+ * this exception.
  * 
  * @author Wojciech Mruczkiewicz
  */
-public class LongHolder {
+public class TransactionException extends RemoteException {
 
 	/**
-	 * Stored long value.
+	 * Randomly generated serialization UID.
 	 */
-	public long value;
+	private static final long serialVersionUID = 530822566931909888L;
 
-	/**
-	 * Initializes new long wrapper.
-	 * 
-	 * @param value
-	 *            initial value stored.
-	 */
-	public LongHolder(long value) {
-		this.value = value;
+	public TransactionException() {
+	}
+
+	public TransactionException(String message) {
+		super(message);
+	}
+
+	public TransactionException(String message, Throwable cause) {
+		super(message, cause);
 	}
 }

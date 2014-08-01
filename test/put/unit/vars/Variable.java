@@ -1,4 +1,4 @@
-package unit.vars;
+package put.unit.vars;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;

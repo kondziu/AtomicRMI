@@ -19,32 +19,22 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package soa.atomicrmi;
+package put.atomicrmi;
 
-import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 /**
- * Specification of a distributed JavaRMI lock. Provides functionality to
- * synchronize remote nodes. This is an internal AtomicRMI mechanism.
+ * Exception that is part of a retry mechanism. This exception is thrown when
+ * retry operation is requested. It is then caught in transaction loop in
+ * {@link Transaction#start(Transactable)} method.
  * 
  * @author Wojciech Mruczkiewicz
  */
-public interface ITransactionsLock extends Remote {
-	/**
-	 * Locks this lock for exclusive access. This method can block and wait
-	 * until other node releases previously obtained lock.
-	 * 
-	 * @throws RemoteException
-	 *             when remote execution failed or lock could not be obtained.
-	 */
-	void lock() throws RemoteException;
+public class RetryCalledException extends RemoteException {
 
 	/**
-	 * Releases previously obtained lock.
-	 * 
-	 * @throws RemoteException
-	 *             when remote execution failed.
+	 * Randomly generated serialization version UID.
 	 */
-	void unlock() throws RemoteException;
+	private static final long serialVersionUID = 5627680719016954542L;
+
 }

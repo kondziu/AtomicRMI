@@ -19,26 +19,31 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package soa.atomicrmi;
+package put.atomicrmi;
 
-import java.io.Serializable;
+import java.rmi.RemoteException;
 
 /**
- * Interface for object proxy serialization replacement. This is necessary in
- * order to properly serialize and deserialize object proxy. During
- * serialization only object proxy instance without {@link ObjectProxyHandler}
- * is written. During deserialization a {@link ObjectProxyHandler} wrapper is
- * created and invocations of {@link ObjectProxy} methods are monitored.
+ * This exception is thrown when rollback action was forced during method
+ * invocation or commit when running a transaction.
  * 
  * @author Wojciech Mruczkiewicz
  */
-public interface IObjectProxySerializer extends Serializable {
+public class RollbackForcedException extends RemoteException {
 
 	/**
-	 * Write method replacement. Provides class with a special implementation of
-	 * serialization for {@link ObjectProxyHandler}.
-	 * 
-	 * @return an instance of {@link ObjectProxySerializer}.
+	 * Randomly generated serialization UID.
 	 */
-	Object writeReplace();
+	private static final long serialVersionUID = -399169557402245639L;
+
+	public RollbackForcedException() {
+	}
+
+	public RollbackForcedException(String message) {
+		super(message);
+	}
+
+	public RollbackForcedException(String message, Throwable cause) {
+		super(message, cause);
+	}
 }

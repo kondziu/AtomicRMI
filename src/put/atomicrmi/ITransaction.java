@@ -19,32 +19,40 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package soa.atomicrmi;
+package put.atomicrmi;
 
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 /**
- * This exception is thrown when a serious problem during transaction execution
- * is detected. In most of the cases a {@link RemoteException} is wrapped by
- * this exception.
+ * Remote interface for transaction execution control. This is a public
+ * interface that provides methods to terminate transaction remotely in various
+ * ways.
+ * 
+ * This interface does not provides remote startup of a transaction. Transaction
+ * can only be started on node where they were created on.
  * 
  * @author Wojciech Mruczkiewicz
  */
-public class TransactionException extends RemoteException {
+public interface ITransaction extends Remote {
 
 	/**
-	 * Randomly generated serialization UID.
+	 * Terminates remote transaction and commits all the changes made. It is
+	 * however possible that transaction was forcibly rolled back during
+	 * execution of this method.
+	 * 
+	 * @throws RemoteException
+	 *             when remote execution failed.
+	 * @throws RollbackForcedException
+	 *             when changes were forcibly restored.
 	 */
-	private static final long serialVersionUID = 530822566931909888L;
+	void commit() throws RemoteException;
 
-	public TransactionException() {
-	}
-
-	public TransactionException(String message) {
-		super(message);
-	}
-
-	public TransactionException(String message, Throwable cause) {
-		super(message, cause);
-	}
+	/**
+	 * Terminates remote transaction and restores all the changes made.
+	 * 
+	 * @throws RemoteException
+	 *             when remote execution failed.
+	 */
+	void rollback() throws RemoteException;
 }
