@@ -11,7 +11,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import put.atomicrmi.opt.TransactionalUnicastRemoteObject;
+import put.atomicrmi.TransactionalUnicastRemoteObject;
 
 public class ServerD extends TransactionalUnicastRemoteObject implements ReferrenceCellPubSubServer {
 

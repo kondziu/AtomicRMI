@@ -3,8 +3,8 @@ package put.atomicrmi.opt.test.search;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
-import put.atomicrmi.opt.ops.Read;
-import put.atomicrmi.opt.ops.Write;
+import put.atomicrmi.ops.Read;
+import put.atomicrmi.ops.Write;
 
 public interface Account extends Remote {
 	@Read

@@ -7,8 +7,8 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
-import put.atomicrmi.opt.Transaction;
-import put.atomicrmi.opt.TransactionException;
+import put.atomicrmi.Transaction;
+import put.atomicrmi.TransactionException;
 import net.sf.cglib.proxy.Enhancer;
 
 public class Server {

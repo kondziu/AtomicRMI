@@ -7,8 +7,8 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
-import put.atomicrmi.opt.Transactional;
-import put.atomicrmi.opt.Transaction;
+import put.atomicrmi.Transaction;
+import put.atomicrmi.Transactional;
 import put.atomicrmi.test.distributed.Tools.Ending;
 
 public class Client {

@@ -3,9 +3,9 @@ package put.atomicrmi.test.tools;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
-import put.atomicrmi.opt.RollbackForcedException;
-import put.atomicrmi.opt.Transaction;
-import put.atomicrmi.opt.TransactionException;
+import put.atomicrmi.RollbackForcedException;
+import put.atomicrmi.Transaction;
+import put.atomicrmi.TransactionException;
 
 public class User {
 	public enum Choice {

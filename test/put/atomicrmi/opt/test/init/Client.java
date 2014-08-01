@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import put.atomicrmi.opt.Transaction;
+import put.atomicrmi.Transaction;
 import put.sync.Barrier;
 import put.sync.DistributedBarrier;
 

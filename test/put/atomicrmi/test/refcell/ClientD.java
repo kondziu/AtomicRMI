@@ -5,8 +5,8 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
-import put.atomicrmi.opt.Transaction;
-import put.atomicrmi.opt.TransactionalUnicastRemoteObject;
+import put.atomicrmi.Transaction;
+import put.atomicrmi.TransactionalUnicastRemoteObject;
 import put.atomicrmi.test.tools.User;
 import put.atomicrmi.test.tools.User.Choice;
 

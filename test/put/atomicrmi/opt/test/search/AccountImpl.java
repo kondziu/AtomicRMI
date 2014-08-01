@@ -2,8 +2,8 @@ package put.atomicrmi.opt.test.search;
 
 import java.rmi.RemoteException;
 
-import put.atomicrmi.opt.TransactionalUnicastRemoteObject;
-import put.atomicrmi.opt.ops.Read;
+import put.atomicrmi.TransactionalUnicastRemoteObject;
+import put.atomicrmi.ops.Read;
 
 public class AccountImpl extends TransactionalUnicastRemoteObject implements Account {
 

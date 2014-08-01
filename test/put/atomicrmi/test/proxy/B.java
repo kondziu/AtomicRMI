@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
-import put.atomicrmi.opt.TransactionalUnicastRemoteObject;
+import put.atomicrmi.TransactionalUnicastRemoteObject;
 
 interface B extends Remote {
 	public String getName() throws RemoteException;

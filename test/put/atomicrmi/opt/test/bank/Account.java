@@ -3,7 +3,7 @@ package put.atomicrmi.opt.test.bank;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
-import put.atomicrmi.opt.ops.Read;
+import put.atomicrmi.ops.Read;
 
 public interface Account extends Remote {
 	public void deposit(int sum) throws RemoteException;

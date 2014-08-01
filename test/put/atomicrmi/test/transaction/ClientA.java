@@ -6,7 +6,7 @@ import java.rmi.NotBoundException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
-import put.atomicrmi.opt.Transaction;
+import put.atomicrmi.Transaction;
 
 public class ClientA {
 	public static void main(String[] args) throws AlreadyBoundException, NotBoundException, IOException {

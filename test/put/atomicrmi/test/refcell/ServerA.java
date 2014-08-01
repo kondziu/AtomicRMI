@@ -6,7 +6,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
-import put.atomicrmi.opt.TransactionalUnicastRemoteObject;
+import put.atomicrmi.TransactionalUnicastRemoteObject;
 
 public class ServerA extends TransactionalUnicastRemoteObject implements ReferrenceCell {
 

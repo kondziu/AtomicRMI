@@ -7,7 +7,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Calendar;
 
-import put.atomicrmi.opt.TransactionalUnicastRemoteObject;
+import put.atomicrmi.TransactionalUnicastRemoteObject;
 
 public class ServerC extends TransactionalUnicastRemoteObject implements ReferrenceCellRequestServer {
 

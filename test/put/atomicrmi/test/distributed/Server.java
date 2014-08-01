@@ -6,7 +6,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
-import put.atomicrmi.opt.TransactionException;
+import put.atomicrmi.TransactionException;
 
 public class Server {
 	// private String host;

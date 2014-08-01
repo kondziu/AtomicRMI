@@ -6,8 +6,8 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
-import put.atomicrmi.opt.Transaction;
-import put.atomicrmi.opt.TransactionException;
+import put.atomicrmi.Transaction;
+import put.atomicrmi.TransactionException;
 
 public class ProxyTest {
 	public void test() throws RemoteException, AlreadyBoundException, TransactionException, NotBoundException {

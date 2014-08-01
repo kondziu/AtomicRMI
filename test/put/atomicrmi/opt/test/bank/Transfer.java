@@ -5,7 +5,7 @@ import java.rmi.NotBoundException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
-import put.atomicrmi.opt.Transaction;
+import put.atomicrmi.Transaction;
 import put.atomicrmi.test.tools.User;
 import put.atomicrmi.test.tools.User.Choice;
 

@@ -2,7 +2,7 @@ package put.atomicrmi.opt.test.init;
 
 import java.rmi.RemoteException;
 
-import put.atomicrmi.opt.TransactionalUnicastRemoteObject;
+import put.atomicrmi.TransactionalUnicastRemoteObject;
 
 public class AccountImpl extends TransactionalUnicastRemoteObject implements Account {
 

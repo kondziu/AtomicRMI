@@ -3,7 +3,7 @@ package put.atomicrmi.test.basic;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
-import put.atomicrmi.opt.TransactionalUnicastRemoteObject;
+import put.atomicrmi.TransactionalUnicastRemoteObject;
 
 interface A extends Remote {
 	public String getName() throws RemoteException;

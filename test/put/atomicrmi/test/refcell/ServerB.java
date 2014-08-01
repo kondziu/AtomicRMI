@@ -9,7 +9,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
-import put.atomicrmi.opt.TransactionalUnicastRemoteObject;
+import put.atomicrmi.TransactionalUnicastRemoteObject;
 
 public class ServerB extends TransactionalUnicastRemoteObject implements ReferrenceCellServer {
 
