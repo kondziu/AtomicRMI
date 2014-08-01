@@ -32,7 +32,7 @@ import java.rmi.RemoteException;
  * 
  * @author Wojciech Mruczkiewicz
  */
-public interface Transactable {
+public interface Transactional {
 
 	/**
 	 * Implementation of main transaction thread. This method is implemented by

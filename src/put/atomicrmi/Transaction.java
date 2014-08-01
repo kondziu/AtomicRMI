@@ -275,7 +275,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	}
 
 	/**
-	 * Starts and executes the transaction given by {@link Transactable}
+	 * Starts and executes the transaction given by {@link Transactional}
 	 * implementation. This method performs transaction initialization (obtains
 	 * global locks and starts the heartbeater). It allows to call
 	 * {@link Transaction#retry()} which will cause re-execution of given
@@ -291,7 +291,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 *             when execution of a transaction was unsuccessful after
 	 *             multiple retries.
 	 */
-	public void start(Transactable transaction) throws TransactionException {
+	public void start(Transactional transaction) throws TransactionException {
 		int restartsByFailure = 0;
 
 		while (true) {
@@ -422,7 +422,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	/**
 	 * Rolls-back all the changes made by this transaction and re-executes it.
 	 * This method can be called only when transaction was started using the
-	 * {@link Transaction#start(Transactable)} method.
+	 * {@link Transaction#start(Transactional)} method.
 	 */
 	public void retry() throws RemoteException {
 		throw new RetryCalledException();
