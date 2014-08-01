@@ -44,6 +44,23 @@ import java.util.UUID;
  * 
  */
 public class Transaction extends UnicastRemoteObject implements ITransaction {
+	/**
+	 * Shared remote object access mode.
+	 * 
+	 * READ mode means objects can only be read, WRITE mode means objects can
+	 * only be written to, and ANY mode means that objects can be either read
+	 * from or written to, or accessed in other ways.
+	 * 
+	 * <p>
+	 * Writing to an object means using methods annotated as writes, reading
+	 * from an object means using methods annotated as reads. Only objects in
+	 * ANY mode can use methods which are neither reads or writes.
+	 * 
+	 * @author Konrad Siek
+	 */
+	enum AccessMode {
+		READ, WRITE, ANY
+	}
 
 	/**
 	 * Implementation of a heartbeater thread that is a part of failure
@@ -169,6 +186,22 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	private List<IObjectProxy> proxies;
 
 	/**
+	 * This transaction's read set.
+	 * 
+	 * <p>
+	 * It is assumed that read set and write set are disjoint.
+	 */
+	private Set<IObjectProxy> readset;
+
+	/**
+	 * This transaction's write set.
+	 * 
+	 * <p>
+	 * It is assumed that read set and write set are disjoint.
+	 */
+	private Set<IObjectProxy> writeset;
+
+	/**
 	 * Heartbeater's thread reference.
 	 */
 	private Thread heartbeatThread;
@@ -201,6 +234,9 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 		// Arrays.sort(globalLocks);
 
 		proxies = new ArrayList<IObjectProxy>();
+		readset = new HashSet<IObjectProxy>();
+		writeset = new HashSet<IObjectProxy>();
+
 		heartbeat = new Heartbeat();
 	}
 
@@ -235,7 +271,100 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 *             proxy.
 	 */
 	public <T> T accesses(T obj) throws TransactionException {
-		return (T) accesses(obj, INF);
+		return accesses(obj, INF);
+	}
+
+	/**
+	 * Adds given remote object to the list of accessed remote objects with the
+	 * given upper bound on number of this object invocations.
+	 * 
+	 * @param obj
+	 *            remote object accessed by transaction.
+	 * @param calls
+	 *            the maximum number of time this object will be accessed within
+	 *            the transaction
+	 * @return given remote object wrapped by special object proxy that monitors
+	 *         object access.
+	 * @throws TransactionException
+	 *             when remote exception occurs during initialization of object
+	 *             proxy.
+	 */
+	public <T> T accesses(T obj, int calls) throws TransactionException {
+		return accesses(obj, calls, AccessMode.ANY);
+	}
+
+	/**
+	 * Adds given remote object to the list of accessed remote objects with
+	 * infinite upper bound on number of this object invocations. The object
+	 * will only be read from.
+	 * 
+	 * @param obj
+	 *            remote object accessed by transaction.
+	 * @return given remote object wrapped by special object proxy that monitors
+	 *         object access.
+	 * @throws TransactionException
+	 *             when remote exception occurs during initialization of object
+	 *             proxy.
+	 */
+	public <T> T reads(T obj) throws TransactionException {
+		return accesses(obj, INF, AccessMode.READ);
+	}
+	
+	/**
+	 * Adds given remote object to the list of accessed remote objects with the
+	 * given upper bound on number of this object invocations. The object
+	 * will only be read from.
+	 * 
+	 * @param obj
+	 *            remote object accessed by transaction.
+	 * @param calls
+	 *            the maximum number of time this object will be accessed within
+	 *            the transaction
+	 * @return given remote object wrapped by special object proxy that monitors
+	 *         object access.
+	 * @throws TransactionException
+	 *             when remote exception occurs during initialization of object
+	 *             proxy.
+	 */
+	public <T> T reads(T obj, int calls) throws TransactionException {
+		return accesses(obj, calls, AccessMode.READ);
+	}
+
+	/**
+	 * Adds given remote object to the list of accessed remote objects with
+	 * infinite upper bound on number of this object invocations. The object
+	 * will only be written to.
+	 * 
+	 * @param obj
+	 *            remote object accessed by transaction.
+	 * @return given remote object wrapped by special object proxy that monitors
+	 *         object access.
+	 * @throws TransactionException
+	 *             when remote exception occurs during initialization of object
+	 *             proxy.
+	 */
+	public <T> T writes(T obj) throws TransactionException {
+		return accesses(obj, INF, AccessMode.WRITE);
+	}
+
+	/**
+	 * Adds given remote object to the list of accessed remote objects with the
+	 * given upper bound on number of this object invocations. The object
+	 * will only be written to.
+	 * 
+	 * @param obj
+	 *            remote object accessed by transaction.
+	 * @param calls
+	 *            the maximum number of time this object will be accessed within
+	 *            the transaction
+	 * @return given remote object wrapped by special object proxy that monitors
+	 *         object access.
+	 * @throws TransactionException
+	 *             when remote exception occurs during initialization of object
+	 *             proxy.
+	 */
+	public <T> T writes(T obj, int calls) throws TransactionException {
+		return accesses(obj, calls, AccessMode.WRITE);
 	}
 
 	/**
@@ -249,6 +378,9 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 *            remote object accessed by transaction.
 	 * @param calls
 	 *            an upper bound on number of invocation to this remote object.
+	 * @param mode
+	 *            object to be opened either in read-only, write-only, or
+	 *            read-write mode
 	 * @return given remote object wrapped by special object proxy that monitors
 	 *         object access.
 	 * @throws TransactionException
@@ -256,7 +388,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 *             proxy.
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> T accesses(T obj, long calls) throws TransactionException {
+	public <T> T accesses(T obj, long calls, AccessMode mode) throws TransactionException {
 		if (calls != INF && calls < 1)
 			throw new TransactionException("Invalid upper bound on number of invocation.");
 
@@ -267,6 +399,18 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 			ITransactionalRemoteObject remote = (ITransactionalRemoteObject) obj;
 			IObjectProxy proxy = (IObjectProxy) remote.createProxy(this, id, calls);
 			proxies.add(proxy);
+
+			switch (mode) {
+			case READ:
+				assert (!writeset.contains(proxy));
+				readset.add(proxy);
+				break;
+			case WRITE:
+				assert (!readset.contains(proxy));
+				writeset.add(proxy);
+				break;
+			}
+
 			heartbeat.addFailureMonitor(remote.getFailureMonitor());
 			return (T) proxy;
 		} catch (RemoteException e) {
@@ -512,6 +656,9 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 		state = newState;
 	}
 
+	/**
+	 * A comparator object for sorting remote object proxies by their IDs.
+	 */
 	private Comparator<IObjectProxy> comparator = new Comparator<IObjectProxy>() {
 		public int compare(IObjectProxy a, IObjectProxy b) {
 			try {
