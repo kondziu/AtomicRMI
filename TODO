@@ -1,0 +1,1 @@
+1. A way to retry an aborted transaction through the API without putting the transaction inside an infinite loop. 
