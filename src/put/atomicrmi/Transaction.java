@@ -19,15 +19,17 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package put.atomicrmi;
+package soa.atomicrmi;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -44,6 +46,13 @@ import java.util.UUID;
  * 
  */
 public class Transaction extends UnicastRemoteObject implements ITransaction {
+
+    /**
+     * Remote object access modes.
+     */
+	enum AccessType {
+		READ, WRITE, ANY
+	}
 
 	/**
 	 * Implementation of a heartbeater thread that is a part of failure
@@ -168,6 +177,11 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 */
 	private List<IObjectProxy> proxies;
 
+    /**
+     * FIXME description
+     **/
+	private Map<IObjectProxy, Semaphore> readConditions;
+
 	/**
 	 * Heartbeater's thread reference.
 	 */
@@ -177,6 +191,16 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 * Heartbeater's instance.
 	 */
 	private Heartbeat heartbeat;
+    
+    /**
+     * This transaction's read set.
+     */
+	private Set<IObjectProxy> reads;
+
+    /**
+     * This transaction's write set.
+     */
+	private Set<IObjectProxy> writes;
 
 	/**
 	 * Creates new transaction. The required argument is a JavaRMI registry
@@ -202,6 +226,11 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 
 		proxies = new ArrayList<IObjectProxy>();
 		heartbeat = new Heartbeat();
+
+		reads = new HashSet<>();
+		writes = new HashSet<>();
+
+		readConditions = new HashMap<>();
 	}
 
 	/**
@@ -235,7 +264,59 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 *             proxy.
 	 */
 	public <T> T accesses(T obj) throws TransactionException {
-		return (T) accesses(obj, INF);
+		return accesses(obj, INF, AccessType.ANY);
+	}
+
+	public <T> T accesses(T obj, int calls) throws TransactionException {
+		return accesses(obj, calls, AccessType.ANY);
+	}
+
+	public <T> List<T> accesses(List<T> list) throws TransactionException {
+		return accesses(list, INF, AccessType.ANY);
+	}
+
+	public <T> List<T> accesses(List<T> list, int calls) throws TransactionException {
+		return accesses(list, calls, AccessType.ANY);
+	}
+
+	public <T> T reads(T obj) throws TransactionException {
+		return accesses(obj, INF, AccessType.READ);
+	}
+
+	public <T> T reads(T obj, int calls) throws TransactionException {
+		return accesses(obj, calls, AccessType.READ);
+	}
+
+	public <T> List<T> reads(List<T> list) throws TransactionException {
+		return accesses(list, INF, AccessType.READ);
+	}
+
+	public <T> List<T> reads(List<T> list, int calls) throws TransactionException {
+		return accesses(list, calls, AccessType.READ);
+	}
+
+	public <T> T writes(T obj) throws TransactionException {
+		return accesses(obj, INF, AccessType.WRITE);
+	}
+
+	public <T> T writes(T obj, int calls) throws TransactionException {
+		return accesses(obj, calls, AccessType.WRITE);
+	}
+
+	public <T> List<T> writes(List<T> list) throws TransactionException {
+		return accesses(list, INF, AccessType.WRITE);
+	}
+
+	public <T> List<T> writes(List<T> list, int calls) throws TransactionException {
+		return accesses(list, calls, AccessType.WRITE);
+	}
+
+	public <T> List<T> accesses(List<T> list, int calls, AccessType type) throws TransactionException {
+		List<T> tlist = new ArrayList<>();
+		for (T e : list) {
+			tlist.add(accesses(e, calls, type));
+		}
+		return tlist;
 	}
 
 	/**
@@ -256,7 +337,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 *             proxy.
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> T accesses(T obj, long calls) throws TransactionException {
+	public <T> T accesses(T obj, long calls, AccessType type) throws TransactionException {
 		if (calls != INF && calls < 1)
 			throw new TransactionException("Invalid upper bound on number of invocation.");
 
@@ -265,8 +346,22 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 
 		try {
 			ITransactionalRemoteObject remote = (ITransactionalRemoteObject) obj;
-			IObjectProxy proxy = (IObjectProxy) remote.createProxy(this, id, calls);
+			IObjectProxy proxy = (IObjectProxy) remote.createProxy(this, id, calls, type);
 			proxies.add(proxy);
+
+			switch (type) {
+			case READ:
+				reads.add(proxy);
+				break;
+			case WRITE:
+				writes.add(proxy);
+				break;
+			case ANY:
+				reads.add(proxy);
+				writes.add(proxy);
+				break;
+			}
+
 			heartbeat.addFailureMonitor(remote.getFailureMonitor());
 			return (T) proxy;
 		} catch (RemoteException e) {
@@ -291,7 +386,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 *             when execution of a transaction was unsuccessful after
 	 *             multiple retries.
 	 */
-	public void start(Transactional transaction) throws TransactionException {
+	public void start(Transactable transaction) throws TransactionException {
 		int restartsByFailure = 0;
 
 		while (true) {
@@ -301,8 +396,9 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 
 					transaction.atomic(this);
 
-					if (getState() == STATE_RUNNING)
+					if (getState() == STATE_RUNNING) {
 						commit();
+					}
 
 					break;
 				} catch (RetryCalledException e) {
@@ -333,6 +429,12 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 		}
 	}
 
+	public Set<IObjectProxy> getReadOnlyProxies() {
+		Set<IObjectProxy> set = new HashSet<>(reads);
+		set.removeAll(writes);
+		return set;
+	}
+
 	/**
 	 * Starts the transaction. This method is responsible for obtaining global
 	 * locks of the accessed object proxies and starts the heartbeater required
@@ -360,6 +462,25 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 
 			for (IObjectProxy proxy : proxies) {
 				proxy.unlock();
+			}
+
+			for (final IObjectProxy proxy : getReadOnlyProxies()) {
+				final Semaphore semaphore = new Semaphore(0);
+				new Thread() {
+					@Override
+					public void run() {
+						try {
+							proxy.bufferForReading();
+							proxy.releaseAfterBuferring();
+							semaphore.release(1);
+						} catch (RemoteException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							throw new RuntimeException(e.getMessage(), e.getCause());
+						}
+					}
+				}.start();
+				readConditions.put(proxy, semaphore);
 			}
 
 		} catch (RemoteException e) {
@@ -393,8 +514,6 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 		synchronized (heartbeat) {
 			heartbeat.notify();
 		}
-
-		// heartbeatThread.stop();
 	}
 
 	/**
@@ -415,8 +534,6 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 		synchronized (heartbeat) {
 			heartbeat.notify();
 		}
-
-		// heartbeatThread.stop();
 	}
 
 	/**
@@ -472,7 +589,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 * 
 	 * @param restore
 	 *            determines if changes made by this transaction should be
-	 *            restored or commited.
+	 *            restored or committed.
 	 */
 	private void finishProxies(boolean restore) {
 		for (IObjectProxy proxy : proxies) {
@@ -512,10 +629,13 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 		state = newState;
 	}
 
+    /**
+     * Comparator for sorting remote objects by ID.
+     */
 	private Comparator<IObjectProxy> comparator = new Comparator<IObjectProxy>() {
 		public int compare(IObjectProxy a, IObjectProxy b) {
 			try {
-				return a.getSortingKey().compareTo(b.getSortingKey());
+				return a.getID().compareTo(b.getID());
 			} catch (RemoteException e) {
 				// Nasty hack
 				throw new RuntimeException(e.getMessage(), e.getCause());

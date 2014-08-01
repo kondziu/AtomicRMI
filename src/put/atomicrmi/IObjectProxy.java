@@ -122,23 +122,27 @@ public interface IObjectProxy extends Remote {
 	void free() throws RemoteException;
 	
 	/**
-	 * TODO
+	 * Lock this object.
 	 * 
 	 * @throws RemoteException
 	 */
 	void lock() throws RemoteException;
 	
 	/**
-	 * TODO
+	 * Unlock this object.
 	 * 
 	 * @throws RemoteException
 	 */
 	void unlock() throws RemoteException;
 	
 	/**
-	 * TODO
+	 * Get the ID of the object. This can be used for sorting objects.
 	 * 
 	 * @throws RemoteException
 	 */
-	UUID getSortingKey() throws RemoteException;
+	UUID getID() throws RemoteException;
+
+	void bufferForReading() throws RemoteException;
+
+	void releaseAfterBuferring() throws RemoteException;
 }

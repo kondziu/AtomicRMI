@@ -2,7 +2,7 @@
 killall rmiregistry 2>/dev/null
 
 # Constants.
-PACKAGE=soa.atomicrmi.test.bank
+PACKAGE=put.atomicrmi.test.bank
 CLASS=Server
 DEFAULT_PROPERTIES="default.properties"
 BUILD_PROPERTIES="build.properties"

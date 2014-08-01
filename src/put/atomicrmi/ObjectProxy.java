@@ -25,6 +25,8 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.UUID;
 
+import put.atomicrmi.Transaction.AccessType;
+
 /**
  * An implementation of {@link IObjectProxy} interface. It is required to
  * control remote method invocations and implement versioning algorithm.
@@ -84,6 +86,20 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	 */
 	private long ub;
 
+    /**
+     * Type of accesses that can be performed on this object.
+	private AccessType accessType;
+
+    /**
+     * OptSVA read/write buffer for storing a private copy of the object while its been released. 
+     */ 
+	private Object buffer = null;
+
+    /**
+     * FIXME Communication with threads handling read-only objects?
+     */ 
+	private Semaphore readSemaphore = new Semaphore(0);
+
 	/**
 	 * Creates the object proxy for given remote object.
 	 * 
@@ -95,16 +111,19 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	 *            remote object that is being wrapped.
 	 * @param calls
 	 *            an upper bound on number of remote object invocations.
+	 * @param type
+     *            type of operation that can be performed on this object (read-mode, write-mode, rw-mode)
 	 * @throws RemoteException
 	 *             when remote execution fails.
 	 */
-	ObjectProxy(ITransaction transaction, UUID tid, TransactionalUnicastRemoteObject object, long calls)
+	ObjectProxy(ITransaction transaction, UUID tid, TransactionalUnicastRemoteObject object, long calls, AccessType type)
 			throws RemoteException {
 		super();
 		this.transaction = transaction;
 		this.object = object;
 		this.tid = tid;
 
+		accessType = type;
 		ub = calls;
 
 		over = true;
@@ -131,6 +150,14 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		mv = 0;
 
 		over = false;
+	}
+
+	public void preRead() throws RemoteException {
+		try {
+			readSemaphore.acquire(1);
+		} catch (InterruptedException e) {
+			throw new RemoteException(e.getMessage(), e.getCause());
+		}
 	}
 
 	public void preSync() throws RemoteException {
@@ -246,7 +273,11 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		object.transactionUnlock(tid);
 	}
 
-	public UUID getSortingKey() throws RemoteException {
+	public UUID getID() throws RemoteException {
 		return object.getSortingKey();
+	}
+
+	public AccessType getAccessType() {
+		return accessType;
 	}
 }

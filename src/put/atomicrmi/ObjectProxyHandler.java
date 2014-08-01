@@ -21,6 +21,7 @@
  */
 package put.atomicrmi;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.rmi.RemoteException;
 import java.util.HashSet;
@@ -109,6 +110,11 @@ class ObjectProxyHandler implements InvocationHandler {
 		if (writeReplaceMethod.equals(method))
 			return new ObjectProxySerializer(proxy);
 
+		
+		for (Annotation annot : method.getAnnotations()) {
+			System.out.println(annot);
+		}
+		
 		try {
 			proxy.preSync();
 		} catch (RemoteException e) {

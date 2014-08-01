@@ -34,6 +34,8 @@ import java.rmi.server.RMIServerSocketFactory;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.UUID;
 
+import put.atomicrmi.Transaction.AccessType;
+
 /**
  * Base class for all remote object implementations that are part of some
  * transactional executions. This class supply remote object with versioning
@@ -126,12 +128,17 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	/**
 	 * Lock used to implement reentrant per-transaction lock.
 	 */
-	private transient LongHolder lock = new LongHolder(0);
+	private transient LongHolder transactionLock = new LongHolder(0);
 
 	/**
 	 * Unique identifier of a transaction that locked this object proxy.
 	 */
 	private transient UUID lockedId;
+	
+	/**
+	 * Unique identifier of this object.
+	 */
+	private UUID id = UUID.randomUUID();
 
 	/**
 	 * Unique identifier of this object.
@@ -155,8 +162,8 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 		return super.clone();
 	}
 
-	public IObjectProxy createProxy(ITransaction transaction, UUID tid, long calls) throws RemoteException {
-		return (IObjectProxy) ObjectProxyHandler.create(new ObjectProxy(transaction, tid, this, calls));
+	public IObjectProxy createProxy(ITransaction transaction, UUID tid, long calls, AccessType type) throws RemoteException {
+		return (IObjectProxy) ObjectProxyHandler.create(new ObjectProxy(transaction, tid, this, calls, type));
 	}
 
 	public ITransactionFailureMonitor getFailureMonitor() throws RemoteException {
@@ -195,16 +202,16 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 *             when error occurred during waiting for lock to be released.
 	 */
 	void transactionLock(UUID tid) throws TransactionException {
-		synchronized (lock) {
+		synchronized (transactionLock) {
 			try {
 				while (lockedId != null && !lockedId.equals(tid))
-					lock.wait();
+					transactionLock.wait();
 			} catch (InterruptedException e) {
 				throw new TransactionException("Interrupted while locking version counter.", e);
 			}
 
 			lockedId = tid;
-			lock.value++;
+			transactionLock.value++;
 		}
 	}
 
@@ -216,13 +223,13 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 *            transaction identifier.
 	 */
 	void transactionUnlock(UUID tid) {
-		synchronized (lock) {
+		synchronized (transactionLock) {
 			if (lockedId.equals(tid)) {
-				lock.value--;
+				transactionLock.value--;
 
-				if (lock.value == 0) {
+				if (transactionLock.value == 0) {
 					lockedId = null;
-					lock.notify();
+					transactionLock.notify();
 				}
 			}
 		}
@@ -237,12 +244,12 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 * @throws TransactionException
 	 *             when lock was acquired by other transaction.
 	 */
-	void transactionUnlockForce(UUID tid) throws TransactionException {
-		synchronized (lock) {
+	void forceTransactionUnlock(UUID tid) throws TransactionException {
+		synchronized (transactionLock) {
 			if (lockedId.equals(tid)) {
-				lock.value = 0;
+				transactionLock.value = 0;
 				lockedId = null;
-				lock.notify();
+				transactionLock.notify();
 			} else
 				throw new TransactionException("Invalid state when releasing transactional remote object lock.");
 		}
@@ -341,7 +348,7 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 			setCurrentVersion(snapshot.getReadVersion());
 
 			// Forced unlock is necessary because of possible failures.
-			transactionUnlockForce(tid);
+			forceTransactionUnlock(tid);
 		}
 
 		lt.release(1);

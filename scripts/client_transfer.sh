@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Constants.
-PACKAGE=soa.atomicrmi.test.bank
+PACKAGE=put.atomicrmi.test.bank
 CLASS=Transfer
 DEFAULT_PROPERTIES="default.properties"
 BUILD_PROPERTIES="build.properties"
