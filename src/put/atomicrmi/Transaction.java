@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import put.atomicrmi.Access.Mode;
+
 /**
  * The main class for controlling transaction life time. Provides methods to
  * start and terminate the transaction. Contains the heartbeater implementation
@@ -44,24 +46,6 @@ import java.util.UUID;
  * 
  */
 public class Transaction extends UnicastRemoteObject implements ITransaction {
-	/**
-	 * Shared remote object access mode.
-	 * 
-	 * READ mode means objects can only be read, WRITE mode means objects can
-	 * only be written to, and ANY mode means that objects can be either read
-	 * from or written to, or accessed in other ways.
-	 * 
-	 * <p>
-	 * Writing to an object means using methods annotated as writes, reading
-	 * from an object means using methods annotated as reads. Only objects in
-	 * ANY mode can use methods which are neither reads or writes.
-	 * 
-	 * @author Konrad Siek
-	 */
-	enum AccessMode {
-		READ, WRITE, ANY
-	}
-
 	/**
 	 * Implementation of a heartbeater thread that is a part of failure
 	 * detection mechanism. This class runs thread that sends a notification
@@ -290,7 +274,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 *             proxy.
 	 */
 	public <T> T accesses(T obj, int calls) throws TransactionException {
-		return accesses(obj, calls, AccessMode.ANY);
+		return accesses(obj, calls, Mode.ANY);
 	}
 
 	/**
@@ -307,7 +291,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 *             proxy.
 	 */
 	public <T> T reads(T obj) throws TransactionException {
-		return accesses(obj, INF, AccessMode.READ);
+		return accesses(obj, INF, Mode.READ_ONLY);
 	}
 	
 	/**
@@ -327,7 +311,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 *             proxy.
 	 */
 	public <T> T reads(T obj, int calls) throws TransactionException {
-		return accesses(obj, calls, AccessMode.READ);
+		return accesses(obj, calls, Mode.READ_ONLY);
 	}
 
 	/**
@@ -344,7 +328,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 *             proxy.
 	 */
 	public <T> T writes(T obj) throws TransactionException {
-		return accesses(obj, INF, AccessMode.WRITE);
+		return accesses(obj, INF, Mode.WRITE_ONLY);
 	}
 
 	/**
@@ -364,7 +348,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 *             proxy.
 	 */
 	public <T> T writes(T obj, int calls) throws TransactionException {
-		return accesses(obj, calls, AccessMode.WRITE);
+		return accesses(obj, calls, Mode.WRITE_ONLY);
 	}
 
 	/**
@@ -388,7 +372,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 *             proxy.
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> T accesses(T obj, long calls, AccessMode mode) throws TransactionException {
+	public <T> T accesses(T obj, long calls, Mode mode) throws TransactionException {
 		if (calls != INF && calls < 1)
 			throw new TransactionException("Invalid upper bound on number of invocation.");
 
@@ -401,11 +385,11 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 			proxies.add(proxy);
 
 			switch (mode) {
-			case READ:
+			case READ_ONLY:
 				assert (!writeset.contains(proxy));
 				readset.add(proxy);
 				break;
-			case WRITE:
+			case WRITE_ONLY:
 				assert (!readset.contains(proxy));
 				writeset.add(proxy);
 				break;
