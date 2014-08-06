@@ -12,9 +12,9 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Access {
 	/**
-	 * Shared remote object or shared remote object method access mode.
+	 * Method access mode.
 	 * 
-	 * <P>
+	 * <p>
 	 * READ_ONLY mode means objects can only be read, WRITE_ONLY mode means
 	 * objects can only be written to, and ANY mode means that objects can be
 	 * either read from or written to, or accessed in other ways.
@@ -31,9 +31,9 @@ public @interface Access {
 	}
 
 	/**
-	 * Shared object or method access mode. See {@link Mode}.
+	 * Shared object method access mode. See {@link Mode}.
 	 * 
-	 * @return object/method access mode
+	 * @return method access mode
 	 */
 	public Mode mode();
 }

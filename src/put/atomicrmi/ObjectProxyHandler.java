@@ -26,6 +26,7 @@ import java.rmi.RemoteException;
 import java.util.HashSet;
 import java.util.Set;
 
+import put.atomicrmi.Access.Mode;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.InvocationHandler;
 
@@ -100,24 +101,36 @@ class ObjectProxyHandler implements InvocationHandler {
 	}
 
 	public Object invoke(Object obj, Method method, Object[] args) throws Throwable {
-		if (methods.contains(method))
+		if (methods.contains(method)) {
 			return method.invoke(proxy, args);
+		}
 
-		if (method.getName().equals("finalize"))
+		if (method.getName().equals("finalize")) {
 			return method.invoke(obj, args);
+		}
 
-		if (writeReplaceMethod.equals(method))
+		if (writeReplaceMethod.equals(method)) {
 			return new ObjectProxySerializer(proxy);
+		}
+
+		Mode mode = getAccessMode(method);
+		if (!modesAgree(mode, proxy.getMode())) {
+			throw new TransactionException("Method access mode was " + mode + " which does not agree with the delared "
+					+ proxy.getMode());
+		}
 
 		try {
 			proxy.preSync();
 		} catch (RemoteException e) {
-			if (e.getCause() instanceof RollbackForcedException)
+			if (e.getCause() instanceof RollbackForcedException) {
 				throw e.getCause();
-			else if (e.getCause() instanceof TransactionException)
-				throw e.getCause();
-			else
-				throw e;
+			} else {
+				if (e.getCause() instanceof TransactionException) {
+					throw e.getCause();
+				} else {
+					throw e;
+				}
+			}
 		}
 
 		method.setAccessible(true);
@@ -126,6 +139,43 @@ class ObjectProxyHandler implements InvocationHandler {
 		proxy.postSync();
 
 		return result;
+	}
+
+	/**
+	 * Check whether the method access mode agrees with the declared access
+	 * mode.
+	 * 
+	 * @param actual
+	 *            the access mode of the method
+	 * @param declared
+	 *            the access mode declared at transaction start
+	 * @return <code>true</code> if the method mode is contained within the
+	 *         declared mode and <code>false</code> otherwise
+	 */
+	private boolean modesAgree(Mode actual, Mode declared) {
+		if (declared == Mode.ANY) {
+			return true;
+		}
+
+		if (actual == declared) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Determine the access mode of a method from annotations.
+	 * 
+	 * @param method
+	 * @return access mode
+	 */
+	private Mode getAccessMode(Method method) {
+		Access access = method.getAnnotation(Access.class);
+		if (access == null) {
+			return Mode.ANY;
+		}
+		return access.mode();
 	}
 
 	/**

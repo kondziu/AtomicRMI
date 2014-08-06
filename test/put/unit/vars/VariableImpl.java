@@ -3,6 +3,8 @@ package put.unit.vars;
 import java.rmi.RemoteException;
 import java.util.List;
 
+import put.atomicrmi.Access;
+import put.atomicrmi.Access.Mode;
 import put.atomicrmi.TransactionalUnicastRemoteObject;
 
 public class VariableImpl extends TransactionalUnicastRemoteObject implements Variable {
@@ -25,6 +27,7 @@ public class VariableImpl extends TransactionalUnicastRemoteObject implements Va
 		this.value = value;
 	}
 
+	@Access(mode=Mode.READ_ONLY)
 	public int read() {
 		if (log != null) {
 			log.add("r(" + name + ")" + value);
@@ -32,6 +35,7 @@ public class VariableImpl extends TransactionalUnicastRemoteObject implements Va
 		return value;
 	}
 
+	@Access(mode=Mode.WRITE_ONLY)
 	public void write(int value) {
 		if (log != null) {
 			log.add("w(" + name + ")" + value);
@@ -39,6 +43,7 @@ public class VariableImpl extends TransactionalUnicastRemoteObject implements Va
 		this.value = value;
 	}
 
+	@Access(mode=Mode.READ_ONLY)
 	public int read(String id) {
 		if (log != null) {
 			log.add("r<" + id + ">(" + name + ")" + value);
@@ -46,11 +51,18 @@ public class VariableImpl extends TransactionalUnicastRemoteObject implements Va
 		return value;
 	}
 
+	@Access(mode=Mode.WRITE_ONLY)
 	public void write(String id, int value) {
 		if (log != null) {
 			log.add("w<" + id + ">(" + name + ")" + value);
 		}
 		this.value = value;
 	}
+	
+	@Access(mode=Mode.ANY)
+	public void increment() throws RemoteException {
+		write(read() + 1);		
+	}
 
+	
 }

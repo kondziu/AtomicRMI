@@ -970,7 +970,6 @@ public class Safety {
 		Assert.assertEquals(2, state("x"));
 		Assert.assertEquals(1, state("y"));
 		Assert.assertEquals(1, state("z"));
-
 	}
 
 	/**
@@ -1024,4 +1023,347 @@ public class Safety {
 		Assert.assertEquals(0, state("z"));
 	}
 
+	/**
+	 * Writing in write access mode.
+	 */
+	class ValidAccessModeWrite extends MultithreadedTest {
+
+		public void thread1() {
+			Transaction t = null;
+			try {
+				t = new Transaction();
+				Variable x = t.writes((Variable) registry.lookup("x"));
+				t.start();
+				x.write(1);
+				t.commit();
+			} catch (TransactionException e) {
+				Assert.fail(e.getMessage());
+			} catch (Exception e) {
+				Assert.fail(e.getMessage());
+			} finally {
+				t.stopHeartbeat();
+			}
+
+			waitForTick(99);
+			try {
+				TransactionFailureMonitor.getInstance().emergencyStop();
+			} catch (RemoteException e) {
+				Assert.fail(e.getMessage());
+			}
+		}
+	}
+
+	@Test
+	public void validAccessModeWrite() throws Throwable {
+		TestFramework.runOnce(new ValidAccessModeWrite());
+		Assert.assertEquals(1, state("x"));
+	}
+
+	/**
+	 * Reading in read access mode.
+	 */
+	class ValidAccessModeRead extends MultithreadedTest {
+
+		public void thread1() {
+			Transaction t = null;
+			try {
+				t = new Transaction();
+				Variable x = t.reads((Variable) registry.lookup("x"));
+				t.start();
+				x.read();
+				t.commit();
+			} catch (TransactionException e) {
+				Assert.fail(e.getMessage());
+			} catch (Exception e) {
+				Assert.fail(e.getMessage());
+			} finally {
+				t.stopHeartbeat();
+			}
+
+			waitForTick(99);
+			try {
+				TransactionFailureMonitor.getInstance().emergencyStop();
+			} catch (RemoteException e) {
+				Assert.fail(e.getMessage());
+			}
+		}
+	}
+
+	@Test
+	public void validAccessModeRead() throws Throwable {
+		TestFramework.runOnce(new ValidAccessModeRead());
+		Assert.assertEquals(0, state("x"));
+	}
+
+	/**
+	 * Read-writing in read-write access mode.
+	 */
+	class ValidAccessModeAny extends MultithreadedTest {
+
+		public void thread1() {
+			Transaction t = null;
+			try {
+				t = new Transaction();
+				Variable x = t.accesses((Variable) registry.lookup("x"));
+				t.start();
+				x.increment();
+				t.commit();
+			} catch (TransactionException e) {
+				Assert.fail(e.getMessage());
+			} catch (Exception e) {
+				Assert.fail(e.getMessage());
+			} finally {
+				t.stopHeartbeat();
+			}
+
+			waitForTick(99);
+			try {
+				TransactionFailureMonitor.getInstance().emergencyStop();
+			} catch (RemoteException e) {
+				Assert.fail(e.getMessage());
+			}
+		}
+	}
+
+	@Test
+	public void validAccessModeAny() throws Throwable {
+		TestFramework.runOnce(new ValidAccessModeAny());
+		Assert.assertEquals(1, state("x"));
+	}
+
+	/**
+	 * Writing in read-write access mode.
+	 */
+	class ValidAccessModeWriteAny extends MultithreadedTest {
+
+		public void thread1() {
+			Transaction t = null;
+			try {
+				t = new Transaction();
+				Variable x = t.accesses((Variable) registry.lookup("x"));
+				t.start();
+				x.write(1);
+				t.commit();
+			} catch (TransactionException e) {
+				Assert.fail(e.getMessage());
+			} catch (Exception e) {
+				Assert.fail(e.getMessage());
+			} finally {
+				t.stopHeartbeat();
+			}
+
+			waitForTick(99);
+			try {
+				TransactionFailureMonitor.getInstance().emergencyStop();
+			} catch (RemoteException e) {
+				Assert.fail(e.getMessage());
+			}
+		}
+	}
+
+	@Test
+	public void validAccessModeWriteAny() throws Throwable {
+		TestFramework.runOnce(new ValidAccessModeWriteAny());
+		Assert.assertEquals(1, state("x"));
+	}
+
+	/**
+	 * Writing in read-write access mode.
+	 */
+	class ValidAccessModeReadAny extends MultithreadedTest {
+
+		public void thread1() {
+			Transaction t = null;
+			try {
+				t = new Transaction();
+				Variable x = t.accesses((Variable) registry.lookup("x"));
+				t.start();
+				x.read();
+				t.commit();
+			} catch (TransactionException e) {
+				Assert.fail(e.getMessage());
+			} catch (Exception e) {
+				Assert.fail(e.getMessage());
+			} finally {
+				t.stopHeartbeat();
+			}
+
+			waitForTick(99);
+			try {
+				TransactionFailureMonitor.getInstance().emergencyStop();
+			} catch (RemoteException e) {
+				Assert.fail(e.getMessage());
+			}
+		}
+	}
+
+	@Test
+	public void validAccessModeReadAny() throws Throwable {
+		TestFramework.runOnce(new ValidAccessModeReadAny());
+		Assert.assertEquals(0, state("x"));
+	}
+
+	/**
+	 * Writing in read access mode.
+	 */
+	class DetectInvalidAccessModeWrite extends MultithreadedTest {
+
+		public void thread1() {
+			Transaction t = null;
+			try {
+				t = new Transaction();
+				Variable x = t.writes((Variable) registry.lookup("x"));
+				t.start();
+				x.read();
+				Assert.fail("Atempting to commit after illegal access.");
+				t.commit();
+			} catch (TransactionException e) {
+				try {
+					t.rollback();
+				} catch (TransactionException e1) {
+					Assert.fail(e1.getMessage());
+				}
+			} catch (Exception e) {
+				Assert.fail(e.getMessage());
+			} finally {
+				t.stopHeartbeat();
+			}
+
+			waitForTick(99);
+			try {
+				TransactionFailureMonitor.getInstance().emergencyStop();
+			} catch (RemoteException e) {
+				Assert.fail(e.getMessage());
+			}
+		}
+	}
+
+	@Test
+	public void detectInvalidAccessModeWrite() throws Throwable {
+		TestFramework.runOnce(new DetectInvalidAccessModeWrite());
+		Assert.assertEquals(0, state("x"));
+	}
+
+	/**
+	 * Reading in write access mode.
+	 */
+	class DetectInvalidAccessModeRead extends MultithreadedTest {
+
+		public void thread1() {
+			Transaction t = null;
+			try {
+				t = new Transaction();
+				Variable x = t.reads((Variable) registry.lookup("x"));
+				t.start();
+				x.write(1);
+				Assert.fail("Atempting to commit after illegal access.");
+				t.commit();
+			} catch (TransactionException e) {
+				try {
+					t.rollback();
+				} catch (TransactionException e1) {
+					Assert.fail(e1.getMessage());
+				}
+			} catch (Exception e) {
+				Assert.fail(e.getMessage());
+			} finally {
+				t.stopHeartbeat();
+			}
+
+			waitForTick(99);
+			try {
+				TransactionFailureMonitor.getInstance().emergencyStop();
+			} catch (RemoteException e) {
+				Assert.fail(e.getMessage());
+			}
+		}
+	}
+
+	@Test
+	public void detectInvalidAccessModeRead() throws Throwable {
+		TestFramework.runOnce(new DetectInvalidAccessModeRead());
+		Assert.assertEquals(0, state("x"));
+	}
+
+	/**
+	 * Read-writing in read access mode.
+	 */
+	class DetectInvalidAccessModeAnyRead extends MultithreadedTest {
+
+		public void thread1() {
+			Transaction t = null;
+			try {
+				t = new Transaction();
+				Variable x = t.reads((Variable) registry.lookup("x"));
+				t.start();
+				x.increment();
+				Assert.fail("Atempting to commit after illegal access.");
+				t.commit();
+			} catch (TransactionException e) {
+				try {
+					t.rollback();
+				} catch (TransactionException e1) {
+					Assert.fail(e1.getMessage());
+				}
+			} catch (Exception e) {
+				Assert.fail(e.getMessage());
+			} finally {
+				t.stopHeartbeat();
+			}
+
+			waitForTick(99);
+			try {
+				TransactionFailureMonitor.getInstance().emergencyStop();
+			} catch (RemoteException e) {
+				Assert.fail(e.getMessage());
+			}
+		}
+	}
+
+	@Test
+	public void detectInvalidAccessModeAnyRead() throws Throwable {
+		TestFramework.runOnce(new DetectInvalidAccessModeAnyRead());
+		Assert.assertEquals(0, state("x"));
+	}
+
+	/**
+	 * Read-writing in write access mode.
+	 */
+	class DetectInvalidAccessModeAnyWrite extends MultithreadedTest {
+
+		public void thread1() {
+			Transaction t = null;
+			try {
+				t = new Transaction();
+				Variable x = t.writes((Variable) registry.lookup("x"));
+				t.start();
+				x.increment();
+				Assert.fail("Atempting to commit after illegal access.");
+				t.commit();
+			} catch (TransactionException e) {
+				try {
+					t.rollback();
+				} catch (TransactionException e1) {
+					Assert.fail(e1.getMessage());
+				}
+			} catch (Exception e) {
+				Assert.fail(e.getMessage());
+			} finally {
+				t.stopHeartbeat();
+			}
+
+			waitForTick(99);
+			try {
+				TransactionFailureMonitor.getInstance().emergencyStop();
+			} catch (RemoteException e) {
+				Assert.fail(e.getMessage());
+			}
+		}
+	}
+
+	@Test
+	public void detectInvalidAccessModeAnyWrite() throws Throwable {
+		TestFramework.runOnce(new DetectInvalidAccessModeAnyWrite());
+		Assert.assertEquals(0, state("x"));
+	}
 }

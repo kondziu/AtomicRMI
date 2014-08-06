@@ -144,18 +144,21 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	}
 
 	public void preSync() throws RemoteException {
-		if (over)
+		if (over) {
 			throw new TransactionException("Attempting to access transactional object after release.");
+		}
 
-		if (mv == RELEASED || mv == ub)
+		if (mv == RELEASED || mv == ub) {
 			throw new TransactionException("Upper bound is lower then number of invocations.");
+		}
 
 		if (mv == 0) {
 			object.waitForCounter(px - 1);
 			object.transactionLock(tid);
 			snapshot = object.snapshot();
-		} else
+		} else {
 			object.transactionLock(tid);
+		}
 
 		if (snapshot.getReadVersion() != object.getCurrentVersion()) {
 			object.transactionUnlockForce(tid);
