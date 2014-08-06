@@ -10,6 +10,9 @@
 		<pathelement location="." />
 		<pathelement location="${dir.build}" />
 		<pathelement location="${dir.lib}/${cglib.file}" />
+		<pathelement location="${dir.lib}/${junit.file}" />
+		<pathelement location="${dir.lib}/${hamcrest.file}" />
+		<pathelement location="${dir.lib}/${mtc.file}" />
 	</path>
 
 	<path id="project.class.path.all">
@@ -19,6 +22,9 @@
 		<pathelement location="${dir.lib}/${soot.file}" />
 		<pathelement location="${dir.lib}/${polyglot.file}" />
 		<pathelement location="${dir.lib}/${jasmin.file}" />
+		<pathelement location="${dir.lib}/${junit.file}" />
+		<pathelement location="${dir.lib}/${hamcrest.file}" />
+		<pathelement location="${dir.lib}/${mtc.file}" />
 	</path>
 
 	<path id="project.class.path.precompiler">
