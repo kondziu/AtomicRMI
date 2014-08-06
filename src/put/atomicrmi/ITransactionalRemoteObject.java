@@ -25,6 +25,8 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.UUID;
 
+import put.atomicrmi.Access.Mode;
+
 /**
  * Internal transactional mechanism of {@link TransactionalUnicastRemoteObject}
  * class. Specifies methods required to initiate remote transaction.
@@ -44,11 +46,13 @@ public interface ITransactionalRemoteObject extends Remote {
 	 *            transaction unique identifier.
 	 * @param calls
 	 *            upper bound on number of remote object invocations.
+	 * @param mode 
+	 *            access mode (read-only, write-only, etc.)
 	 * @return an instance of object proxy that wraps this remote object.
 	 * @throws RemoteException
 	 *             when remote execution failed.
 	 */
-	IObjectProxy createProxy(ITransaction transaction, UUID tid, long calls) throws RemoteException;
+	IObjectProxy createProxy(ITransaction transaction, UUID tid, long calls, Mode mode) throws RemoteException;
 
 	/**
 	 * Gives a transaction failure monitor used at specific node where this

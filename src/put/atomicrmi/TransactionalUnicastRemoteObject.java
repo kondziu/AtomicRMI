@@ -34,6 +34,8 @@ import java.rmi.server.RMIServerSocketFactory;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.UUID;
 
+import put.atomicrmi.Access.Mode;
+
 /**
  * Base class for all remote object implementations that are part of some
  * transactional executions. This class supply remote object with versioning
@@ -155,8 +157,8 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 		return super.clone();
 	}
 
-	public IObjectProxy createProxy(ITransaction transaction, UUID tid, long calls) throws RemoteException {
-		return (IObjectProxy) ObjectProxyHandler.create(new ObjectProxy(transaction, tid, this, calls));
+	public IObjectProxy createProxy(ITransaction transaction, UUID tid, long calls, Mode mode) throws RemoteException {
+		return (IObjectProxy) ObjectProxyHandler.create(new ObjectProxy(transaction, tid, this, calls, mode));
 	}
 
 	public ITransactionFailureMonitor getFailureMonitor() throws RemoteException {

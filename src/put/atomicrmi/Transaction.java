@@ -175,7 +175,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 * <p>
 	 * It is assumed that read set and write set are disjoint.
 	 */
-	private Set<IObjectProxy> readset;
+	private Set<IObjectProxy> readonly;
 
 	/**
 	 * This transaction's write set.
@@ -183,7 +183,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 * <p>
 	 * It is assumed that read set and write set are disjoint.
 	 */
-	private Set<IObjectProxy> writeset;
+	private Set<IObjectProxy> writeonly;
 
 	/**
 	 * Heartbeater's thread reference.
@@ -218,8 +218,8 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 		// Arrays.sort(globalLocks);
 
 		proxies = new ArrayList<IObjectProxy>();
-		readset = new HashSet<IObjectProxy>();
-		writeset = new HashSet<IObjectProxy>();
+		readonly = new HashSet<IObjectProxy>();
+		writeonly = new HashSet<IObjectProxy>();
 
 		heartbeat = new Heartbeat();
 	}
@@ -381,17 +381,17 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 
 		try {
 			ITransactionalRemoteObject remote = (ITransactionalRemoteObject) obj;
-			IObjectProxy proxy = (IObjectProxy) remote.createProxy(this, id, calls);
+			IObjectProxy proxy = (IObjectProxy) remote.createProxy(this, id, calls, mode);
 			proxies.add(proxy);
 
 			switch (mode) {
 			case READ_ONLY:
-				assert (!writeset.contains(proxy));
-				readset.add(proxy);
+				assert (!writeonly.contains(proxy));
+				readonly.add(proxy);
 				break;
 			case WRITE_ONLY:
-				assert (!readset.contains(proxy));
-				writeset.add(proxy);
+				assert (!readonly.contains(proxy));
+				writeonly.add(proxy);
 				break;
 			}
 

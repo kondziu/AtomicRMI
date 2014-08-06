@@ -25,6 +25,8 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.UUID;
 
+import put.atomicrmi.Access.Mode;
+
 /**
  * An interface for remote object proxy. This allows to access remote object
  * proxy remotely and control the wrapped remote object invocation.
@@ -141,4 +143,12 @@ public interface IObjectProxy extends Remote {
 	 * @throws RemoteException
 	 */
 	UUID getSortingKey() throws RemoteException;
+	
+	/**
+	 * Return specified access mode for this proxy object.
+	 * 
+	 * @return access mode
+	 * @throws RemoteException
+	 */
+	Mode getMode() throws RemoteException;
 }

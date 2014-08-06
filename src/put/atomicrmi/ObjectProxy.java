@@ -25,6 +25,8 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.UUID;
 
+import put.atomicrmi.Access.Mode;
+
 /**
  * An implementation of {@link IObjectProxy} interface. It is required to
  * control remote method invocations and implement versioning algorithm.
@@ -85,6 +87,11 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	private long ub;
 
 	/**
+	 * Access mode to this remote object by this transaction: read-only, write-only, etc.
+	 */
+	private Mode mode;
+
+	/**
 	 * Creates the object proxy for given remote object.
 	 * 
 	 * @param transaction
@@ -95,15 +102,18 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	 *            remote object that is being wrapped.
 	 * @param calls
 	 *            an upper bound on number of remote object invocations.
+	 * @param mode
+	 *            access mode (read-only, write-only, etc.)
 	 * @throws RemoteException
 	 *             when remote execution fails.
 	 */
-	ObjectProxy(ITransaction transaction, UUID tid, TransactionalUnicastRemoteObject object, long calls)
+	ObjectProxy(ITransaction transaction, UUID tid, TransactionalUnicastRemoteObject object, long calls, Mode mode)
 			throws RemoteException {
 		super();
 		this.transaction = transaction;
 		this.object = object;
 		this.tid = tid;
+		this.mode = mode;
 
 		ub = calls;
 
@@ -159,7 +169,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	public void postSync() throws RemoteException {
 		if (over)
 			throw new TransactionException("Attempting to access transactional object after release.");
-			//return;
+		// return;
 
 		if (mv == ub) {
 			object.setCurrentVersion(px);
@@ -228,7 +238,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		} else {
 			object.transactionLock(tid);
 		}
-		
+
 		object.setCurrentVersion(px);
 		releaseTransaction();
 
@@ -248,5 +258,9 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 	public UUID getSortingKey() throws RemoteException {
 		return object.getSortingKey();
+	}
+	
+	public Mode getMode() throws RemoteException {
+		return mode;
 	}
 }
