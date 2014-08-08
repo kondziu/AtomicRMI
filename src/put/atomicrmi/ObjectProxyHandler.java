@@ -86,7 +86,7 @@ class ObjectProxyHandler implements InvocationHandler {
 	 *             when remote execution failed.
 	 */
 	static Object create(IObjectProxy proxy) throws RemoteException {
-		return Enhancer.create(null, getArrayOfRemoteInterfaces(proxy.getWrapped().getClass()), new ObjectProxyHandler(
+		return Enhancer.create(null, getArrayOfRemoteInterfaces(proxy.getWrapped(false).getClass()), new ObjectProxyHandler(
 				proxy));
 	}
 
@@ -119,8 +119,10 @@ class ObjectProxyHandler implements InvocationHandler {
 					+ proxy.getMode());
 		}
 
+		
+		boolean bufferred;
 		try {
-			proxy.preSync();
+			bufferred = proxy.preSync(mode);
 		} catch (RemoteException e) {
 			if (e.getCause() instanceof RollbackForcedException) {
 				throw e.getCause();
@@ -134,9 +136,9 @@ class ObjectProxyHandler implements InvocationHandler {
 		}
 
 		method.setAccessible(true);
-		Object result = method.invoke(proxy.getWrapped(), args);
+		Object result = method.invoke(proxy.getWrapped(bufferred), args);
 
-		proxy.postSync();
+		proxy.postSync(mode);
 
 		return result;
 	}

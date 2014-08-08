@@ -37,12 +37,12 @@ public interface IObjectProxy extends Remote {
 
 	/**
 	 * Gives the remote reference to the remote object that is being wrapped.
-	 * 
+	 * @param bufferred return the actual reference or the buffer.
 	 * @return reference to wrapped object.
 	 * @throws RemoteException
 	 *             when remote execution fails.
 	 */
-	Object getWrapped() throws RemoteException;
+	Object getWrapped(boolean bufferred) throws RemoteException;
 
 	/**
 	 * Notifies this object proxy that transaction is starting. The failure
@@ -59,20 +59,29 @@ public interface IObjectProxy extends Remote {
 	 * versioning and checkpoint counters appropriately and obtain required
 	 * locks.
 	 * 
+	 * @param accessType
+	 *            type of access: read/write/read-write
+	 * @return <code>true</code> if the preSync determines that a buffer has to
+	 *         be used instead of the actual reference, and <code>false</code>
+	 *         otherwise.
+	 * 
 	 * @throws RemoteException
 	 *             when remote execution fails.
 	 */
-	void preSync() throws RemoteException;
+	boolean preSync(Mode accessType) throws RemoteException;
 
 	/**
 	 * Action performed after every remote method invocation. It should update
 	 * versioning and checkpoint counters appropriately and release appropriate
 	 * locks.
 	 * 
+	 * @param accessType
+	 *            type of access: read/write/read-write
+	 * 
 	 * @throws RemoteException
 	 *             when remote execution fails.
 	 */
-	void postSync() throws RemoteException;
+	void postSync(Mode accessType) throws RemoteException;
 
 	/**
 	 * Notifies this remote object to release version counters and allow other
@@ -122,28 +131,28 @@ public interface IObjectProxy extends Remote {
 	 * @throws RemoteException
 	 */
 	void free() throws RemoteException;
-	
+
 	/**
 	 * TODO
 	 * 
 	 * @throws RemoteException
 	 */
 	void lock() throws RemoteException;
-	
+
 	/**
 	 * TODO
 	 * 
 	 * @throws RemoteException
 	 */
 	void unlock() throws RemoteException;
-	
+
 	/**
 	 * TODO
 	 * 
 	 * @throws RemoteException
 	 */
 	UUID getSortingKey() throws RemoteException;
-	
+
 	/**
 	 * Return specified access mode for this proxy object.
 	 * 

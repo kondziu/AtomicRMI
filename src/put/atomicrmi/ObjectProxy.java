@@ -36,6 +36,58 @@ import put.atomicrmi.Access.Mode;
 class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 	/**
+	 * TODO
+	 * 
+	 * @author Konrad Siek
+	 */
+	private class ReadThread extends Thread {
+
+		private Object buffer = null;
+		private Semaphore semaphore = new Semaphore(0);
+		private boolean commit;
+
+		@Override
+		public void run() {
+			System.err.println("READ THREAD started");
+			try {
+				object.waitForCounter(px - 1); // 12
+				object.transactionLock(tid);
+				// we have to make a snapshot, else it thinks we didn't read the
+				// object and in effect we don't get cv and rv
+				snapshot = object.snapshot(); // 15
+				buffer = object.clone(); // 13
+				object.setCurrentVersion(px); // 14
+				releaseTransaction(); // 16
+			} catch (Exception e) {
+				// FIXME the client-side should see the exceptions from this
+				// thread.
+				throw new RuntimeException(e);
+			} finally {
+				object.transactionUnlock(tid);
+			}
+			System.err.println("READ THREAD released");
+
+			semaphore.release(1); // 17 & 18
+
+			System.err.println("READ THREAD signaled");
+
+			// dismiss
+			try {
+				System.err.println(">> wait for snapshot");
+				commit = waitForSnapshot(); // 19 & 20
+				System.err.println(">> done wait for snapshot");
+				// line 21 will be taken care of in wait for snapshots
+				finishTransaction(commit); // 22
+			} catch (RemoteException e) {
+				throw new RuntimeException(e);
+			}
+
+			// semaphore.release(RELEASED);
+			System.err.println("READ THREAD comitted");
+		}
+	}
+
+	/**
 	 * Randomly generated serialization UID.
 	 */
 	private static final long serialVersionUID = -5524954471581314314L;
@@ -87,9 +139,15 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	private long ub;
 
 	/**
-	 * Access mode to this remote object by this transaction: read-only, write-only, etc.
+	 * Access mode to this remote object by this transaction: read-only,
+	 * write-only, etc.
 	 */
 	private Mode mode;
+
+	/**
+	 * Thread that performs read-only optimization, created as needed.
+	 */
+	private ReadThread readThread;
 
 	/**
 	 * Creates the object proxy for given remote object.
@@ -116,7 +174,6 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		this.mode = mode;
 
 		ub = calls;
-
 		over = true;
 	}
 
@@ -130,7 +187,19 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		return tid;
 	}
 
-	public ITransactionalRemoteObject getWrapped() {
+	public Object getWrapped(boolean buffer) throws RemoteException {
+		System.err.println("getWrapper " + buffer + " " + mode);
+		if (buffer) {
+			try {
+				// this should have been handled by by preRead
+				readThread.semaphore.acquire(1);
+				readThread.semaphore.release(1);
+				return readThread.buffer;
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new RemoteException(e.getMessage(), e.getCause());
+			}
+		}
 		return object;
 	}
 
@@ -143,7 +212,37 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		over = false;
 	}
 
-	public void preSync() throws RemoteException {
+	public boolean preRead() throws RemoteException {
+		System.err.println("preRead " + mode);
+		if (mode == Mode.READ_ONLY) {
+			// Read-only optimization (green).
+			// We don't check for UB etc. because we already released this
+			// object anyway, and we're using a buffer.
+			try {
+				// Synchronize with the Read Thread
+				System.err.println("wait for sem");
+				readThread.semaphore.acquire(1);
+				System.err.println("done wait for sem");
+				readThread.semaphore.release(1);
+				System.err.println("returned sem");
+			} catch (InterruptedException e) {
+				throw new RemoteException(e.getMessage(), e.getCause());
+			}
+
+			// object.transactionLock(tid);
+
+			mv++;
+
+			return true;
+		} else {
+			// Read in a R/W object.
+			return preAny();
+		}
+		// TODO (yellow)
+		// TODO (pink)
+	}
+
+	public boolean preAny() throws RemoteException {
 		if (over) {
 			throw new TransactionException("Attempting to access transactional object after release.");
 		}
@@ -167,12 +266,49 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		}
 
 		mv++;
+
+		return false;
 	}
 
-	public void postSync() throws RemoteException {
-		if (over)
+	public boolean preSync(Mode accessType) throws RemoteException {
+		switch (accessType) {
+		case READ_ONLY:
+			return preRead();
+		case WRITE_ONLY:
+		case ANY:
+		default:
+			return preAny();
+		}
+	}
+
+	public void postRead() throws RemoteException {
+		if (mode == Mode.READ_ONLY) {
+			// if (mv == ub) {
+			// object.setCurrentVersion(px);
+			// releaseTransaction();
+			// }
+			// XXX this should be handled by read thread?
+
+			// multiple reads should be able to coincide
+			// object.transactionUnlock(tid);
+		} else {
+			if (over) {
+				throw new TransactionException("Attempting to access transactional object after release.");
+			}
+
+			if (mv == ub) {
+				object.setCurrentVersion(px);
+				releaseTransaction();
+			}
+
+			object.transactionUnlock(tid);
+		}
+	}
+
+	public void postAny() throws RemoteException {
+		if (over) {
 			throw new TransactionException("Attempting to access transactional object after release.");
-		// return;
+		}
 
 		if (mv == ub) {
 			object.setCurrentVersion(px);
@@ -180,6 +316,18 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		}
 
 		object.transactionUnlock(tid);
+	}
+
+	public void postSync(Mode accessType) throws RemoteException {
+		switch (accessType) {
+		case READ_ONLY:
+			postRead();
+			break;
+		case WRITE_ONLY:
+		case ANY:
+		default:
+			postAny();
+		}
 	}
 
 	public void releaseTransaction() throws RemoteException {
@@ -190,26 +338,52 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	}
 
 	public void finishTransaction(boolean restore) throws RemoteException {
-		TransactionFailureMonitor.getInstance().stopMonitoring(this);
 
-		object.finishTransaction(tid, snapshot, restore);
+		if (readThread != Thread.currentThread() && mode == Mode.READ_ONLY) { // line
+																				// 65
+			System.err.println("non-read thread");
+			// empty
+		} else {
+			System.err.println("read thread");
+			TransactionFailureMonitor.getInstance().stopMonitoring(this);
 
-		over = true;
-		snapshot = null;
+			object.finishTransaction(tid, snapshot, restore);
+
+			over = true;
+			snapshot = null;
+		}
 	}
 
 	public boolean waitForSnapshot() throws RemoteException {
-		object.waitForSnapshot(px - 1);
+		System.err.println(tid + "..." + mode);
+		if (readThread != Thread.currentThread() && mode == Mode.READ_ONLY) { // line
+																				// 57
+			try {
+				readThread.join(); // line 58
+			} catch (InterruptedException e) {
+				throw new RemoteException(e.getMessage(), e.getCause());
+			}
 
-		if (mv != 0 && mv != RELEASED && snapshot.getReadVersion() == object.getCurrentVersion())
-			object.setCurrentVersion(px);
+			System.err.println(tid + "WAIT FOR SNAPSHOTS (r) " + readThread.commit);
+			return readThread.commit; // line 21
+		} else {
+			System.err.println(tid + ",,," + mode);
+			object.waitForSnapshot(px - 1);
 
-		releaseTransaction();
+			if (mv != 0 && mv != RELEASED && snapshot.getReadVersion() == object.getCurrentVersion())
+				object.setCurrentVersion(px);
 
-		if (snapshot == null)
-			return true;
+			releaseTransaction();
 
-		return snapshot.getReadVersion() <= object.getCurrentVersion();
+			if (snapshot == null) // FIXME
+				return true;
+
+			System.err.println(tid + "cv: " + object.getCurrentVersion());
+			System.err.println(tid + "rv: " + snapshot.getReadVersion());
+			boolean commit = snapshot.getReadVersion() <= object.getCurrentVersion();
+			System.err.println("WAIT FOR SNAPSHOTS (!r) " + commit);
+			return commit;
+		}
 	}
 
 	/**
@@ -257,12 +431,18 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 	public void unlock() throws RemoteException {
 		object.transactionUnlock(tid);
+
+		// Read-only optimization.
+		if (mode == Mode.READ_ONLY) {
+			readThread = new ReadThread();
+			readThread.start();
+		}
 	}
 
 	public UUID getSortingKey() throws RemoteException {
 		return object.getSortingKey();
 	}
-	
+
 	public Mode getMode() throws RemoteException {
 		return mode;
 	}

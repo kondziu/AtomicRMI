@@ -218,6 +218,8 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 		// Arrays.sort(globalLocks);
 
 		proxies = new ArrayList<IObjectProxy>();
+		
+		// XXX probably redundant
 		readonly = new HashSet<IObjectProxy>();
 		writeonly = new HashSet<IObjectProxy>();
 
@@ -293,11 +295,11 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	public <T> T reads(T obj) throws TransactionException {
 		return accesses(obj, INF, Mode.READ_ONLY);
 	}
-	
+
 	/**
 	 * Adds given remote object to the list of accessed remote objects with the
-	 * given upper bound on number of this object invocations. The object
-	 * will only be read from.
+	 * given upper bound on number of this object invocations. The object will
+	 * only be read from.
 	 * 
 	 * @param obj
 	 *            remote object accessed by transaction.
@@ -333,8 +335,8 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 
 	/**
 	 * Adds given remote object to the list of accessed remote objects with the
-	 * given upper bound on number of this object invocations. The object
-	 * will only be written to.
+	 * given upper bound on number of this object invocations. The object will
+	 * only be written to.
 	 * 
 	 * @param obj
 	 *            remote object accessed by transaction.
@@ -384,6 +386,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 			IObjectProxy proxy = (IObjectProxy) remote.createProxy(this, id, calls, mode);
 			proxies.add(proxy);
 
+			// XXX probably unnecessary
 			switch (mode) {
 			case READ_ONLY:
 				assert (!writeonly.contains(proxy));
@@ -487,7 +490,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 			}
 
 			for (IObjectProxy proxy : proxies) {
-				proxy.unlock();
+				proxy.unlock();				
 			}
 
 		} catch (RemoteException e) {
@@ -495,7 +498,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 		}
 
 		setState(STATE_RUNNING);
-	}
+	}	
 
 	/**
 	 * Commit changes made by this transaction and terminates transaction.

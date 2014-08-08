@@ -107,7 +107,8 @@ public class Safety {
 				t.rollback();
 
 			} catch (Exception e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			} finally {
 				t.stopHeartbeat();
 			}
@@ -116,7 +117,8 @@ public class Safety {
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
 			} catch (RemoteException e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			}
 		}
 
@@ -151,7 +153,8 @@ public class Safety {
 
 			} catch (RollbackForcedException e) {
 			} catch (Exception e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			} finally {
 				t.stopHeartbeat();
 			}
@@ -160,7 +163,8 @@ public class Safety {
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
 			} catch (RemoteException e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			}
 		}
 	}
@@ -215,7 +219,8 @@ public class Safety {
 				t.rollback();
 
 			} catch (Exception e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			} finally {
 				t.stopHeartbeat();
 			}
@@ -224,7 +229,8 @@ public class Safety {
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
 			} catch (RemoteException e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			}
 		}
 
@@ -265,7 +271,8 @@ public class Safety {
 
 				} catch (RollbackForcedException e) {
 				} catch (Exception e) {
-					Assert.fail(e.getMessage());
+					e.printStackTrace();
+					throw new RuntimeException(e.getMessage(), e.getCause());
 				} finally {
 					t.stopHeartbeat();
 					i += 10;
@@ -276,7 +283,8 @@ public class Safety {
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
 			} catch (RemoteException e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			}
 		}
 	}
@@ -330,7 +338,8 @@ public class Safety {
 				waitForTick(4);
 
 			} catch (Exception e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			} finally {
 				t.stopHeartbeat();
 			}
@@ -339,7 +348,8 @@ public class Safety {
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
 			} catch (RemoteException e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			}
 		}
 
@@ -372,7 +382,8 @@ public class Safety {
 
 			} catch (RollbackForcedException e) {
 			} catch (Exception e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			} finally {
 				t.stopHeartbeat();
 			}
@@ -381,7 +392,8 @@ public class Safety {
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
 			} catch (RemoteException e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			}
 		}
 	}
@@ -435,7 +447,8 @@ public class Safety {
 				waitForTick(4);
 
 			} catch (Exception e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			} finally {
 				t.stopHeartbeat();
 			}
@@ -444,7 +457,8 @@ public class Safety {
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
 			} catch (RemoteException e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			}
 		}
 
@@ -493,7 +507,8 @@ public class Safety {
 
 				} catch (RollbackForcedException e) {
 				} catch (Exception e) {
-					Assert.fail(e.getMessage());
+					e.printStackTrace();
+					throw new RuntimeException(e.getMessage(), e.getCause());
 				} finally {
 					t.stopHeartbeat();
 					i += 10;
@@ -504,7 +519,8 @@ public class Safety {
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
 			} catch (RemoteException e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			}
 		}
 	}
@@ -547,7 +563,8 @@ public class Safety {
 				t.commit();
 
 			} catch (Exception e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			} finally {
 				t.stopHeartbeat();
 			}
@@ -556,7 +573,8 @@ public class Safety {
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
 			} catch (RemoteException e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			}
 		}
 
@@ -616,7 +634,8 @@ public class Safety {
 				t.commit();
 
 			} catch (Exception e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			} finally {
 				t.stopHeartbeat();
 			}
@@ -625,7 +644,8 @@ public class Safety {
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
 			} catch (RemoteException e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			}
 		}
 
@@ -713,7 +733,8 @@ public class Safety {
 				t.commit();
 
 			} catch (Exception e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			} finally {
 				t.stopHeartbeat();
 			}
@@ -722,7 +743,8 @@ public class Safety {
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
 			} catch (RemoteException e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			}
 		}
 
@@ -746,7 +768,8 @@ public class Safety {
 				t.commit();
 
 			} catch (Exception e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			} finally {
 				t.stopHeartbeat();
 			}
@@ -755,7 +778,8 @@ public class Safety {
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
 			} catch (RemoteException e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			}
 		}
 	}
@@ -813,7 +837,8 @@ public class Safety {
 				t.commit();
 
 			} catch (Exception e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			} finally {
 				t.stopHeartbeat();
 			}
@@ -822,7 +847,8 @@ public class Safety {
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
 			} catch (RemoteException e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			}
 		}
 
@@ -846,7 +872,8 @@ public class Safety {
 				t.commit();
 
 			} catch (Exception e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			} finally {
 				t.stopHeartbeat();
 			}
@@ -855,7 +882,8 @@ public class Safety {
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
 			} catch (RemoteException e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			}
 		}
 	}
@@ -916,7 +944,8 @@ public class Safety {
 				t.commit();
 
 			} catch (Exception e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			} finally {
 				t.stopHeartbeat();
 			}
@@ -925,7 +954,8 @@ public class Safety {
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
 			} catch (RemoteException e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			}
 		}
 
@@ -949,7 +979,8 @@ public class Safety {
 				aint.set(2);
 
 			} catch (Exception e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			} finally {
 				t.stopHeartbeat();
 			}
@@ -958,7 +989,8 @@ public class Safety {
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
 			} catch (RemoteException e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			}
 		}
 	}
@@ -1000,7 +1032,8 @@ public class Safety {
 					Assert.fail(e1.getMessage());
 				}
 			} catch (Exception e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			} finally {
 				t.stopHeartbeat();
 			}
@@ -1009,7 +1042,8 @@ public class Safety {
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
 			} catch (RemoteException e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			}
 		}
 	}
@@ -1037,9 +1071,11 @@ public class Safety {
 				x.write(1);
 				t.commit();
 			} catch (TransactionException e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			} catch (Exception e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			} finally {
 				t.stopHeartbeat();
 			}
@@ -1048,7 +1084,8 @@ public class Safety {
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
 			} catch (RemoteException e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			}
 		}
 	}
@@ -1070,12 +1107,17 @@ public class Safety {
 				t = new Transaction();
 				Variable x = t.reads((Variable) registry.lookup("x"));
 				t.start();
+				System.err.println("started");
 				x.read();
+				System.err.println("read");
 				t.commit();
+				System.err.println("comitted");
 			} catch (TransactionException e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			} catch (Exception e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			} finally {
 				t.stopHeartbeat();
 			}
@@ -1084,7 +1126,8 @@ public class Safety {
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
 			} catch (RemoteException e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			}
 		}
 	}
@@ -1109,9 +1152,11 @@ public class Safety {
 				x.increment();
 				t.commit();
 			} catch (TransactionException e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			} catch (Exception e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			} finally {
 				t.stopHeartbeat();
 			}
@@ -1120,7 +1165,8 @@ public class Safety {
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
 			} catch (RemoteException e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			}
 		}
 	}
@@ -1145,9 +1191,11 @@ public class Safety {
 				x.write(1);
 				t.commit();
 			} catch (TransactionException e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			} catch (Exception e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			} finally {
 				t.stopHeartbeat();
 			}
@@ -1156,7 +1204,8 @@ public class Safety {
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
 			} catch (RemoteException e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			}
 		}
 	}
@@ -1181,9 +1230,11 @@ public class Safety {
 				x.read();
 				t.commit();
 			} catch (TransactionException e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			} catch (Exception e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			} finally {
 				t.stopHeartbeat();
 			}
@@ -1192,7 +1243,8 @@ public class Safety {
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
 			} catch (RemoteException e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			}
 		}
 	}
@@ -1224,7 +1276,8 @@ public class Safety {
 					Assert.fail(e1.getMessage());
 				}
 			} catch (Exception e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			} finally {
 				t.stopHeartbeat();
 			}
@@ -1233,7 +1286,8 @@ public class Safety {
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
 			} catch (RemoteException e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			}
 		}
 	}
@@ -1265,7 +1319,8 @@ public class Safety {
 					Assert.fail(e1.getMessage());
 				}
 			} catch (Exception e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			} finally {
 				t.stopHeartbeat();
 			}
@@ -1274,7 +1329,8 @@ public class Safety {
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
 			} catch (RemoteException e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			}
 		}
 	}
@@ -1306,7 +1362,8 @@ public class Safety {
 					Assert.fail(e1.getMessage());
 				}
 			} catch (Exception e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			} finally {
 				t.stopHeartbeat();
 			}
@@ -1315,7 +1372,8 @@ public class Safety {
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
 			} catch (RemoteException e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			}
 		}
 	}
@@ -1347,7 +1405,8 @@ public class Safety {
 					Assert.fail(e1.getMessage());
 				}
 			} catch (Exception e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			} finally {
 				t.stopHeartbeat();
 			}
@@ -1356,7 +1415,8 @@ public class Safety {
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
 			} catch (RemoteException e) {
-				Assert.fail(e.getMessage());
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			}
 		}
 	}
@@ -1366,4 +1426,474 @@ public class Safety {
 		TestFramework.runOnce(new DetectInvalidAccessModeAnyWrite());
 		Assert.assertEquals(0, state("x"));
 	}
+
+	/**
+	 * Read-only buffered read test case.
+	 * 
+	 * <pre>
+	 * T1 [ r(x)0 r(x)0 r(x)0 r(x)0 ]r
+	 * T2  [      r(x)1 w(x)2       ]
+	 * </pre>
+	 * 
+	 * Specifically checks whether T2 is free to operate on x while T1 operates
+	 * on x at the same time, and whether T1 sees a consistent value of x
+	 * regardless.
+	 */
+	class ReadOnlyBuferredRead extends MultithreadedTest {
+
+		AtomicInteger aint;
+
+		@Override
+		public void initialize() {
+			aint = new AtomicInteger(0);
+		}
+
+		public void thread1() {
+			Transaction t = null;
+			try {
+				t = new Transaction();
+				Variable x = t.reads((Variable) registry.lookup("x"));
+
+				t.start();
+				waitForTick(1);
+				waitForTick(2);
+
+				int v1 = x.read();
+				Assert.assertEquals(0, v1);
+
+				waitForTick(3);
+				int v2 = x.read();
+				Assert.assertEquals(0, v2);
+
+				// If T1 was released by T1 then T2 will not have read x yet and
+				// it wouldn't have set aint to 2 yet. (Also, if x is not
+				// released by T1, then tick 4 will never be reached, so the
+				// point is moot).
+				waitForTick(4);
+				Assert.assertEquals("Read-only variable released.", 2, aint.get());
+
+				int v3 = x.read();
+				Assert.assertEquals(0, v3);
+
+				waitForTick(5);
+				int v4 = x.read();
+				Assert.assertEquals(0, v4);
+
+				waitForTick(6);
+
+				t.commit();
+
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
+			} finally {
+				t.stopHeartbeat();
+			}
+
+			waitForTick(99);
+			try {
+				TransactionFailureMonitor.getInstance().emergencyStop();
+			} catch (RemoteException e) {
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
+			}
+		}
+
+		public void thread2() {
+			Transaction t = null;
+			try {
+				t = new Transaction();
+				Variable x = t.accesses((Variable) registry.lookup("x"));
+
+				waitForTick(1);
+				t.start();
+				waitForTick(2);
+
+				waitForTick(3);
+				int vx = x.read();
+				aint.set(2);
+
+				waitForTick(4);
+				x.write(vx + 1);
+
+				waitForTick(6);
+
+				t.commit();
+
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
+			} finally {
+				t.stopHeartbeat();
+			}
+
+			waitForTick(99);
+			try {
+				TransactionFailureMonitor.getInstance().emergencyStop();
+			} catch (RemoteException e) {
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
+			}
+		}
+	}
+
+	@Test
+	public void readOnlyBufferedRead() throws Throwable {
+		TestFramework.runOnce(new ReadOnlyBuferredRead());
+
+		Assert.assertEquals(1, state("x"));
+	}
+
+	/**
+	 * Read-only release at start test case.
+	 * 
+	 * <pre>
+	 * T1 [              r(x)0 ]r
+	 * T2  [ r(x)1 w(x)2       ]
+	 * </pre>
+	 * 
+	 * Specifically checks whether T2 is free to operate on x <b>before</b> T1
+	 * even touches x.
+	 */
+	class ReadOnlyReleaseAtStart extends MultithreadedTest {
+
+		public void thread1() {
+			Transaction t = null;
+			try {
+				t = new Transaction();
+				Variable x = t.reads((Variable) registry.lookup("x"));
+
+				t.start();
+				waitForTick(1);
+				waitForTick(2);
+
+				waitForTick(3);
+
+				// If T1 was released by T1 then T2 will not have read x yet and
+				// it wouldn't have set aint to 2 yet. (Also, if x is not
+				// released by T1, then tick 4 will never be reached, so the
+				// point is moot).
+				int v1 = x.read();
+				Assert.assertEquals(0, v1);
+
+				waitForTick(4);
+
+				t.commit();
+
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
+			} finally {
+				t.stopHeartbeat();
+			}
+
+			waitForTick(99);
+			try {
+				TransactionFailureMonitor.getInstance().emergencyStop();
+			} catch (RemoteException e) {
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
+			}
+		}
+
+		public void thread2() {
+			Transaction t = null;
+			try {
+				t = new Transaction();
+				Variable x = t.accesses((Variable) registry.lookup("x"));
+
+				waitForTick(1);
+				t.start();
+				waitForTick(2);
+
+				// If T1 did not release x at start, then T2 will deadlock here
+				// waiting for x to be released, and never progress to tick 3.
+				int vx = x.read();
+				x.write(vx + 1);
+
+				waitForTick(3);
+				waitForTick(4);
+
+				t.commit();
+
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
+			} finally {
+				t.stopHeartbeat();
+			}
+
+			waitForTick(99);
+			try {
+				TransactionFailureMonitor.getInstance().emergencyStop();
+			} catch (RemoteException e) {
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
+			}
+		}
+	}
+
+	@Test
+	public void readOnlyReleaseAtStart() throws Throwable {
+		TestFramework.runOnce(new ReadOnlyReleaseAtStart());
+
+		Assert.assertEquals(1, state("x"));
+	}
+
+	/**
+	 * Read-only abort.
+	 * 
+	 * <pre>
+	 * T1 [ w(x)1                    !
+	 * T2  [      r(x)1               !r  #forced
+	 * </pre>
+	 * 
+	 * Checks whether a read-only transaction reacts to forced aborts.
+	 */
+	class ReadOnlyAbort extends MultithreadedTest {
+		
+		public void thread1() {
+			Transaction t = null;
+			try {
+				t = new Transaction();
+				Variable x = t.accesses((Variable) registry.lookup("x"), 1);
+				
+				t.start();
+				waitForTick(1);
+				waitForTick(2);
+				
+				x.write(1);
+				System.err.println("write");
+				
+				waitForTick(3);
+				
+				waitForTick(4);
+				
+				System.err.println("attempt rollback");
+				
+				t.rollback();
+				
+				waitForTick(5);
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
+			} finally {
+				t.stopHeartbeat();
+			}
+			
+			waitForTick(99);
+			try {
+				TransactionFailureMonitor.getInstance().emergencyStop();
+			} catch (RemoteException e) {
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
+			}
+		}
+
+		public void thread2() {
+			Transaction t = null;
+			try {
+				t = new Transaction();
+				Variable x = t.reads((Variable) registry.lookup("x"));
+
+				waitForTick(1);
+				t.start();
+				waitForTick(2);
+
+				waitForTick(3);
+
+				int v1 = x.read();
+				Assert.assertEquals(1, v1);
+				System.err.println("read");
+
+				waitForTick(4);
+				waitForTick(5);
+
+				System.err.println("attempt commit");
+				t.commit();
+				Assert.fail("Transaction comitted when it should have aborted");
+
+			} catch (RollbackForcedException e) {
+				// everything is fine
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
+			} finally {
+				t.stopHeartbeat();
+			}
+
+			waitForTick(99);
+			try {
+				TransactionFailureMonitor.getInstance().emergencyStop();
+			} catch (RemoteException e) {
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
+			}
+		}
+	}
+
+
+	@Test
+	public void readOnlyAbort() throws Throwable {
+		TestFramework.runOnce(new ReadOnlyAbort());
+
+		Assert.assertEquals(0, state("x"));
+	}
+
+	/**
+	 * Read-only cascading abort.
+	 * 
+	 * <pre>
+	 * T1 [ w(x)1                    !
+	 * T2  [      r(x)1               !r  #forced
+	 * T3  [            r(x)1 w(x)2     !  #forced
+	 * </pre>
+	 * 
+	 * Checks whether a read-only transaction reacts to forced aborts and
+	 * continues the cascade in following transactions.
+	 */
+	class ReadOnlyCascadingAbort extends MultithreadedTest {
+		
+		public void thread1() {
+			Transaction t = null;
+			try {
+				t = new Transaction();
+				Variable x = t.accesses((Variable) registry.lookup("x"), 1);
+				
+				t.start();
+				waitForTick(1);
+				waitForTick(2);
+				waitForTick(3);
+				
+				x.write(1);
+				System.err.println("write");
+				
+				
+				waitForTick(4);
+				
+				System.err.println("attempt rollback");
+				
+				waitForTick(10);
+				
+				t.rollback();
+				
+				waitForTick(11);
+
+				
+				//waitForTick(5);
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
+			} finally {
+				t.stopHeartbeat();
+			}
+			
+			waitForTick(99);
+			try {
+				TransactionFailureMonitor.getInstance().emergencyStop();
+			} catch (RemoteException e) {
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
+			}
+		}
+
+		public void thread2() {
+			Transaction t = null;
+			try {
+				t = new Transaction();
+				Variable x = t.reads((Variable) registry.lookup("x"));
+
+				waitForTick(1);
+				t.start();
+				waitForTick(2);
+				waitForTick(3);
+
+				waitForTick(4);
+				int v1 = x.read();
+				Assert.assertEquals(1, v1);
+				System.err.println("read");
+
+				waitForTick(5);
+				waitForTick(6);
+
+				waitForTick(11);
+				System.err.println("attempt commit");
+				t.commit();
+				waitForTick(12);
+				Assert.fail("Transaction comitted when it should have aborted");
+
+			} catch (RollbackForcedException e) {
+				// everything is fine
+				waitForTick(7);
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
+			} finally {
+				t.stopHeartbeat();
+			}
+
+			waitForTick(99);
+			try {
+				TransactionFailureMonitor.getInstance().emergencyStop();
+			} catch (RemoteException e) {
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
+			}
+		}
+		
+		public void thread3() {
+			Transaction t = null;
+			try {
+				t = new Transaction();
+				Variable x = t.accesses((Variable) registry.lookup("x"));
+
+				waitForTick(3);
+				t.start();
+
+				waitForTick(6);
+
+
+				
+				int v = x.read();
+				Assert.assertEquals(1, v);
+				x.write(v+1);
+
+				waitForTick(7);
+				
+				waitForTick(12);
+				System.err.println("attempt commit");
+				t.commit();
+				Assert.fail("Transaction comitted when it should have aborted");
+
+			} catch (RollbackForcedException e) {
+				// everything is fine
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
+			} finally {
+				t.stopHeartbeat();
+			}
+
+			waitForTick(99);
+			try {
+				TransactionFailureMonitor.getInstance().emergencyStop();
+			} catch (RemoteException e) {
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
+			}
+		}
+	}
+	
+	@Test
+	public void readOnlyCascadingAbort() throws Throwable {
+		TestFramework.runOnce(new ReadOnlyCascadingAbort());
+
+		Assert.assertEquals(0, state("x"));
+	}
+
+	// ro transaction waiting for release + doing other stuff simulataneously on
+	// other objects
+	// test with multiple variables
 }
