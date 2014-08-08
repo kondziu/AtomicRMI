@@ -1,1 +1,3 @@
 1. A way to retry an aborted transaction through the API without putting the transaction inside an infinite loop. 
+2. Check if object is already in the access set before making a proxy.
+3. Fix exceptions in threads created by OptSVA on the server side
