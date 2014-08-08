@@ -1,11 +1,14 @@
 package put.unit.vars;
 
+import static put.atomicrmi.Access.Mode.ANY;
+import static put.atomicrmi.Access.Mode.READ_ONLY;
+import static put.atomicrmi.Access.Mode.WRITE_ONLY;
+
 import java.rmi.RemoteException;
 import java.util.List;
 
 import put.atomicrmi.Access;
 import put.atomicrmi.TransactionalUnicastRemoteObject;
-import static put.atomicrmi.Access.Mode.*;
 
 public class VariableImpl extends TransactionalUnicastRemoteObject implements Variable, Cloneable {
 
