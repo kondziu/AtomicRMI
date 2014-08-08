@@ -1107,11 +1107,8 @@ public class Safety {
 				t = new Transaction();
 				Variable x = t.reads((Variable) registry.lookup("x"));
 				t.start();
-				System.err.println("started");
 				x.read();
-				System.err.println("read");
 				t.commit();
-				System.err.println("comitted");
 			} catch (TransactionException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -1663,15 +1660,12 @@ public class Safety {
 				waitForTick(2);
 				
 				x.write(1);
-				System.err.println("write");
 				
 				waitForTick(3);
 				
 				waitForTick(4);
 				
-				System.err.println("attempt rollback");
-				
-				t.rollback();
+			t.rollback();
 				
 				waitForTick(5);
 				
@@ -1705,12 +1699,10 @@ public class Safety {
 
 				int v1 = x.read();
 				Assert.assertEquals(1, v1);
-				System.err.println("read");
 
 				waitForTick(4);
 				waitForTick(5);
 
-				System.err.println("attempt commit");
 				t.commit();
 				Assert.fail("Transaction comitted when it should have aborted");
 
@@ -1766,14 +1758,10 @@ public class Safety {
 				waitForTick(2);
 				waitForTick(3);
 				
-				x.write(1);
-				System.err.println("write");
-				
+				x.write(1);			
 				
 				waitForTick(4);
-				
-				System.err.println("attempt rollback");
-				
+								
 				waitForTick(10);
 				
 				t.rollback();
@@ -1813,13 +1801,11 @@ public class Safety {
 				waitForTick(4);
 				int v1 = x.read();
 				Assert.assertEquals(1, v1);
-				System.err.println("read");
 
 				waitForTick(5);
 				waitForTick(6);
 
 				waitForTick(11);
-				System.err.println("attempt commit");
 				t.commit();
 				waitForTick(12);
 				Assert.fail("Transaction comitted when it should have aborted");
@@ -1863,7 +1849,6 @@ public class Safety {
 				waitForTick(7);
 				
 				waitForTick(12);
-				System.err.println("attempt commit");
 				t.commit();
 				Assert.fail("Transaction comitted when it should have aborted");
 

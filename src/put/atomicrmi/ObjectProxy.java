@@ -48,7 +48,6 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 		@Override
 		public void run() {
-			System.err.println("READ THREAD started");
 			try {
 				object.waitForCounter(px - 1); // 12
 				object.transactionLock(tid);
@@ -65,17 +64,12 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			} finally {
 				object.transactionUnlock(tid);
 			}
-			System.err.println("READ THREAD released");
 
 			semaphore.release(1); // 17 & 18
 
-			System.err.println("READ THREAD signaled");
-
 			// dismiss
 			try {
-				System.err.println(">> wait for snapshot");
 				commit = waitForSnapshot(); // 19 & 20
-				System.err.println(">> done wait for snapshot");
 				// line 21 will be taken care of in wait for snapshots
 				finishTransaction(commit); // 22
 			} catch (RemoteException e) {
@@ -83,7 +77,6 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			}
 
 			// semaphore.release(RELEASED);
-			System.err.println("READ THREAD comitted");
 		}
 	}
 
@@ -188,7 +181,6 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	}
 
 	public Object getWrapped(boolean buffer) throws RemoteException {
-		System.err.println("getWrapper " + buffer + " " + mode);
 		if (buffer) {
 			try {
 				// this should have been handled by by preRead
@@ -213,18 +205,14 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	}
 
 	public boolean preRead() throws RemoteException {
-		System.err.println("preRead " + mode);
 		if (mode == Mode.READ_ONLY) {
 			// Read-only optimization (green).
 			// We don't check for UB etc. because we already released this
 			// object anyway, and we're using a buffer.
 			try {
 				// Synchronize with the Read Thread
-				System.err.println("wait for sem");
 				readThread.semaphore.acquire(1);
-				System.err.println("done wait for sem");
 				readThread.semaphore.release(1);
-				System.err.println("returned sem");
 			} catch (InterruptedException e) {
 				throw new RemoteException(e.getMessage(), e.getCause());
 			}
@@ -339,12 +327,9 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 	public void finishTransaction(boolean restore) throws RemoteException {
 
-		if (readThread != Thread.currentThread() && mode == Mode.READ_ONLY) { // line
-																				// 65
-			System.err.println("non-read thread");
+		if (readThread != Thread.currentThread() && mode == Mode.READ_ONLY) { // 65
 			// empty
 		} else {
-			System.err.println("read thread");
 			TransactionFailureMonitor.getInstance().stopMonitoring(this);
 
 			object.finishTransaction(tid, snapshot, restore);
@@ -355,7 +340,6 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	}
 
 	public boolean waitForSnapshot() throws RemoteException {
-		System.err.println(tid + "..." + mode);
 		if (readThread != Thread.currentThread() && mode == Mode.READ_ONLY) { // line
 																				// 57
 			try {
@@ -364,10 +348,8 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 				throw new RemoteException(e.getMessage(), e.getCause());
 			}
 
-			System.err.println(tid + "WAIT FOR SNAPSHOTS (r) " + readThread.commit);
 			return readThread.commit; // line 21
 		} else {
-			System.err.println(tid + ",,," + mode);
 			object.waitForSnapshot(px - 1);
 
 			if (mv != 0 && mv != RELEASED && snapshot.getReadVersion() == object.getCurrentVersion())
@@ -375,13 +357,10 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 			releaseTransaction();
 
-			if (snapshot == null) // FIXME
+			if (snapshot == null) 
 				return true;
 
-			System.err.println(tid + "cv: " + object.getCurrentVersion());
-			System.err.println(tid + "rv: " + snapshot.getReadVersion());
 			boolean commit = snapshot.getReadVersion() <= object.getCurrentVersion();
-			System.err.println("WAIT FOR SNAPSHOTS (!r) " + commit);
 			return commit;
 		}
 	}
