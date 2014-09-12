@@ -34,7 +34,8 @@ public class RMITest {
 	 */
 	@Before
 	public void populate() throws Exception {
-		registry = LocateRegistry.createRegistry(1995);
+		Thread.sleep(100);
+		registry = LocateRegistry.createRegistry(1099);
 		registry.bind("x", new VariableImpl("x", 0));
 		registry.bind("y", new VariableImpl("y", 0));
 		registry.bind("z", new VariableImpl("z", 0));

@@ -54,6 +54,8 @@ public class CommitOrder extends RMITest {
 
 				int vz = z.read();
 				z.write(vz + 1);
+				
+				waitForTick(4);
 
 				// T2 should not be able to set aint to 2, because it should not
 				// be able to commit.
@@ -91,8 +93,10 @@ public class CommitOrder extends RMITest {
 				x.write(vx + 1);
 
 				aint.set(1);
-
+				
+				waitForTick(3);
 				t.commit();
+
 
 				aint.set(2);
 

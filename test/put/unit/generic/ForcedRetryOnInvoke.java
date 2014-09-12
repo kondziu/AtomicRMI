@@ -45,8 +45,10 @@ public class ForcedRetryOnInvoke extends RMITest {
 				int vy = y.read();
 				y.write(vy + 1);
 
-				t.rollback();
 				waitForTick(4);
+				waitForTick(5);
+				t.rollback();
+				waitForTick(6);
 
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -66,8 +68,8 @@ public class ForcedRetryOnInvoke extends RMITest {
 
 		public void thread2() {
 			Transaction t = null;
-			boolean comitted = false;
 			int i = 0;
+			boolean comitted = false;
 			while (!comitted) {
 				try {
 					t = new Transaction();
@@ -75,7 +77,6 @@ public class ForcedRetryOnInvoke extends RMITest {
 					Variable y = t.accesses((Variable) registry.lookup("y"), 2);
 					Variable z = t.accesses((Variable) registry.lookup("z"), 2);
 
-					System.out.println(i + 1);
 
 					waitForTick(i + 1);
 					System.out.println("starting");
@@ -83,20 +84,17 @@ public class ForcedRetryOnInvoke extends RMITest {
 					System.out.println("started");
 					waitForTick(i + 2);
 
-					System.out.println(i + 2);
-
 					int vx = x.read();
 					x.write(vx + 1);
 
-					System.out.println(i + 3);
-
-					waitForTick(i + 3);
-					int vy = y.read();
 					waitForTick(i + 4);
-
-					System.out.println(i + 4);
-
+					int vy = y.read();
+					
+					waitForTick(i + 5);					
+					waitForTick(i + 6);
+					
 					y.write(vy + 1);
+
 					int vz = z.read();
 					z.write(vz + 1);
 
