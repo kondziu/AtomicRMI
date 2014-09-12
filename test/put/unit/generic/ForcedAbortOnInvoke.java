@@ -44,9 +44,10 @@ public class ForcedAbortOnInvoke extends RMITest {
 				waitForTick(3);
 				int vy = y.read();
 				y.write(vy + 1);
+				waitForTick(4);
 
 				t.rollback();
-				waitForTick(4);
+				waitForTick(5);
 
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -83,8 +84,9 @@ public class ForcedAbortOnInvoke extends RMITest {
 				waitForTick(3);
 				v = y.read();
 				waitForTick(4);
-
+				waitForTick(5);
 				y.write(v + 1);
+				
 				v = z.read();
 				z.write(v + 1);
 

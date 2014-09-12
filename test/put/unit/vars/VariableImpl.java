@@ -30,7 +30,7 @@ public class VariableImpl extends TransactionalUnicastRemoteObject implements Va
 		this.value = value;
 	}
 
-	@Access(mode = READ_ONLY)
+	@Access(value = READ_ONLY)
 	public int read() {
 		if (log != null) {
 			log.add("r(" + name + ")" + value);
@@ -38,7 +38,7 @@ public class VariableImpl extends TransactionalUnicastRemoteObject implements Va
 		return value;
 	}
 
-	@Access(mode = WRITE_ONLY)
+	@Access(value = WRITE_ONLY)
 	public void write(int value) {
 		if (log != null) {
 			log.add("w(" + name + ")" + value);
@@ -46,7 +46,7 @@ public class VariableImpl extends TransactionalUnicastRemoteObject implements Va
 		this.value = value;
 	}
 
-	@Access(mode = READ_ONLY)
+	@Access(value = READ_ONLY)
 	public int read(String id) {
 		if (log != null) {
 			log.add("r<" + id + ">(" + name + ")" + value);
@@ -54,7 +54,7 @@ public class VariableImpl extends TransactionalUnicastRemoteObject implements Va
 		return value;
 	}
 
-	@Access(mode = WRITE_ONLY)
+	@Access(value = WRITE_ONLY)
 	public void write(String id, int value) {
 		if (log != null) {
 			log.add("w<" + id + ">(" + name + ")" + value);
@@ -62,7 +62,7 @@ public class VariableImpl extends TransactionalUnicastRemoteObject implements Va
 		this.value = value;
 	}
 
-	@Access(mode = ANY)
+	@Access(value = ANY)
 	public void increment() throws RemoteException {
 		write(read() + 1);
 	}

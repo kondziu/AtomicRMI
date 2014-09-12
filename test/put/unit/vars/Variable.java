@@ -8,13 +8,13 @@ import put.atomicrmi.Access.Mode;
 
 public interface Variable extends Remote {
 
-	@Access(mode=Mode.READ_ONLY)
+	@Access(Mode.READ_ONLY)
 	int read() throws RemoteException;
 
-	@Access(mode=Mode.WRITE_ONLY)
+	@Access(Mode.WRITE_ONLY)
 	void write(int v) throws RemoteException;
 	
-	@Access(mode=Mode.ANY)
+	@Access(Mode.ANY)
 	void increment() throws RemoteException;
 
 }
