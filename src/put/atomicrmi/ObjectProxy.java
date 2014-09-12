@@ -203,6 +203,49 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 		over = false;
 	}
+	
+	/**
+	 * Dear future me,
+	 * 
+	 * Watch out: lines 60--61 in the algorithm in the paper should 
+	 * probably say:
+	 * if (Cw(xT) != dom(SwT) then 
+	 *     start writerelease as thread THwrx
+	 * join with THwrx.
+	 * 
+	 * While currently preWrite is just a copy of preAny. I have not 
+	 * started doing serious stuff here.
+	 * 
+	 * Best regards and sincere comiserations,
+	 * Past me
+	 */
+	public boolean preWrite() throws RemoteException {
+		if (over) {
+			throw new TransactionException("Attempting to access transactional object after release.");
+		}
+
+		if (mv == RELEASED || mv == ub) {
+			throw new TransactionException("Upper bound is lower then number of invocations.");
+		}
+
+		if (mv == 0) {
+			object.waitForCounter(px - 1);
+			object.transactionLock(tid);
+			snapshot = object.snapshot();
+		} else {
+			object.transactionLock(tid);
+		}
+
+		if (snapshot.getReadVersion() != object.getCurrentVersion()) {
+			object.transactionUnlockForce(tid);
+			transaction.rollback();
+			throw new RollbackForcedException("Rollback forced during invocation.");
+		}
+
+		mv++;
+
+		return false;
+	}
 
 	public boolean preRead() throws RemoteException {
 		if (mode == Mode.READ_ONLY) {
@@ -263,6 +306,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		case READ_ONLY:
 			return preRead();
 		case WRITE_ONLY:
+			return preWrite();
 		case ANY:
 		default:
 			return preAny();
