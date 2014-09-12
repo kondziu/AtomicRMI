@@ -177,7 +177,7 @@ class ObjectProxyHandler implements InvocationHandler {
 		if (access == null) {
 			return Mode.ANY;
 		}
-		return access.mode();
+		return access.value();
 	}
 
 	/**

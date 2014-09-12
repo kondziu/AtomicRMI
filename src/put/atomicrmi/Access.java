@@ -35,5 +35,5 @@ public @interface Access {
 	 * 
 	 * @return method access mode
 	 */
-	public Mode mode();
+	public Mode value();
 }
