@@ -238,6 +238,52 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		if (mv == 0) {
 			object.waitForCounter(px - 1);
 			object.transactionLock(tid);
+			/*
+			 * Dear future me,
+			 * 
+			 * Since buffering writes assumes that at the time of performing
+			 * those writes you won't attempt to pass the access condition. This
+			 * means that you can't use a snapshot of the object for the buffer,
+			 * since the snapshot could be a) out of date, or b) completely
+			 * inconsistent (eg made in the middle of executing some method by
+			 * some other transaction). Hence, you need methods of mitigating
+			 * that.
+			 * 
+			 * One way is to use a log instead of a buffer. Whenever a method
+			 * needs to be performed, store the method name, argument values,
+			 * etc. in a log. Then, when the actual object should be updated
+			 * from the buffer just run the methods one-by-one- from the log.
+			 * Upside: fairly simple. Downside: if the transaction is simple,
+			 * this yields little to none performance benefits.
+			 * 
+			 * Another way is to create a band new object (constructor, factory)
+			 * and use that as the buffer. The methods are supposed to be all
+			 * writes, so it shouldn't be a problem that the state is not the
+			 * same. Then, when the object is synchronized with the buffer make
+			 * a diff between a) the actual object and a brand new object, b)
+			 * the brand new object and the buffer, and c) the uffer and the
+			 * actual object; then use the three diffs to set the state of the
+			 * actual object to include the changes from the buffer. Pro: update
+			 * should be cheaper than executing log. Con: update is complex.
+			 * 
+			 * There's a library that can potentially facilitate this way of
+			 * doing things: https://github.com/SQiShER/java-object-diff
+			 * 
+			 * Potentially, instead of using a brand new object, maybe a stale
+			 * coherent version of the object in question could be used? Con:
+			 * require a snapshot to be saved, extra overhead (how big?). Pro:
+			 * quicker/simpler buffer update on average, we would do this in the
+			 * future for EC implementations anyway.
+			 * 
+			 * By the way, as a way of optimizing writes, you can check the
+			 * access condition (rather than wait for it) and if it fails, only
+			 * then perform buffering. If it does not fail, perform the writes
+			 * on the actual object, and maybe save some time. This can be
+			 * extended to automatically switching from the buffer to the actual
+			 * object as soon as the access condition turns true.
+			 * 
+			 * Best regards, Past me
+			 */
 			snapshot = object.snapshot();
 		} else {
 			object.transactionLock(tid);
