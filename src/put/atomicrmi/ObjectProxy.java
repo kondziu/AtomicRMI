@@ -36,13 +36,20 @@ import put.atomicrmi.Access.Mode;
 class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 	/**
-	 * TODO
+	 * Copy of object for the purpose of buffering writes and reading from
+	 * buffer after release.
+	 */
+	private Object buffer = null;
+	
+	/**
+	 * A separate thread for performing buffering of an object that is used
+	 * exclusively in read only mode. Up to one such thread can exist per object
+	 * proxy.
 	 * 
 	 * @author Konrad Siek
 	 */
 	private class ReadThread extends Thread {
 
-		private Object buffer = null;
 		private Semaphore semaphore = new Semaphore(0);
 		private boolean commit;
 
@@ -180,13 +187,13 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		return tid;
 	}
 
-	public Object getWrapped(boolean buffer) throws RemoteException {
-		if (buffer) {
+	public Object getWrapped(boolean useBuffer) throws RemoteException {
+		if (useBuffer) {
 			try {
 				// this should have been handled by by preRead
 				readThread.semaphore.acquire(1);
 				readThread.semaphore.release(1);
-				return readThread.buffer;
+				return buffer;
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RemoteException(e.getMessage(), e.getCause());
@@ -203,7 +210,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 		over = false;
 	}
-	
+
 	/**
 	 * Dear future me,
 	 * 
@@ -401,7 +408,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 			releaseTransaction();
 
-			if (snapshot == null) 
+			if (snapshot == null)
 				return true;
 
 			boolean commit = snapshot.getReadVersion() <= object.getCurrentVersion();
@@ -456,6 +463,8 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		object.transactionUnlock(tid);
 
 		// Read-only optimization.
+		// This has to be lumped in here with unlock, in order to minimize the
+		// number of network messages sent between transaction and proxy.
 		if (mode == Mode.READ_ONLY) {
 			readThread = new ReadThread();
 			readThread.start();
