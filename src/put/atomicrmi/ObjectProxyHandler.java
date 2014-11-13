@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import put.atomicrmi.Access.Mode;
+import put.atomicrmi.IObjectProxy.Source;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.InvocationHandler;
 
@@ -86,7 +87,7 @@ class ObjectProxyHandler implements InvocationHandler {
 	 *             when remote execution failed.
 	 */
 	static Object create(IObjectProxy proxy) throws RemoteException {
-		return Enhancer.create(null, getArrayOfRemoteInterfaces(proxy.getWrapped(false).getClass()), new ObjectProxyHandler(
+		return Enhancer.create(null, getArrayOfRemoteInterfaces(proxy.getWrapped(Source.ACTUAL).getClass()), new ObjectProxyHandler(
 				proxy));
 	}
 
@@ -120,9 +121,9 @@ class ObjectProxyHandler implements InvocationHandler {
 		}
 
 		
-		boolean bufferred;
+		Source source;
 		try {
-			bufferred = proxy.preSync(mode);
+			source = proxy.preSync(mode);
 		} catch (RemoteException e) {
 			if (e.getCause() instanceof RollbackForcedException) {
 				throw e.getCause();
@@ -136,7 +137,7 @@ class ObjectProxyHandler implements InvocationHandler {
 		}
 
 		method.setAccessible(true);
-		Object result = method.invoke(proxy.getWrapped(bufferred), args);
+		Object result = method.invoke(proxy.getWrapped(source), args);
 
 		proxy.postSync(mode);
 

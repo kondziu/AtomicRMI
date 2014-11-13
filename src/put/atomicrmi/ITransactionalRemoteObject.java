@@ -46,13 +46,15 @@ public interface ITransactionalRemoteObject extends Remote {
 	 *            transaction unique identifier.
 	 * @param calls
 	 *            upper bound on number of remote object invocations.
+	 * @param writes
+	 *            upper bound on number of writes.
 	 * @param mode 
 	 *            access mode (read-only, write-only, etc.)
 	 * @return an instance of object proxy that wraps this remote object.
 	 * @throws RemoteException
 	 *             when remote execution failed.
 	 */
-	IObjectProxy createProxy(ITransaction transaction, UUID tid, long calls, Mode mode) throws RemoteException;
+	IObjectProxy createProxy(ITransaction transaction, UUID tid, long calls, long writes, Mode mode) throws RemoteException;
 
 	/**
 	 * Gives a transaction failure monitor used at specific node where this

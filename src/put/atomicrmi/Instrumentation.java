@@ -59,7 +59,7 @@ public class Instrumentation {
 	 * 
 	 * <pre>
 	 * Object instrumentedInstance = Instrumentation.transform(cls, instance);
-	 * Method method = cls.getMethod(&quot;someMethod&quot;, new Class&lt;?&gt;[0]);
+	 * Method method = instrumentedInstance.getClass().getMethod(&quot;someMethod&quot;, new Class&lt;?&gt;[0]);
 	 * method.invoke(instrumentedInstance, new Object[0]);
 	 * </pre>
 	 * 
@@ -92,5 +92,4 @@ public class Instrumentation {
 
 		return instance;
 	}
-
 }

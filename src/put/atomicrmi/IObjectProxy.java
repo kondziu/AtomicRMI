@@ -34,6 +34,8 @@ import put.atomicrmi.Access.Mode;
  * @author Wojciech Mruczkiewicz, Konrad Siek
  */
 public interface IObjectProxy extends Remote {
+	
+	enum Source { ACTUAL, READ_BUFFER, INSTRUMENTED_WRITE_BUFFER }; 
 
 	/**
 	 * Gives the remote reference to the remote object that is being wrapped.
@@ -42,7 +44,7 @@ public interface IObjectProxy extends Remote {
 	 * @throws RemoteException
 	 *             when remote execution fails.
 	 */
-	Object getWrapped(boolean bufferred) throws RemoteException;
+	Object getWrapped(Source source) throws RemoteException;
 
 	/**
 	 * Notifies this object proxy that transaction is starting. The failure
@@ -68,7 +70,7 @@ public interface IObjectProxy extends Remote {
 	 * @throws RemoteException
 	 *             when remote execution fails.
 	 */
-	boolean preSync(Mode accessType) throws RemoteException;
+	Source preSync(Mode accessType) throws RemoteException;
 
 	/**
 	 * Action performed after every remote method invocation. It should update

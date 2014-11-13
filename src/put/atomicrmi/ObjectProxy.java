@@ -36,11 +36,25 @@ import put.atomicrmi.Access.Mode;
 class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 	/**
-	 * Copy of object for the purpose of buffering writes and reading from
-	 * buffer after release.
+	 * Copy of object for the purpose of reading from buffer after release.
 	 */
 	private Object buffer = null;
-	
+
+	/**
+	 * A raw version of the object (created from constructor) for the purpose of
+	 * buffering write operations until the first read. Instrumented to submit
+	 * all changes to write recorder.
+	 */
+	private Object writeBuffer = null;
+
+	/**
+	 * State recorder for recording all changes applied to the write buffer. Can
+	 * be used to apply all the changes to another instance of the same object.
+	 * Used to apply those changes made in a "clean" instance of the object to a
+	 * current instance.
+	 */
+	private StateRecorder writeRecorder = null;
+
 	/**
 	 * A separate thread for performing buffering of an object that is used
 	 * exclusively in read only mode. Up to one such thread can exist per object
@@ -58,8 +72,8 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			try {
 				object.waitForCounter(px - 1); // 12
 				object.transactionLock(tid);
-				// we have to make a snapshot, else it thinks we didn't read the
-				// object and in effect we don't get cv and rv
+				// We have to make a snapshot, else it thinks we didn't read the
+				// object and in effect we don't get cv and rv.
 				snapshot = object.snapshot(); // 15
 				buffer = object.clone(); // 13
 				object.setCurrentVersion(px); // 14
@@ -67,6 +81,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			} catch (Exception e) {
 				// FIXME the client-side should see the exceptions from this
 				// thread.
+				e.printStackTrace();
 				throw new RuntimeException(e);
 			} finally {
 				object.transactionUnlock(tid);
@@ -84,6 +99,44 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			}
 
 			// semaphore.release(RELEASED);
+		}
+	}
+
+	private class WriteThread extends Thread {
+		@Override
+		public void run() {
+			try {
+				// FIXME should this be synchronized within transaction to prevent
+				// some other operation concurrently doing stuff with
+				// writeRecorder etc?
+				object.waitForCounter(px - 1); // 24
+				object.transactionLock(tid);
+
+				// Short circuit, if pre-empted.
+				if (writeRecorder == null) {
+					object.transactionUnlock(tid);
+					return;
+				}
+
+				// We have to make a snapshot, else it thinks we didn't read the
+				// object and in effect we don't get cv and rv.
+				snapshot = object.snapshot(); // 28
+
+				writeRecorder.applyChanges(object); // 24-25
+
+				writeRecorder = null; // prevent recorder from being used again
+				writeBuffer = null; // release memory for buffer
+
+				object.setCurrentVersion(px); // 27
+				releaseTransaction(); // 29
+			} catch (Exception e) {
+				// FIXME the client-side should see the exceptions from this
+				// thread.
+				e.printStackTrace();
+				throw new RuntimeException(e);
+			} finally {
+				object.transactionUnlock(tid);
+			}
 		}
 	}
 
@@ -134,6 +187,11 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	private long mv;
 
 	/**
+	 * The minor write version counter that counts writes.
+	 */
+	private long mwv;
+
+	/**
 	 * An upper bound on remote method invocations.
 	 */
 	private long ub;
@@ -150,6 +208,11 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	private ReadThread readThread;
 
 	/**
+	 * Thread that performs write-only asynchronous release, created as needed.
+	 */
+	private WriteThread writeThread;
+
+	/**
 	 * Creates the object proxy for given remote object.
 	 * 
 	 * @param transaction
@@ -160,13 +223,16 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	 *            remote object that is being wrapped.
 	 * @param calls
 	 *            an upper bound on number of remote object invocations.
+	 * @param writes
+	 *            an upper bound on number of remote object writes. If unknown,
+	 *            no of writes should equal no of calls (worst case).
 	 * @param mode
 	 *            access mode (read-only, write-only, etc.)
 	 * @throws RemoteException
 	 *             when remote execution fails.
 	 */
-	ObjectProxy(ITransaction transaction, UUID tid, TransactionalUnicastRemoteObject object, long calls, Mode mode)
-			throws RemoteException {
+	ObjectProxy(ITransaction transaction, UUID tid, TransactionalUnicastRemoteObject object, long calls, long writes,
+			Mode mode) throws RemoteException {
 		super();
 		this.transaction = transaction;
 		this.object = object;
@@ -187,8 +253,9 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		return tid;
 	}
 
-	public Object getWrapped(boolean useBuffer) throws RemoteException {
-		if (useBuffer) {
+	public Object getWrapped(Source source) throws RemoteException {
+		switch (source) {
+		case READ_BUFFER:
 			try {
 				// this should have been handled by by preRead
 				readThread.semaphore.acquire(1);
@@ -198,8 +265,12 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 				e.printStackTrace();
 				throw new RemoteException(e.getMessage(), e.getCause());
 			}
+		case INSTRUMENTED_WRITE_BUFFER:
+			return writeBuffer;
+		case ACTUAL:
+			return object;
 		}
-		return object;
+		throw new RemoteException("Unknown buffer type (this should never happen).");
 	}
 
 	public void startTransaction() throws RemoteException {
@@ -207,6 +278,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		px = object.startTransaction(tid);
 
 		mv = 0;
+		mwv = 0;
 
 		over = false;
 	}
@@ -214,19 +286,16 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	/**
 	 * Dear future me,
 	 * 
-	 * Watch out: lines 60--61 in the algorithm in the paper should 
-	 * probably say:
-	 * if (Cw(xT) != dom(SwT) then 
-	 *     start writerelease as thread THwrx
-	 * join with THwrx.
+	 * Watch out: lines 60--61 in the algorithm in the paper should probably
+	 * say: if (Cw(xT) != dom(SwT) then start writerelease as thread THwrx join
+	 * with THwrx.
 	 * 
-	 * While currently preWrite is just a copy of preAny. I have not 
-	 * started doing serious stuff here.
+	 * While currently preWrite is just a copy of preAny. I have not started
+	 * doing serious stuff here.
 	 * 
-	 * Best regards and sincere comiserations,
-	 * Past me
+	 * Best regards and sincere comiserations, Past me
 	 */
-	public boolean preWrite() throws RemoteException {
+	public Source preWrite() throws RemoteException {
 		if (over) {
 			throw new TransactionException("Attempting to access transactional object after release.");
 		}
@@ -235,72 +304,30 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			throw new TransactionException("Upper bound is lower then number of invocations.");
 		}
 
+		object.transactionLock(tid);
 		if (mv == 0) {
-			object.waitForCounter(px - 1);
-			object.transactionLock(tid);
-			/*
-			 * Dear future me,
-			 * 
-			 * Since buffering writes assumes that at the time of performing
-			 * those writes you won't attempt to pass the access condition. This
-			 * means that you can't use a snapshot of the object for the buffer,
-			 * since the snapshot could be a) out of date, or b) completely
-			 * inconsistent (eg made in the middle of executing some method by
-			 * some other transaction). Hence, you need methods of mitigating
-			 * that.
-			 * 
-			 * One way is to use a log instead of a buffer. Whenever a method
-			 * needs to be performed, store the method name, argument values,
-			 * etc. in a log. Then, when the actual object should be updated
-			 * from the buffer just run the methods one-by-one- from the log.
-			 * Upside: fairly simple. Downside: if the transaction is simple,
-			 * this yields little to none performance benefits.
-			 * 
-			 * Another way is to create a band new object (constructor, factory)
-			 * and use that as the buffer. The methods are supposed to be all
-			 * writes, so it shouldn't be a problem that the state is not the
-			 * same. Then, when the object is synchronized with the buffer make
-			 * a diff between a) the actual object and a brand new object, b)
-			 * the brand new object and the buffer, and c) the uffer and the
-			 * actual object; then use the three diffs to set the state of the
-			 * actual object to include the changes from the buffer. Pro: update
-			 * should be cheaper than executing log. Con: update is complex.
-			 * 
-			 * There's a library that can potentially facilitate this way of
-			 * doing things: https://github.com/SQiShER/java-object-diff
-			 * 
-			 * Potentially, instead of using a brand new object, maybe a stale
-			 * coherent version of the object in question could be used? Con:
-			 * require a snapshot to be saved, extra overhead (how big?). Pro:
-			 * quicker/simpler buffer update on average, we would do this in the
-			 * future for EC implementations anyway.
-			 * 
-			 * By the way, as a way of optimizing writes, you can check the
-			 * access condition (rather than wait for it) and if it fails, only
-			 * then perform buffering. If it does not fail, perform the writes
-			 * on the actual object, and maybe save some time. This can be
-			 * extended to automatically switching from the buffer to the actual
-			 * object as soon as the access condition turns true.
-			 * 
-			 * Best regards, Past me
-			 */
-			snapshot = object.snapshot();
-		} else {
-			object.transactionLock(tid);
-		}
-
-		if (snapshot.getReadVersion() != object.getCurrentVersion()) {
-			object.transactionUnlockForce(tid);
-			transaction.rollback();
-			throw new RollbackForcedException("Rollback forced during invocation.");
+			writeRecorder = new StateRecorder();
+			try {
+				writeBuffer = Instrumentation.transform(object.getClass(), object, writeRecorder);
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new RemoteException(e.getLocalizedMessage(), e.getCause());
+			}
 		}
 
 		mv++;
+		mwv++;
 
-		return false;
+		if (writeRecorder != null) {
+			return Source.INSTRUMENTED_WRITE_BUFFER;
+		} else {
+			return Source.ACTUAL;
+		}
 	}
 
-	public boolean preRead() throws RemoteException {
+	// TODO: re-arrange these, so preRead is close to postRead, lest I go
+	// insane.
+	public Source preRead() throws RemoteException {
 		if (mode == Mode.READ_ONLY) {
 			// Read-only optimization (green).
 			// We don't check for UB etc. because we already released this
@@ -317,7 +344,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 			mv++;
 
-			return true;
+			return Source.READ_BUFFER;
 		} else {
 			// Read in a R/W object.
 			return preAny();
@@ -326,7 +353,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		// TODO (pink)
 	}
 
-	public boolean preAny() throws RemoteException {
+	public Source preAny() throws RemoteException {
 		if (over) {
 			throw new TransactionException("Attempting to access transactional object after release.");
 		}
@@ -339,6 +366,16 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			object.waitForCounter(px - 1);
 			object.transactionLock(tid);
 			snapshot = object.snapshot();
+
+			if (writeRecorder != null) {
+				try {
+					writeRecorder.applyChanges(snapshot);
+				} catch (Exception e) {
+					throw new RemoteException(e.getLocalizedMessage(), e.getCause());
+				} finally {
+					writeRecorder = null;
+				}
+			}
 		} else {
 			object.transactionLock(tid);
 		}
@@ -350,11 +387,12 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		}
 
 		mv++;
+		mwv++;
 
-		return false;
+		return Source.ACTUAL;
 	}
 
-	public boolean preSync(Mode accessType) throws RemoteException {
+	public Source preSync(Mode accessType) throws RemoteException {
 		switch (accessType) {
 		case READ_ONLY:
 			return preRead();
@@ -390,6 +428,22 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		}
 	}
 
+	public void postWrite() throws RemoteException {
+		if (over) {
+			throw new TransactionException("Attempting to access transactional object after release.");
+		}
+
+		if (writeRecorder != null && mwv == ub) {
+			writeThread = new WriteThread();
+			writeThread.start();
+		} else if (mv == ub) {
+			object.setCurrentVersion(px);
+			releaseTransaction();
+		}
+
+		object.transactionUnlock(tid);
+	}
+
 	public void postAny() throws RemoteException {
 		if (over) {
 			throw new TransactionException("Attempting to access transactional object after release.");
@@ -409,8 +463,9 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			postRead();
 			break;
 		case WRITE_ONLY:
+			postWrite();
+			break;
 		case ANY:
-		default:
 			postAny();
 		}
 	}
