@@ -135,6 +135,11 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	private long mv;
 
 	/**
+	 * The minor write version counter that counts writes.
+	 */
+	private long mwv;
+
+	/**
 	 * An upper bound on remote method invocations.
 	 */
 	private long ub;
@@ -161,13 +166,16 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	 *            remote object that is being wrapped.
 	 * @param calls
 	 *            an upper bound on number of remote object invocations.
+	 * @param writes
+	 *            an upper bound on number of remote object writes. If unknown,
+	 *            no of writes should equal no of calls (worst case).
 	 * @param mode
 	 *            access mode (read-only, write-only, etc.)
 	 * @throws RemoteException
 	 *             when remote execution fails.
 	 */
-	ObjectProxy(ITransaction transaction, UUID tid, TransactionalUnicastRemoteObject object, long calls, Mode mode)
-			throws RemoteException {
+	ObjectProxy(ITransaction transaction, UUID tid, TransactionalUnicastRemoteObject object, long calls, long writes,
+			Mode mode) throws RemoteException {
 		super();
 		this.transaction = transaction;
 		this.object = object;
@@ -208,6 +216,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		px = object.startTransaction(tid);
 
 		mv = 0;
+		mwv = 0;
 
 		over = false;
 	}
@@ -297,6 +306,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		}
 
 		mv++;
+		mwv++;
 
 		return false;
 	}

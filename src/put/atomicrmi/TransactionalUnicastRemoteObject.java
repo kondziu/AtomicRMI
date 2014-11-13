@@ -156,9 +156,9 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	public Object clone() throws CloneNotSupportedException {
 		return super.clone();
 	}
-
-	public IObjectProxy createProxy(ITransaction transaction, UUID tid, long calls, Mode mode) throws RemoteException {
-		return (IObjectProxy) ObjectProxyHandler.create(new ObjectProxy(transaction, tid, this, calls, mode));
+	
+	public IObjectProxy createProxy(ITransaction transaction, UUID tid, long calls, long writes, Mode mode) throws RemoteException {
+		return (IObjectProxy) ObjectProxyHandler.create(new ObjectProxy(transaction, tid, this, calls, writes, mode));
 	}
 
 	public ITransactionFailureMonitor getFailureMonitor() throws RemoteException {
