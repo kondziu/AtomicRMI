@@ -67,6 +67,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			} catch (Exception e) {
 				// FIXME the client-side should see the exceptions from this
 				// thread.
+				e.printStackTrace();
 				throw new RuntimeException(e);
 			} finally {
 				object.transactionUnlock(tid);
