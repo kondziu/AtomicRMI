@@ -88,6 +88,44 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		}
 	}
 
+	private class WriteThread extends Thread {
+		@Override
+		public void run() {
+			try {
+				// FIXME should this be synchronized within transaction to prevent
+				// some other operation concurrently doing stuff with
+				// writeRecorder etc?
+				object.waitForCounter(px - 1); // 24
+				object.transactionLock(tid);
+
+				// Short circuit, if pre-empted.
+				if (writeRecorder == null) {
+					object.transactionUnlock(tid);
+					return;
+				}
+
+				// We have to make a snapshot, else it thinks we didn't read the
+				// object and in effect we don't get cv and rv.
+				snapshot = object.snapshot(); // 28
+
+				writeRecorder.applyChanges(object); // 24-25
+
+				writeRecorder = null; // prevent recorder from being used again
+				writeBuffer = null; // release memory for buffer
+
+				object.setCurrentVersion(px); // 27
+				releaseTransaction(); // 29
+			} catch (Exception e) {
+				// FIXME the client-side should see the exceptions from this
+				// thread.
+				e.printStackTrace();
+				throw new RuntimeException(e);
+			} finally {
+				object.transactionUnlock(tid);
+			}
+		}
+	}
+
 	/**
 	 * Randomly generated serialization UID.
 	 */
@@ -154,6 +192,11 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	 * Thread that performs read-only optimization, created as needed.
 	 */
 	private ReadThread readThread;
+
+	/**
+	 * Thread that performs write-only asynchronous release, created as needed.
+	 */
+	private WriteThread writeThread;
 
 	/**
 	 * Creates the object proxy for given remote object.
