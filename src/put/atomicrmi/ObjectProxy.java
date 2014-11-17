@@ -40,7 +40,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	 * buffer after release.
 	 */
 	private Object buffer = null;
-	
+
 	/**
 	 * A separate thread for performing buffering of an object that is used
 	 * exclusively in read only mode. Up to one such thread can exist per object
@@ -91,11 +91,12 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	private class WriteThread extends Thread {
 		StateRecorder writeRecorder;
 		Object writeBuffer;
-		
+
 		@Override
 		public void run() {
 			try {
-				// FIXME should this be synchronized within transaction to prevent
+				// FIXME should this be synchronized within transaction to
+				// prevent
 				// some other operation concurrently doing stuff with
 				// writeRecorder etc?
 				object.waitForCounter(px - 1); // 24
@@ -270,17 +271,14 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	/**
 	 * Dear future me,
 	 * 
-	 * Watch out: lines 60--61 in the algorithm in the paper should 
-	 * probably say:
-	 * if (Cw(xT) != dom(SwT) then 
-	 *     start writerelease as thread THwrx
-	 * join with THwrx.
+	 * Watch out: lines 60--61 in the algorithm in the paper should probably
+	 * say: if (Cw(xT) != dom(SwT) then start writerelease as thread THwrx join
+	 * with THwrx.
 	 * 
-	 * While currently preWrite is just a copy of preAny. I have not 
-	 * started doing serious stuff here.
+	 * While currently preWrite is just a copy of preAny. I have not started
+	 * doing serious stuff here.
 	 * 
-	 * Best regards and sincere comiserations,
-	 * Past me
+	 * Best regards and sincere comiserations, Past me
 	 */
 	public boolean preWrite() throws RemoteException {
 		if (over) {
@@ -419,7 +417,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			return preWrite();
 		case ANY:
 		default:
-			return preAny();
+			throw new RemoteException("Illegal access type: " + accessType);
 		}
 	}
 
