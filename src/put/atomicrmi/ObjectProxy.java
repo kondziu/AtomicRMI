@@ -40,7 +40,9 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	 * buffer after release.
 	 */
 	private Object buffer = null;
-	
+
+	StateRecorder writeRecorder;
+
 	/**
 	 * A separate thread for performing buffering of an object that is used
 	 * exclusively in read only mode. Up to one such thread can exist per object
@@ -89,13 +91,14 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	}
 
 	private class WriteThread extends Thread {
-		StateRecorder writeRecorder;
+		// StateRecorder writeRecorder;
 		Object writeBuffer;
-		
+
 		@Override
 		public void run() {
 			try {
-				// FIXME should this be synchronized within transaction to prevent
+				// FIXME should this be synchronized within transaction to
+				// prevent
 				// some other operation concurrently doing stuff with
 				// writeRecorder etc?
 				object.waitForCounter(px - 1); // 24
@@ -179,11 +182,24 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	 * The minor write version counter that counts writes.
 	 */
 	private long mwv;
+	
+	/**
+	 * The minor read version counter that counts writes.
+	 */
+	private long mrv;
+	
+	/**
+	 * The minor any version counter that counts writes.
+	 */
+	private long mav;
 
 	/**
 	 * An upper bound on remote method invocations.
 	 */
 	private long ub;
+	private long wub;
+	private long rub;
+	private long aub;
 
 	/**
 	 * Access mode to this remote object by this transaction: read-only,
@@ -229,6 +245,10 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		this.mode = mode;
 
 		ub = calls;
+		wub = writes;
+		rub = calls;
+		aub = calls;
+		
 		over = true;
 	}
 
@@ -263,6 +283,8 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 		mv = 0;
 		mwv = 0;
+		mav = 0;
+		mrv = 0;
 
 		over = false;
 	}
@@ -270,76 +292,27 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	/**
 	 * Dear future me,
 	 * 
-	 * Watch out: lines 60--61 in the algorithm in the paper should 
-	 * probably say:
-	 * if (Cw(xT) != dom(SwT) then 
-	 *     start writerelease as thread THwrx
-	 * join with THwrx.
+	 * Watch out: lines 60--61 in the algorithm in the paper should probably
+	 * say: if (Cw(xT) != dom(SwT) then start writerelease as thread THwrx join
+	 * with THwrx.
 	 * 
-	 * While currently preWrite is just a copy of preAny. I have not 
-	 * started doing serious stuff here.
+	 * While currently preWrite is just a copy of preAny. I have not started
+	 * doing serious stuff here.
 	 * 
-	 * Best regards and sincere comiserations,
-	 * Past me
+	 * Best regards and sincere comiserations, Past me
 	 */
 	public boolean preWrite() throws RemoteException {
 		if (over) {
 			throw new TransactionException("Attempting to access transactional object after release.");
 		}
 
-		if (mv == RELEASED || mv == ub) {
+		if (mv == RELEASED || mv == ub || mwv == wub) {
 			throw new TransactionException("Upper bound is lower then number of invocations.");
 		}
 
 		if (mv == 0) {
 			object.waitForCounter(px - 1);
 			object.transactionLock(tid);
-			/*
-			 * Dear future me,
-			 * 
-			 * Since buffering writes assumes that at the time of performing
-			 * those writes you won't attempt to pass the access condition. This
-			 * means that you can't use a snapshot of the object for the buffer,
-			 * since the snapshot could be a) out of date, or b) completely
-			 * inconsistent (eg made in the middle of executing some method by
-			 * some other transaction). Hence, you need methods of mitigating
-			 * that.
-			 * 
-			 * One way is to use a log instead of a buffer. Whenever a method
-			 * needs to be performed, store the method name, argument values,
-			 * etc. in a log. Then, when the actual object should be updated
-			 * from the buffer just run the methods one-by-one- from the log.
-			 * Upside: fairly simple. Downside: if the transaction is simple,
-			 * this yields little to none performance benefits.
-			 * 
-			 * Another way is to create a band new object (constructor, factory)
-			 * and use that as the buffer. The methods are supposed to be all
-			 * writes, so it shouldn't be a problem that the state is not the
-			 * same. Then, when the object is synchronized with the buffer make
-			 * a diff between a) the actual object and a brand new object, b)
-			 * the brand new object and the buffer, and c) the uffer and the
-			 * actual object; then use the three diffs to set the state of the
-			 * actual object to include the changes from the buffer. Pro: update
-			 * should be cheaper than executing log. Con: update is complex.
-			 * 
-			 * There's a library that can potentially facilitate this way of
-			 * doing things: https://github.com/SQiShER/java-object-diff
-			 * 
-			 * Potentially, instead of using a brand new object, maybe a stale
-			 * coherent version of the object in question could be used? Con:
-			 * require a snapshot to be saved, extra overhead (how big?). Pro:
-			 * quicker/simpler buffer update on average, we would do this in the
-			 * future for EC implementations anyway.
-			 * 
-			 * By the way, as a way of optimizing writes, you can check the
-			 * access condition (rather than wait for it) and if it fails, only
-			 * then perform buffering. If it does not fail, perform the writes
-			 * on the actual object, and maybe save some time. This can be
-			 * extended to automatically switching from the buffer to the actual
-			 * object as soon as the access condition turns true.
-			 * 
-			 * Best regards, Past me
-			 */
 			snapshot = object.snapshot();
 		} else {
 			object.transactionLock(tid);
@@ -373,13 +346,78 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			// object.transactionLock(tid);
 
 			mv++;
+			mrv++;
 
 			return true;
+		} else if (writeRecorder != null) {
+			// This occurs when the transaction was writing to a buffer, but
+			// there is a
+			// read. Since a read cannot be done from a write buffer, the
+			// transaction must synchronize with the actual current state of the
+			// actual shared object before proceeding.
+
+			// Synchronize with existing state in order to proceed.
+			object.waitForCounter(px - 1);
+			object.transactionLock(tid);
+
+			// Make snapshot.
+			snapshot = object.snapshot();
+
+			try {
+				// Overwrite buffer to become consistent state.
+				// buffer = object.clone();
+
+				// Remove buffer completely, since
+				buffer = null;
+
+				// Roll back, if necessary.
+				if (snapshot.getReadVersion() != object.getCurrentVersion()) {
+					object.transactionUnlockForce(tid);
+					transaction.rollback();
+					// TODO nullify buffer, writeRecorder etc.?
+					throw new RollbackForcedException("Rollback forced during read.");
+				}
+
+				// Use the write recorder to bring the consistent state up
+				// to
+				// date with the writes done prior to synch.
+				writeRecorder.applyChanges(object);
+				
+				// It's an access.
+				mv++;
+				mrv++;
+
+				return false;
+
+			} catch (Exception e) {
+				throw new RemoteException(e.getLocalizedMessage(), e.getCause());
+			} finally {
+				writeRecorder = null;
+			}
+		} else if (writeThread != null) { // 34
+			// this occurs when the transaction writes to a buffer beforehand
+			// and releases using a separate thread. The read must wait for
+			// write release to complete before proceeding with the read. The
+			// write thread will bring the buffer up to date, so the reads can
+			// be done from the buffer without further synchronization.
+
+			try {
+				writeThread.join();
+			} catch (InterruptedException e) {
+				// Intentionally left empty.
+			}
+			
+			// It's an access nevertheless.
+			mv++;
+			mrv++;
+
+			return true;
+
 		} else {
 			// Read in a R/W object.
 			return preAny();
 		}
-		// TODO (yellow)
+
 		// TODO (pink)
 	}
 
@@ -407,6 +445,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		}
 
 		mv++;
+		mav++;
 
 		return false;
 	}
@@ -438,7 +477,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 				throw new TransactionException("Attempting to access transactional object after release.");
 			}
 
-			if (mv == ub) {
+			if (mv == ub && object.checkCounter(px - 1)) { // checkCounter: 45
 				object.setCurrentVersion(px);
 				releaseTransaction();
 			}

@@ -156,8 +156,9 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	public Object clone() throws CloneNotSupportedException {
 		return super.clone();
 	}
-	
-	public IObjectProxy createProxy(ITransaction transaction, UUID tid, long calls, long writes, Mode mode) throws RemoteException {
+
+	public IObjectProxy createProxy(ITransaction transaction, UUID tid, long calls, long writes, Mode mode)
+			throws RemoteException {
 		return (IObjectProxy) ObjectProxyHandler.create(new ObjectProxy(transaction, tid, this, calls, writes, mode));
 	}
 
@@ -299,6 +300,20 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	}
 
 	/**
+	 * Checks whether the versioning counter value reached the specified value.
+	 * 
+	 * @param value
+	 *            the required versioning counter value.
+	 * @return <code>true</code> if the value of the counter equals that of the
+	 *         parameter and <code>false</code> otherwise.
+	 * @throws TransactionException
+	 *             when error occurred when waiting for the versioning counter.
+	 */
+	boolean checkCounter(long value) throws TransactionException {
+		return lv.getAvailable() == value;
+	}
+
+	/**
 	 * Blocks until checkpoint counter reaches the required value.
 	 * 
 	 * @param value
@@ -416,7 +431,7 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 			throw new TransactionException("Unable to restore snapshot.", e);
 		}
 	}
-	
+
 	public UUID getSortingKey() throws RemoteException {
 		return id;
 	}
