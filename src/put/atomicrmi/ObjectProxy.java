@@ -89,6 +89,9 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	}
 
 	private class WriteThread extends Thread {
+		StateRecorder writeRecorder;
+		Object writeBuffer;
+		
 		@Override
 		public void run() {
 			try {
