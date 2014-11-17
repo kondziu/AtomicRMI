@@ -88,44 +88,50 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		}
 	}
 
-	private class WriteThread extends Thread {
-		StateRecorder writeRecorder;
-		Object writeBuffer;
+	/**
+	 * State recorder for recording all changes applied to the write buffer. Can
+	 * be used to apply all the changes to another instance of the same object.
+	 * Used to apply those changes made in a "clean" instance of the object to a
+	 * current instance.
+	 */
+	StateRecorder writeRecorder;
 
+	private class WriteThread extends Thread {
 		@Override
 		public void run() {
-			try {
-				// FIXME should this be synchronized within transaction to
-				// prevent
-				// some other operation concurrently doing stuff with
-				// writeRecorder etc?
-				object.waitForCounter(px - 1); // 24
-				object.transactionLock(tid);
+			synchronized (ObjectProxy.this) {
+				try {
+					object.waitForCounter(px - 1); // 24
+					object.transactionLock(tid);
 
-				// Short circuit, if pre-empted.
-				if (writeRecorder == null) {
+					// Short circuit, if pre-empted.
+					if (writeRecorder == null) {
+						object.transactionUnlock(tid);
+						return;
+					}
+
+					// We have to make a snapshot, else it thinks we didn't read
+					// the object and in effect we don't get cv and rv.
+					snapshot = object.snapshot(); // 28
+
+					writeRecorder.applyChanges(object); // 24-25
+
+					// prevent recorder from being used again
+					writeRecorder = null;
+
+					// release memory for buffer
+					buffer = null;
+
+					object.setCurrentVersion(px); // 27
+					releaseTransaction(); // 29
+				} catch (Exception e) {
+					// FIXME the client-side should see the exceptions from this
+					// thread.
+					e.printStackTrace();
+					throw new RuntimeException(e);
+				} finally {
 					object.transactionUnlock(tid);
-					return;
 				}
-
-				// We have to make a snapshot, else it thinks we didn't read the
-				// object and in effect we don't get cv and rv.
-				snapshot = object.snapshot(); // 28
-
-				writeRecorder.applyChanges(object); // 24-25
-
-				writeRecorder = null; // prevent recorder from being used again
-				writeBuffer = null; // release memory for buffer
-
-				object.setCurrentVersion(px); // 27
-				releaseTransaction(); // 29
-			} catch (Exception e) {
-				// FIXME the client-side should see the exceptions from this
-				// thread.
-				e.printStackTrace();
-				throw new RuntimeException(e);
-			} finally {
-				object.transactionUnlock(tid);
 			}
 		}
 	}
@@ -182,9 +188,24 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	private long mwv;
 
 	/**
-	 * An upper bound on remote method invocations.
+	 * The minor write version counter that counts reads.
+	 */
+	private long mrv;
+
+	/**
+	 * An upper bound on remote method invocations: all.
 	 */
 	private long ub;
+
+	/**
+	 * An upper bound on remote method invocations: writes.
+	 */
+	private long wub;
+
+	/**
+	 * An upper bound on remote method invocations: reads.
+	 */
+	private long rub;
 
 	/**
 	 * Access mode to this remote object by this transaction: read-only,
@@ -281,32 +302,106 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	 * Best regards and sincere comiserations, Past me
 	 */
 	public boolean preWrite() throws RemoteException {
-		if (over) {
+		if (over) { 
 			throw new TransactionException("Attempting to access transactional object after release.");
 		}
 
-		if (mv == RELEASED || mv == ub) {
+		if (mv == RELEASED || mv == ub || mwv == wub) {
 			throw new TransactionException("Upper bound is lower then number of invocations.");
 		}
 
-		if (mv == 0) {
-			object.waitForCounter(px - 1);
+		if (mv == 0 /* mwv == 0 && mrv == 0 */) {
+
+			// The transaction was neither writing nor reading yet.
+			// Create a buffer for writing and proceed to use the buffer.
+
 			object.transactionLock(tid);
-			snapshot = object.snapshot();
-		} else {
+
+			writeRecorder = new StateRecorder();
+			try {
+				buffer = Instrumentation.transform(object.getClass(), object, writeRecorder);
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new RemoteException(e.getLocalizedMessage(), e.getCause());
+			}
+
+			mv++;
+			mwv++;
+
+			return true;
+
+		} else if ( /* mwv > 0 && */mrv == 0) {
+
+			// The transaction was writing before but not reading.
+			// So there already exists a buffer for writing to---no need to
+			// create one.
+			// Use the buffer.
+
 			object.transactionLock(tid);
+
+			mv++;
+			mwv++;
+
+			return true;
+
+		} else /* if (mrv > 0) */{
+
+			// The transaction already read from the object, so we have access
+			// to it.
+			// There's no need to buffer writes for now, so proceed as normal.
+
+			object.transactionLock(tid);
+
+			if (snapshot.getReadVersion() != object.getCurrentVersion()) {
+				object.transactionUnlockForce(tid);
+				transaction.rollback();
+				throw new RollbackForcedException("Rollback forced during invocation.");
+			}
+
+			mv++;
+			mwv++;
+
+			return false;
+		}
+	}
+
+	public void postWrite() throws RemoteException {
+		// if (writeRecorder != null && mwv == ub) {
+		// writeThread = new WriteThread();
+		// writeThread.start();
+		// } else if (mv == ub) {
+		// object.setCurrentVersion(px);
+		// releaseTransaction();
+		// }
+
+		if (mwv == wub) {
+			// If mrv > 0 then there's no need for a new thread, because we
+			// already have access.
+			if (mrv > 0) {
+				// Transaction already has access to, because there were reads.
+				snapshot = object.snapshot(); // 28
+
+				// Create buffer for accessing objects after release.
+				try {
+					buffer = object.clone();
+				} catch (CloneNotSupportedException e) {
+					e.printStackTrace();
+					object.transactionUnlock(tid);
+					throw new RemoteException(e.getLocalizedMessage(), e.getCause());
+				}
+
+				// Release.
+				object.setCurrentVersion(px); // 27
+				releaseTransaction(); // 29
+
+			} else {
+				writeThread = new WriteThread();
+				writeThread.start();
+			}
 		}
 
-		if (snapshot.getReadVersion() != object.getCurrentVersion()) {
-			object.transactionUnlockForce(tid);
-			transaction.rollback();
-			throw new RollbackForcedException("Rollback forced during invocation.");
-		}
-
-		mv++;
-		mwv++;
-
-		return false;
+		// in all cases
+		object.transactionUnlock(tid);
 	}
 
 	public boolean preRead() throws RemoteException {
@@ -325,9 +420,16 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			// object.transactionLock(tid);
 
 			mv++;
+			mrv++;
 
 			return true;
 		} else {
+			synchronized (this) {
+				// buffer related stuff goes here
+			}
+			
+			// make sure "over" is also conditional on there not being a buffer to read from
+			
 			// Read in a R/W object.
 			return preAny();
 		}
