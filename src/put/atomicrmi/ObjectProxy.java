@@ -116,12 +116,25 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 					writeRecorder.applyChanges(object); // 24-25
 
-					// prevent recorder from being used again
+					// Prevent recorder from being used again
 					writeRecorder = null;
 
-					// release memory for buffer
-					buffer = null;
+					// Create buffer for accessing objects after release or
+					// remove buffer.
+					if (rub > mrv || rub == Transaction.INF) {
+						try {
+							buffer = object.clone();
+						} catch (CloneNotSupportedException e) {
+							e.printStackTrace();
+							// object.transactionUnlock(tid);
+							throw new RemoteException(e.getLocalizedMessage(), e.getCause());
+						}
+					} else {
+						// Release memory for buffer
+						buffer = null;
+					}
 
+					// Release object.
 					object.setCurrentVersion(px); // 27
 					releaseTransaction(); // 29
 				} catch (Exception e) {
@@ -302,7 +315,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	 * Best regards and sincere comiserations, Past me
 	 */
 	public boolean preWrite() throws RemoteException {
-		if (over) { 
+		if (over) {
 			throw new TransactionException("Attempting to access transactional object after release.");
 		}
 
@@ -405,6 +418,8 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	}
 
 	public boolean preRead() throws RemoteException {
+		// assert((mode == Mode.READ_ONLY) == (wub == 0));
+
 		if (mode == Mode.READ_ONLY) {
 			// Read-only optimization (green).
 			// We don't check for UB etc. because we already released this
@@ -417,23 +432,108 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 				throw new RemoteException(e.getMessage(), e.getCause());
 			}
 
-			// object.transactionLock(tid);
-
 			mv++;
 			mrv++;
 
 			return true;
-		} else {
-			synchronized (this) {
-				// buffer related stuff goes here
-			}
-			
-			// make sure "over" is also conditional on there not being a buffer to read from
-			
-			// Read in a R/W object.
-			return preAny();
 		}
-		// TODO (yellow)
+
+		// Check for exceeding the upper bounds.
+		if (mrv == rub || mv == ub) {
+			throw new TransactionException("Upper bound is lower then number of invocations.");
+		}
+
+		// If there were previously no writes proceed as normal.
+		if (mwv == 0) {
+			if (over) {
+				throw new TransactionException("Attempting to access transactional object after release.");
+			}
+
+			// If there were no reads, wait for access and make snapshot.
+			if (mrv == 0) {
+				object.waitForCounter(px - 1);
+				object.transactionLock(tid);
+				snapshot = object.snapshot();
+			} else {
+				object.transactionLock(tid);
+			}
+
+			// Check for inconsistent state and rollback if necessary.
+			if (snapshot.getReadVersion() != object.getCurrentVersion()) {
+				object.transactionUnlockForce(tid);
+				transaction.rollback();
+				throw new RollbackForcedException("Rollback forced during invocation.");
+			}
+
+			mrv++;
+			mv++;
+
+			return false;
+
+		}
+
+		// If there were reads and writes before, do the minimal "normal"
+		// procedure.
+		if (wub > mwv || wub == Transaction.INF) {
+			if (over) {
+				throw new TransactionException("Attempting to access transactional object after release.");
+			}
+
+			object.transactionLock(tid);
+
+			// Check for inconsistent state and rollback if necessary.
+			if (snapshot.getReadVersion() != object.getCurrentVersion()) {
+				object.transactionUnlockForce(tid);
+				transaction.rollback();
+				throw new RollbackForcedException("Rollback forced during invocation.");
+			}
+
+			mrv++;
+			mv++;
+
+			return false;
+		}
+
+		// If the writes already reached their upper bound, operate on buffers.
+		{
+			// If this is the first read after write was released then
+			// synchronize with the release thread, to make sure that access to
+			// the object is gained and the release procedure is finished.
+			if (mrv == 0) {
+				try {
+					writeThread.join();
+				} catch (InterruptedException e) {
+					// Ignore.
+				}
+			}
+
+			mrv++;
+			mv++;
+
+			return true;
+		}
+
+		// else {
+		// throw new RemoteException("Unexpected state: " + mrv + "/" + rub +
+		// " " + mwv + "/" + wub);
+		// }
+
+		// if (mwv > 0) {
+		// // The transaction was writing stuff to the buffer, so we can read
+		// from the buffer.
+		// return true;
+		// } else
+		//
+		// synchronized (this) {
+		// // buffer related stuff goes here
+		// }
+
+		// make sure "over" is also conditional on there not being a buffer to
+		// read from
+
+		// Read in a R/W object.
+		// return preAny();
+		// }
 		// TODO (pink)
 	}
 
@@ -483,16 +583,16 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			// object.setCurrentVersion(px);
 			// releaseTransaction();
 			// }
-			// XXX this should be handled by read thread?
-
 			// multiple reads should be able to coincide
 			// object.transactionUnlock(tid);
 		} else {
-			if (over) {
-				throw new TransactionException("Attempting to access transactional object after release.");
-			}
+			// if (over) {
+			// throw new
+			// TransactionException("Attempting to access transactional object after release.");
+			// }
 
 			if (mv == ub) {
+				object.waitForCounter(px - 1);
 				object.setCurrentVersion(px);
 				releaseTransaction();
 			}
@@ -539,6 +639,13 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			// empty
 		} else {
 			TransactionFailureMonitor.getInstance().stopMonitoring(this);
+
+			if (writeThread != null) {
+				try {
+					writeThread.join();
+				} catch (InterruptedException e) {
+				}
+			}
 
 			object.finishTransaction(tid, snapshot, restore);
 
