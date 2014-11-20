@@ -98,7 +98,7 @@ public class ReadOnlyCascadingAbort extends RMITest {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
 			} finally {
-				t.stopHeartbeat();
+			//	t.stopHeartbeat();
 			}
 
 			waitForTick(99);

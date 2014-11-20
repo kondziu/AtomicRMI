@@ -63,8 +63,15 @@ public class StateRecorder implements InterceptFieldCallback {
 			IllegalAccessException {
 		final Class<?> cls = object.getClass();
 		for (String fieldName : state.keySet()) {
+			
+			
+			for (Field f : object.getClass().getFields()){
+				System.out.println(f.getName());
+			}
+			
 			Field field = cls.getField(fieldName);
 			Pair<FType, Object> pair = state.get(fieldName);
+			//System.err.println("apply: " + fieldName + "=" + pair.left + "," + pair.right);
 
 			switch (pair.left) {
 			case Boolean:

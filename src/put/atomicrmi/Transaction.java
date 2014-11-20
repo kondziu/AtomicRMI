@@ -257,7 +257,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 *             proxy.
 	 */
 	public <T> T accesses(T obj) throws TransactionException {
-		return accesses(obj, INF);
+		return accesses(obj, INF, INF, INF, Mode.ANY);
 	}
 	
 	/**
@@ -281,7 +281,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 *             proxy.
 	 */
 	public <T> T accesses(T obj, long calls, Mode mode) throws TransactionException {
-		return accesses(obj, calls, calls, mode);
+		return accesses(obj, calls, calls, calls, mode);
 	}
 
 	/**
@@ -300,7 +300,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 *             proxy.
 	 */
 	public <T> T accesses(T obj, int calls) throws TransactionException {
-		return accesses(obj, calls, calls, Mode.ANY);
+		return accesses(obj, calls, calls, calls, Mode.ANY);
 	}
 
 	/**
@@ -317,7 +317,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 *             proxy.
 	 */
 	public <T> T reads(T obj) throws TransactionException {
-		return accesses(obj, INF, 0L, Mode.READ_ONLY);
+		return accesses(obj, INF, 0L, INF, Mode.READ_ONLY);
 	}
 
 	/**
@@ -337,7 +337,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 *             proxy.
 	 */
 	public <T> T reads(T obj, int calls) throws TransactionException {
-		return accesses(obj, calls, 0L, Mode.READ_ONLY);
+		return accesses(obj, calls, calls, 0L, Mode.READ_ONLY);
 	}
 
 	/**
@@ -354,7 +354,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 *             proxy.
 	 */
 	public <T> T writes(T obj) throws TransactionException {
-		return accesses(obj, INF, INF, Mode.WRITE_ONLY);
+		return accesses(obj, INF, 0L, INF, Mode.WRITE_ONLY);
 	}
 
 	/**
@@ -374,7 +374,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 *             proxy.
 	 */
 	public <T> T writes(T obj, int calls) throws TransactionException {
-		return accesses(obj, calls, Mode.WRITE_ONLY);
+		return accesses(obj, calls, 0L, calls, Mode.WRITE_ONLY);
 	}
 
 	/**
@@ -400,7 +400,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 *             proxy.
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> T accesses(T obj, long allCalls, long writes, Mode mode) throws TransactionException {
+	public <T> T accesses(T obj, long allCalls, long reads, long writes, Mode mode) throws TransactionException {
 		if (allCalls != INF && allCalls < 1)
 			throw new TransactionException("Invalid upper bound: negative number of invocations (" + allCalls + ").");
 
@@ -419,7 +419,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 
 		try {
 			ITransactionalRemoteObject remote = (ITransactionalRemoteObject) obj;
-			IObjectProxy proxy = (IObjectProxy) remote.createProxy(this, id, allCalls, writes, mode);
+			IObjectProxy proxy = (IObjectProxy) remote.createProxy(this, id, allCalls, reads, writes, mode);
 			proxies.add(proxy);
 
 			// XXX probably unnecessary

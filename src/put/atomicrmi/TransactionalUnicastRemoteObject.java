@@ -157,8 +157,8 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 		return super.clone();
 	}
 	
-	public IObjectProxy createProxy(ITransaction transaction, UUID tid, long calls, long writes, Mode mode) throws RemoteException {
-		return (IObjectProxy) ObjectProxyHandler.create(new ObjectProxy(transaction, tid, this, calls, writes, mode));
+	public IObjectProxy createProxy(ITransaction transaction, UUID tid, long calls, long reads, long writes, Mode mode) throws RemoteException {
+		return (IObjectProxy) ObjectProxyHandler.create(new ObjectProxy(transaction, tid, this, calls, reads, writes, mode));
 	}
 
 	public ITransactionFailureMonitor getFailureMonitor() throws RemoteException {
@@ -419,5 +419,13 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	
 	public UUID getSortingKey() throws RemoteException {
 		return id;
+	}
+	
+	public void applyChanges(StateRecorder recorder) throws RemoteException {
+		try {
+			recorder.applyChanges(this);
+		} catch (Exception e) {
+			throw new RemoteException(e.getLocalizedMessage(), e.getCause());
+		}
 	}
 }

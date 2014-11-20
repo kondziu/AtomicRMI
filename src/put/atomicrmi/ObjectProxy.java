@@ -114,7 +114,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 					// the object and in effect we don't get cv and rv.
 					snapshot = object.snapshot(); // 28
 
-					writeRecorder.applyChanges(object); // 24-25
+					object.applyChanges(writeRecorder); // 24-25
 
 					// Prevent recorder from being used again
 					writeRecorder = null;
@@ -255,8 +255,8 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	 * @throws RemoteException
 	 *             when remote execution fails.
 	 */
-	ObjectProxy(ITransaction transaction, UUID tid, TransactionalUnicastRemoteObject object, long calls, long writes,
-			Mode mode) throws RemoteException {
+	ObjectProxy(ITransaction transaction, UUID tid, TransactionalUnicastRemoteObject object, long calls, long reads,
+			long writes, Mode mode) throws RemoteException {
 		super();
 		this.transaction = transaction;
 		this.object = object;
@@ -281,8 +281,10 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		if (useBuffer) {
 			try {
 				// this should have been handled by by preRead
-				readThread.semaphore.acquire(1);
-				readThread.semaphore.release(1);
+				if (readThread != null) {
+					readThread.semaphore.acquire(1);
+					readThread.semaphore.release(1);
+				}
 				return buffer;
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -319,8 +321,9 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			throw new TransactionException("Attempting to access transactional object after release.");
 		}
 
-		if (mv == RELEASED || mv == ub || mwv == wub) {
-			throw new TransactionException("Upper bound is lower then number of invocations.");
+		if (mv == RELEASED || (ub != 0 && mv != 0 && mv == ub) || (wub != 0 && mwv != 0 && mwv == wub)) {
+			throw new TransactionException("Upper bound is lower then number of invocations:" + mrv + "/" + rub + " "
+					+ mwv + "/" + wub + " " + mv + "/" + ub);
 		}
 
 		if (mv == 0 /* mwv == 0 && mrv == 0 */) {
@@ -439,8 +442,9 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		}
 
 		// Check for exceeding the upper bounds.
-		if (mrv == rub || mv == ub) {
-			throw new TransactionException("Upper bound is lower then number of invocations.");
+		if (mrv != 0 && rub != 0 && mrv == rub || mv != 0 && ub != 0 && mv == ub) {
+			throw new TransactionException("Upper bound is lower then number of invocations:" + mrv + "/" + rub + " "
+					+ mwv + "/" + wub + " " + mv + "/" + ub);
 		}
 
 		// If there were previously no writes proceed as normal.
@@ -543,7 +547,8 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		}
 
 		if (mv == RELEASED || mv == ub) {
-			throw new TransactionException("Upper bound is lower then number of invocations.");
+			throw new TransactionException("Upper bound is lower then number of invocations:" + +mrv + "/" + rub + " "
+					+ mwv + "/" + wub + " " + mv + "/" + ub);
 		}
 
 		if (mv == 0) {
@@ -640,13 +645,6 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		} else {
 			TransactionFailureMonitor.getInstance().stopMonitoring(this);
 
-			if (writeThread != null) {
-				try {
-					writeThread.join();
-				} catch (InterruptedException e) {
-				}
-			}
-
 			object.finishTransaction(tid, snapshot, restore);
 
 			over = true;
@@ -665,12 +663,57 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 			return readThread.commit; // line 21
 		} else {
+			
+			if (writeThread != null) {
+				try {
+					writeThread.join();
+				} catch (InterruptedException e) {
+				}
+			}
+			
+			synchronized (this) {
+				System.err.println("XXXXXXX");
+				if (writeRecorder != null) {
+					object.waitForCounter(px - 1); // 24
+					object.transactionLock(tid);
+
+					// We have to make a snapshot, else it thinks we didn't read
+					// the object and in effect we don't get cv and rv.
+					snapshot = object.snapshot(); // 28
+
+					System.out.println(object);
+					try {
+						object.applyChanges(writeRecorder); // 24-25
+					} catch (Exception e) {
+						e.printStackTrace();
+						throw new RemoteException(e.getLocalizedMessage(),e.getCause());
+					}
+
+					// Prevent recorder from being used again.
+					writeRecorder = null;
+
+					// Remove buffer.
+					buffer = null;
+
+					// Release object.
+					object.setCurrentVersion(px); // 27
+					releaseTransaction(); // 29
+				}
+			}
+			
+			
 			object.waitForSnapshot(px - 1);
+
+			System.err.println("xxxx" + snapshot);
 
 			if (mv != 0 && mv != RELEASED && snapshot.getReadVersion() == object.getCurrentVersion())
 				object.setCurrentVersion(px);
 
+			System.err.println("yyyy");
+
 			releaseTransaction();
+
+			System.err.println("zzzz");
 
 			if (snapshot == null)
 				return true;

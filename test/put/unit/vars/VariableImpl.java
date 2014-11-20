@@ -16,6 +16,10 @@ public class VariableImpl extends TransactionalUnicastRemoteObject implements Va
 	private int value;
 	private String name;
 	private List<String> log = null;
+	
+	public VariableImpl() throws RemoteException {
+	
+	}
 
 	public VariableImpl(String name, int value, List<String> log) throws RemoteException {
 		super();
@@ -32,33 +36,33 @@ public class VariableImpl extends TransactionalUnicastRemoteObject implements Va
 
 	@Access(value = READ_ONLY)
 	public int read() {
-		if (log != null) {
-			log.add("r(" + name + ")" + value);
-		}
+//		if (log != null) {
+//			log.add("r(" + name + ")" + value);
+//		}
 		return value;
 	}
 
 	@Access(value = WRITE_ONLY)
 	public void write(int value) {
-		if (log != null) {
-			log.add("w(" + name + ")" + value);
-		}
+//		if (log != null) {
+//			log.add("w(" + name + ")" + value);
+//		}
 		this.value = value;
 	}
 
 	@Access(value = READ_ONLY)
 	public int read(String id) {
-		if (log != null) {
-			log.add("r<" + id + ">(" + name + ")" + value);
-		}
+//		if (log != null) {
+//			log.add("r<" + id + ">(" + name + ")" + value);
+//		}
 		return value;
 	}
 
 	@Access(value = WRITE_ONLY)
 	public void write(String id, int value) {
-		if (log != null) {
-			log.add("w<" + id + ">(" + name + ")" + value);
-		}
+//		if (log != null) {
+//			log.add("w<" + id + ">(" + name + ")" + value);
+//		}
 		this.value = value;
 	}
 
