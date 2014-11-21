@@ -26,13 +26,17 @@ public class ValidAccessModeAny extends RMITest {
 				Variable x = t.accesses((Variable) registry.lookup("x"));
 				t.start();
 				x.increment();
+				
+				Assert.fail("Transaction attempted to commit, when it should have aborted on invoke.");
+				
 				t.commit();
 			} catch (TransactionException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
 			} catch (Exception e) {
 				e.printStackTrace();
-				throw new RuntimeException(e.getMessage(), e.getCause());
+				if (!e.getMessage().equals("Illegal access type: ANY"))
+					throw new RuntimeException(e.getMessage(), e.getCause());
 			} finally {
 				t.stopHeartbeat();
 			}
@@ -50,6 +54,6 @@ public class ValidAccessModeAny extends RMITest {
 	@Test
 	public void validAccessModeAny() throws Throwable {
 		TestFramework.runOnce(new Threads());
-		Assert.assertEquals(1, state("x"));
+		Assert.assertEquals(0, state("x"));
 	}
 }
