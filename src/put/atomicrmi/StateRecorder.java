@@ -58,7 +58,7 @@ public class StateRecorder implements InterceptFieldCallback {
 		for (String fieldName : state.keySet()) {
 			
 			
-			for (Field f : object.getClass().getDeclaredFields()){
+			for (Field f : object.getClass().getFields()){
 				System.out.println(f.getName());
 			}
 			

@@ -45,7 +45,7 @@ import put.atomicrmi.Access.Mode;
  * 
  * @author Wojciech Mruczkiewicz
  */
-public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implements ITransactionalRemoteObject {
+public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implements ITransactionalRemoteObject, Stateful  {
 
 	/**
 	 * Stores snapshot of particular remote object together with snapshot
@@ -419,5 +419,43 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	
 	public UUID getSortingKey() throws RemoteException {
 		return id;
+	}
+	
+	public void set(String fieldName, FieldType type, Object value) throws RemoteException {
+		try {
+			Field field = this.getClass().getDeclaredField(fieldName);
+			field.setAccessible(true);
+			switch (type) {
+			case Boolean:
+				field.setBoolean(this, ((Boolean) value).booleanValue());
+				break;
+			case Byte:
+				field.setByte(this, ((Byte) value).byteValue());
+				break;
+			case Char:
+				field.setChar(this, ((Character) value).charValue());
+				break;
+			case Double:
+				field.setDouble(this, ((Double) value).doubleValue());
+				break;
+			case Float:
+				field.setFloat(this, ((Float) value).floatValue());
+				break;
+			case Int:
+				field.setInt(this, ((Integer) value).intValue());
+				break;
+			case Long:
+				field.setLong(this, ((Long) value).longValue());
+				break;
+			case Object:
+				field.set(this, value);
+				break;
+			case Short:
+				field.setShort(this, ((Short) value).shortValue());
+				break;
+			}
+		} catch (Exception e) {
+			throw new RemoteException(e.getLocalizedMessage(), e.getCause());
+		}
 	}
 }
