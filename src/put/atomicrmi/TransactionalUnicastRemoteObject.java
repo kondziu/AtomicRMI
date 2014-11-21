@@ -397,6 +397,7 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 					for (Field f : fields) {
 						if (!Modifier.isStatic(f.getModifiers()) && !Modifier.isFinal(f.getModifiers())) {
 							Object val = f.get(obj);
+							System.err.println("rollback restoring " + f + " to " + val);
 							f.set(this, val);
 						}
 					}

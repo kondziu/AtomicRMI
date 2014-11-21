@@ -42,6 +42,8 @@ public class VariableImpl extends TransactionalUnicastRemoteObject implements Va
 		// if (log != null) {
 		// log.add("r(" + name + ")" + value);
 		// }
+		// log.add("r(" + name + ")" + value);
+		System.err.println("r(" + name + ")" + value);
 		return value;
 	}
 
@@ -50,6 +52,7 @@ public class VariableImpl extends TransactionalUnicastRemoteObject implements Va
 		// if (log != null) {
 		// log.add("w(" + name + ")" + value);
 		// }
+		System.err.println("w(" + "?" + ")" + value);
 		this.value = value;
 	}
 

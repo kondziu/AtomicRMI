@@ -510,7 +510,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 */
 	public void start() throws TransactionException {
 		try {
-			heartbeatThread = new Thread(heartbeat);
+			heartbeatThread = new Thread(heartbeat, "Heartbeat for " + id);
 			heartbeatThread.start();
 
 			// Arrays.sort(proxies);
