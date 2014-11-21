@@ -672,7 +672,6 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			}
 			
 			synchronized (this) {
-				System.err.println("XXXXXXX");
 				if (writeRecorder != null) {
 					object.waitForCounter(px - 1); // 24
 					object.transactionLock(tid);
@@ -681,7 +680,6 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 					// the object and in effect we don't get cv and rv.
 					snapshot = object.snapshot(); // 28
 
-					System.out.println(object);
 					try {
 						writeRecorder.applyChanges(object); // 24-25
 					} catch (Exception e) {
@@ -704,16 +702,10 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			
 			object.waitForSnapshot(px - 1);
 
-			System.err.println("xxxx" + snapshot);
-
 			if (mv != 0 && mv != RELEASED && snapshot.getReadVersion() == object.getCurrentVersion())
 				object.setCurrentVersion(px);
 
-			System.err.println("yyyy");
-
 			releaseTransaction();
-
-			System.err.println("zzzz");
 
 			if (snapshot == null)
 				return true;
