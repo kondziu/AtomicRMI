@@ -420,12 +420,4 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	public UUID getSortingKey() throws RemoteException {
 		return id;
 	}
-	
-	public void applyChanges(StateRecorder recorder) throws RemoteException {
-		try {
-			recorder.applyChanges(this);
-		} catch (Exception e) {
-			throw new RemoteException(e.getLocalizedMessage(), e.getCause());
-		}
-	}
 }

@@ -1,6 +1,7 @@
 package put.atomicrmi;
 
 import java.lang.reflect.Field;
+import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,15 +17,6 @@ import net.sf.cglib.transform.impl.InterceptFieldCallback;
 public class StateRecorder implements InterceptFieldCallback {
 
 	/**
-	 * Helper class: primitives and universal object types.
-	 * 
-	 * @author Konrad Siek
-	 */
-	static private enum FType {
-		Int, Float, Byte, Char, Object, Double, Long, Short, Boolean
-	}
-
-	/**
 	 * Helper class: pair.
 	 * 
 	 * @author Konrad Siek
@@ -34,7 +26,7 @@ public class StateRecorder implements InterceptFieldCallback {
 	 * @param <T2>
 	 *            right field type
 	 */
-	private class Pair<T1, T2> {
+	class Pair<T1, T2> {
 		public Pair(T1 left, T2 right) {
 			this.left = left;
 			this.right = right;
@@ -47,7 +39,7 @@ public class StateRecorder implements InterceptFieldCallback {
 	/**
 	 * The state recorded by the instrumented accesses.
 	 */
-	private Map<String, Pair<FType, Object>> state = new HashMap<String, Pair<FType, Object>>();
+	Map<String, Pair<Stateful.FieldType, Object>> state = new HashMap<String, Pair<Stateful.FieldType, Object>>();
 
 	/**
 	 * Apply changes registered during the instrumented execution to object.
@@ -58,50 +50,22 @@ public class StateRecorder implements InterceptFieldCallback {
 	 * @throws SecurityException
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
+	 * @throws RemoteException 
 	 */
 	public void applyChanges(Object object) throws NoSuchFieldException, SecurityException, IllegalArgumentException,
-			IllegalAccessException {
+			IllegalAccessException, RemoteException {
 		final Class<?> cls = object.getClass();
 		for (String fieldName : state.keySet()) {
 			
 			
-			for (Field f : object.getClass().getFields()){
+			for (Field f : object.getClass().getDeclaredFields()){
 				System.out.println(f.getName());
 			}
 			
-			Field field = cls.getField(fieldName);
-			Pair<FType, Object> pair = state.get(fieldName);
+			Pair<Stateful.FieldType, Object> pair = state.get(fieldName);
 			//System.err.println("apply: " + fieldName + "=" + pair.left + "," + pair.right);
-
-			switch (pair.left) {
-			case Boolean:
-				field.setBoolean(object, ((Boolean) pair.right).booleanValue());
-				break;
-			case Byte:
-				field.setByte(object, ((Byte) pair.right).byteValue());
-				break;
-			case Char:
-				field.setChar(object, ((Character) pair.right).charValue());
-				break;
-			case Double:
-				field.setDouble(object, ((Double) pair.right).doubleValue());
-				break;
-			case Float:
-				field.setFloat(object, ((Float) pair.right).floatValue());
-				break;
-			case Int:
-				field.setInt(object, ((Integer) pair.right).intValue());
-				break;
-			case Long:
-				field.setLong(object, ((Long) pair.right).longValue());
-				break;
-			case Object:
-				field.set(object, pair.right);
-				break;
-			case Short:
-				field.setShort(object, ((Short) pair.right).shortValue());
-				break;
-			}
+			
+			((Stateful) object).set(fieldName, pair.left, pair.right);			
 		}
 	}
 
@@ -198,7 +162,7 @@ public class StateRecorder implements InterceptFieldCallback {
 	public boolean writeBoolean(Object object, String name, boolean oldValue, boolean newValue) {
 		System.err.println("WRITE " + object + " " + name + " " + oldValue + " " + newValue);
 
-		state.put(name, new Pair<FType, Object>(FType.Boolean, newValue));
+		state.put(name, new Pair<Stateful.FieldType, Object>(Stateful.FieldType.Boolean, newValue));
 
 		return newValue;
 	}
@@ -206,7 +170,7 @@ public class StateRecorder implements InterceptFieldCallback {
 	public byte writeByte(Object object, String name, byte oldValue, byte newValue) {
 		System.err.println("WRITE " + object + " " + name + " " + oldValue + " " + newValue);
 
-		state.put(name, new Pair<FType, Object>(FType.Byte, newValue));
+		state.put(name, new Pair<Stateful.FieldType, Object>(Stateful.FieldType.Byte, newValue));
 
 		return newValue;
 	}
@@ -214,7 +178,7 @@ public class StateRecorder implements InterceptFieldCallback {
 	public char writeChar(Object object, String name, char oldValue, char newValue) {
 		System.err.println("WRITE " + object + " " + name + " " + oldValue + " " + newValue);
 
-		state.put(name, new Pair<FType, Object>(FType.Char, newValue));
+		state.put(name, new Pair<Stateful.FieldType, Object>(Stateful.FieldType.Char, newValue));
 
 		return newValue;
 	}
@@ -222,7 +186,7 @@ public class StateRecorder implements InterceptFieldCallback {
 	public double writeDouble(Object object, String name, double oldValue, double newValue) {
 		System.err.println("WRITE " + object + " " + name + " " + oldValue + " " + newValue);
 
-		state.put(name, new Pair<FType, Object>(FType.Double, newValue));
+		state.put(name, new Pair<Stateful.FieldType, Object>(Stateful.FieldType.Double, newValue));
 
 		return newValue;
 	}
@@ -230,7 +194,7 @@ public class StateRecorder implements InterceptFieldCallback {
 	public float writeFloat(Object object, String name, float oldValue, float newValue) {
 		System.err.println("WRITE " + object + " " + name + " " + oldValue + " " + newValue);
 
-		state.put(name, new Pair<FType, Object>(FType.Float, newValue));
+		state.put(name, new Pair<Stateful.FieldType, Object>(Stateful.FieldType.Float, newValue));
 
 		return newValue;
 	}
@@ -238,7 +202,7 @@ public class StateRecorder implements InterceptFieldCallback {
 	public int writeInt(Object object, String name, int oldValue, int newValue) {
 		System.err.println("WRITE " + object + " " + name + " " + oldValue + " " + newValue);
 
-		state.put(name, new Pair<FType, Object>(FType.Int, newValue));
+		state.put(name, new Pair<Stateful.FieldType, Object>(Stateful.FieldType.Int, newValue));
 
 		return newValue;
 	}
@@ -246,7 +210,7 @@ public class StateRecorder implements InterceptFieldCallback {
 	public long writeLong(Object object, String name, long oldValue, long newValue) {
 		System.err.println("WRITE " + object + " " + name + " " + oldValue + " " + newValue);
 
-		state.put(name, new Pair<FType, Object>(FType.Long, newValue));
+		state.put(name, new Pair<Stateful.FieldType, Object>(Stateful.FieldType.Long, newValue));
 
 		return newValue;
 	}
@@ -254,7 +218,7 @@ public class StateRecorder implements InterceptFieldCallback {
 	public Object writeObject(Object object, String name, Object oldValue, Object newValue) {
 		System.err.println("WRITE " + object + " " + name + " " + oldValue + " " + newValue);
 
-		state.put(name, new Pair<FType, Object>(FType.Object, newValue));
+		state.put(name, new Pair<Stateful.FieldType, Object>(Stateful.FieldType.Object, newValue));
 
 		return newValue;
 	}
@@ -262,7 +226,7 @@ public class StateRecorder implements InterceptFieldCallback {
 	public short writeShort(Object object, String name, short oldValue, short newValue) {
 		System.err.println("WRITE " + object + " " + name + " " + oldValue + " " + newValue);
 
-		state.put(name, new Pair<FType, Object>(FType.Short, newValue));
+		state.put(name, new Pair<Stateful.FieldType, Object>(Stateful.FieldType.Short, newValue));
 
 		return newValue;
 	}

@@ -68,6 +68,4 @@ public interface ITransactionalRemoteObject extends Remote {
 	 *             when remote execution failed.
 	 */
 	ITransactionFailureMonitor getFailureMonitor() throws RemoteException;
-	
-	public void applyChanges(StateRecorder recorder) throws RemoteException;
 }

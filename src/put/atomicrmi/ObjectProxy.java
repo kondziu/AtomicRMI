@@ -114,7 +114,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 					// the object and in effect we don't get cv and rv.
 					snapshot = object.snapshot(); // 28
 
-					object.applyChanges(writeRecorder); // 24-25
+					writeRecorder.applyChanges(object); // 24-25
 
 					// Prevent recorder from being used again
 					writeRecorder = null;
@@ -683,7 +683,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 					System.out.println(object);
 					try {
-						object.applyChanges(writeRecorder); // 24-25
+						writeRecorder.applyChanges(object); // 24-25
 					} catch (Exception e) {
 						e.printStackTrace();
 						throw new RemoteException(e.getLocalizedMessage(),e.getCause());
