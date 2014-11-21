@@ -337,7 +337,6 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		}
 
 		if (mv == 0 /* mwv == 0 && mrv == 0 */) {
-
 			// The transaction was neither writing nor reading yet.
 			// Create a buffer for writing and proceed to use the buffer.
 
@@ -357,13 +356,11 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			return true;
 
 		} else if ( /* mwv > 0 && */mrv == 0) {
-
 			// The transaction was writing before but not reading.
 			// So there already exists a buffer for writing to---no need to
 			// create one.
 			// Use the buffer.
 			
-
 			object.transactionLock(tid);
 
 			mv++;
@@ -372,9 +369,6 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			return true;
 
 		} else /* if (mrv > 0) */{
-			
-			System.err.println("hello");
-
 			// The transaction already read from the object, so we have access
 			// to it.
 			// There's no need to buffer writes for now, so proceed as normal.
@@ -403,11 +397,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		// releaseTransaction();
 		// }
 
-		// CLEAN System.err.println("Hello :D");
-
 		if (mwv == wub || mv == ub) {
-			// CLEAN System.err.println("releasing after write");
-
 			// If mrv > 0 then there's no need for a new thread, because we
 			// already have access.
 			if (mrv > 0) {
@@ -437,9 +427,6 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	}
 
 	public boolean preRead() throws RemoteException {		
-		if (over) {
-			throw new TransactionException("Attempting to access transactional object after commit.");
-		}
 
 		if (mode == Mode.READ_ONLY) {
 			// Read-only optimization (green).
@@ -458,6 +445,10 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 			return true;
 		}
+		
+		if (over) {
+			throw new TransactionException("Attempting to access transactional object after commit.");
+		}
 
 		// Check for exceeding the upper bounds.
 		if (mrv != 0 && rub != 0 && mrv == rub || mv != 0 && ub != 0 && mv == ub) {
@@ -475,7 +466,6 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			if (mrv == 0) {
 				object.waitForCounter(px - 1);
 				object.transactionLock(tid);
-				System.err.println("pre read ss");
 				snapshot = object.snapshot();
 			} else {
 				object.transactionLock(tid);
@@ -539,33 +529,6 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 	public boolean preAny() throws RemoteException {
 		throw new RemoteException("Operation not supported.");
-		
-//		if (over) {
-//			throw new TransactionException("Attempting to access transactional object after commit.");
-//		}
-//
-//		if (mv == RELEASED || mv == ub) {
-//			throw new TransactionException("Upper bound is lower then number of invocations:" + +mrv + "/" + rub + " "
-//					+ mwv + "/" + wub + " " + mv + "/" + ub);
-//		}
-//
-//		if (mv == 0) {
-//			object.waitForCounter(px - 1);
-//			object.transactionLock(tid);
-//			snapshot = object.snapshot();
-//		} else {
-//			object.transactionLock(tid);
-//		}
-//
-//		if (snapshot.getReadVersion() != object.getCurrentVersion()) {
-//			object.transactionUnlockForce(tid);
-//			transaction.rollback();
-//			throw new RollbackForcedException("Rollback forced during invocation.");
-//		}
-//
-//		mv++;
-
-		//return false;
 	}
 
 	public boolean preSync(Mode accessType) throws RemoteException {
@@ -582,18 +545,8 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 	public void postRead() throws RemoteException {
 		if (mode == Mode.READ_ONLY) {
-			// if (mv == ub) {
-			// object.setCurrentVersion(px);
-			// releaseTransaction();
-			// }
-			// multiple reads should be able to coincide
-			// object.transactionUnlock(tid);
+			// Empty.
 		} else {
-			// if (over) {
-			// throw new
-			// TransactionException("Attempting to access transactional object after release.");
-			// }
-
 			if (mv == ub) {
 				object.waitForCounter(px - 1);
 				object.setCurrentVersion(px);
@@ -605,16 +558,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	}
 
 	public void postAny() throws RemoteException {
-		if (over) {
-			throw new TransactionException("Attempting to access transactional object after commit.");
-		}
-
-		if (mv == ub) {
-			object.setCurrentVersion(px);
-			releaseTransaction();
-		}
-
-		object.transactionUnlock(tid);
+		throw new RemoteException("Operation not supported.");
 	}
 
 	public void postSync(Mode accessType) throws RemoteException {
@@ -626,7 +570,6 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			postWrite();
 			break;
 		case ANY:
-			// postAny();
 		default:
 			throw new RemoteException("Illegal access type: " + accessType);
 		}
@@ -647,9 +590,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			TransactionFailureMonitor.getInstance().stopMonitoring(this);
 
 			object.finishTransaction(tid, snapshot, restore);
-
-			System.err.println("we restored, rite? " + restore + " ss: " + snapshot);
-			
+	
 			over = true;
 			snapshot = null;
 		}
@@ -663,15 +604,13 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			} catch (InterruptedException e) {
 				throw new RemoteException(e.getMessage(), e.getCause());
 			}
-			//boolean commit = readThread.commit;
-			//readThread = null;
+
 			return readThread.commit; // line 21
 		} else {
 
 			if (writeThread != null) {
 				try {
 					writeThread.join();
-					System.err.println("WT: " + writeThread.isAlive());
 				} catch (InterruptedException e) {
 				}
 			}
@@ -730,7 +669,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	 *             when remote execution fails.
 	 */
 	void OnFailure() throws RemoteException {
-		System.out.println("Failure detected.");
+		System.err.println("Failure detected.");
 		waitForSnapshot();
 		finishTransaction(true);
 	}

@@ -4,13 +4,9 @@ import static put.atomicrmi.Access.Mode.ANY;
 import static put.atomicrmi.Access.Mode.READ_ONLY;
 import static put.atomicrmi.Access.Mode.WRITE_ONLY;
 
-import java.lang.reflect.Field;
 import java.rmi.RemoteException;
-import java.util.List;
 
 import put.atomicrmi.Access;
-import put.atomicrmi.Stateful;
-import put.atomicrmi.Stateful.FieldType;
 import put.atomicrmi.TransactionalUnicastRemoteObject;
 
 public class VariableImpl extends TransactionalUnicastRemoteObject implements Variable, Cloneable {
@@ -18,18 +14,18 @@ public class VariableImpl extends TransactionalUnicastRemoteObject implements Va
 	private static final long serialVersionUID = 8037219139497925795L;
 	private int value;
 	private String name;
-	private List<String> log = null;
+	//private List<String> log = null;
 
 	public VariableImpl() throws RemoteException {
 
 	}
 
-	public VariableImpl(String name, int value, List<String> log) throws RemoteException {
-		super();
-		this.name = name;
-		this.value = value;
-		this.log = log;
-	}
+//	public VariableImpl(String name, int value, List<String> log) throws RemoteException {
+//		super();
+//		this.name = name;
+//		this.value = value;
+//		//this.log = log;
+//	}
 
 	public VariableImpl(String name, int value) throws RemoteException {
 		super();

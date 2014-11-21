@@ -54,7 +54,7 @@ public class StateRecorder implements InterceptFieldCallback {
 	 */
 	public void applyChanges(Object object) throws NoSuchFieldException, SecurityException, IllegalArgumentException,
 			IllegalAccessException, RemoteException {
-		final Class<?> cls = object.getClass();
+		//final Class<?> cls = object.getClass();
 		for (String fieldName : state.keySet()) {
 			
 			
