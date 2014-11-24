@@ -401,6 +401,8 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T accesses(T obj, long allCalls, long reads, long writes, Mode mode) throws TransactionException {
+		System.err.println("ACCESSES " + allCalls + "," + reads + "," + writes + ":" + mode);
+		
 		if (allCalls != INF && allCalls < 1)
 			throw new TransactionException("Invalid upper bound: negative number of invocations (" + allCalls + ").");
 
@@ -547,6 +549,8 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 *             to be rolled-back.
 	 */
 	public void commit() throws TransactionException, RollbackForcedException {
+		System.err.println("ATTEMPTING COMMIT " + id);
+		
 		if (!waitForSnapshots()) {
 			finishProxies(true);
 			setState(STATE_ROLLEDBACK);
@@ -574,6 +578,8 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 *             after transaction end.
 	 */
 	public void rollback() throws TransactionException {
+		System.err.println("ATTEMPTING ROLLBACK " + id);
+		
 		waitForSnapshots();
 		finishProxies(true);
 		setState(STATE_ROLLEDBACK);

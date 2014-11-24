@@ -198,6 +198,7 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 */
 	void transactionLock(UUID tid) throws TransactionException {
 		synchronized (lock) {
+			System.err.println("LOCKING " + tid);
 			try {
 				while (lockedId != null && !lockedId.equals(tid))
 					lock.wait();
@@ -219,6 +220,7 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 */
 	void transactionUnlock(UUID tid) {
 		synchronized (lock) {
+			System.err.println("UNLOCKING " + tid);
 			if (lockedId.equals(tid)) {
 				lock.value--;
 
@@ -335,9 +337,15 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 			return;
 		}
 
+		System.out.println("XXX " + tid + " " +  snapshot + " " + restore + " " + snapshot.rv);
+		
+		System.out.println("XXX " + snapshot.getReadVersion() + " < " + getCurrentVersion());
 		if (restore && snapshot.getReadVersion() < getCurrentVersion()) {
+			
 			// Lock before restoring.
-			transactionLock(tid);
+			System.err.println("lock " + tid);
+			transactionLock(tid); // FIXME DEADLOCK HERE
+			System.err.println("past lock " + tid);
 
 			restoreThis(snapshot.getImage());
 			setCurrentVersion(snapshot.getReadVersion());
@@ -346,6 +354,7 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 			transactionUnlockForce(tid);
 		}
 
+		System.err.println("XXX release " + id);
 		lt.release(1);
 	}
 
@@ -397,7 +406,7 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 					for (Field f : fields) {
 						if (!Modifier.isStatic(f.getModifiers()) && !Modifier.isFinal(f.getModifiers())) {
 							Object val = f.get(obj);
-							// System.err.println("rollback restoring " + f + " to " + val);
+							System.err.println(id + " rollback restoring " + f + " to " + val);
 							f.set(this, val);
 						}
 					}

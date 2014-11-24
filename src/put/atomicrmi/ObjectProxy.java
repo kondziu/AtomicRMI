@@ -104,11 +104,12 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		public WriteThread() {
 			super("WriteThread for " + object + "," + tid);
 		}
-		
+
 		@Override
 		public void run() {
 			synchronized (ObjectProxy.this) {
 				try {
+					System.err.println("WT WAIT " + tid);
 					object.waitForCounter(px - 1); // 24
 
 					object.transactionLock(tid);
@@ -273,6 +274,8 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		this.mode = mode;
 
 		ub = calls;
+		wub = writes;
+		rub = writes;
 		over = true;
 	}
 
@@ -330,8 +333,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			throw new TransactionException("Attempting to access transactional object after commit.");
 		}
 
-		if (mv == RELEASED || (ub != 0 && mv != 0 && mv == ub) || (wub != 0 && mwv != 0 && mwv == wub)) {
-			System.err.println("long ass condition");
+		if (mv == RELEASED || (/* ub != 0 && mv != 0 && */mv == ub) || (mwv == wub)) {
 			throw new TransactionException("Upper bound is lower then number of invocations: " + mrv + "/" + rub + " "
 					+ mwv + "/" + wub + " " + mv + "/" + ub);
 		}
@@ -360,7 +362,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			// So there already exists a buffer for writing to---no need to
 			// create one.
 			// Use the buffer.
-			
+
 			object.transactionLock(tid);
 
 			mv++;
@@ -426,7 +428,9 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		object.transactionUnlock(tid);
 	}
 
-	public boolean preRead() throws RemoteException {		
+	public boolean preRead() throws RemoteException {
+
+		System.err.println("PREREAD " + mrv + " " + mwv);
 
 		if (mode == Mode.READ_ONLY) {
 			// Read-only optimization (green).
@@ -445,7 +449,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 			return true;
 		}
-		
+
 		if (over) {
 			throw new TransactionException("Attempting to access transactional object after commit.");
 		}
@@ -492,7 +496,31 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 				throw new TransactionException("Attempting to access transactional object after commit.");
 			}
 
-			object.transactionLock(tid);
+			if (mrv == 0) {
+				// Twist! Actually there were no reads! Synchronize with write
+				// buffer.
+				object.transactionLock(tid);
+
+				object.waitForCounter(px - 1); // 24
+
+				snapshot = object.snapshot(); 
+
+				try {
+					writeRecorder.applyChanges(object);
+				} catch (Exception e) {
+					e.printStackTrace();
+					throw new RemoteException(e.getLocalizedMessage(), e);
+				}
+
+				// Prevent recorder from being used again
+				writeRecorder = null;
+
+				// Potentially create buffer for accessing objects after release
+				// or remove buffer. Maybe?
+
+			} else {
+				object.transactionLock(tid);
+			}
 
 			// Check for inconsistent state and rollback if necessary.
 			if (snapshot.getReadVersion() != object.getCurrentVersion()) {
@@ -507,8 +535,12 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			return false;
 		}
 
+		System.err.println("xxx " + wub + ":" + mwv);
+
 		// If the writes already reached their upper bound, operate on buffers.
 		{
+			object.transactionLock(tid);
+
 			// If this is the first read after write was released then
 			// synchronize with the release thread, to make sure that access to
 			// the object is gained and the release procedure is finished.
@@ -583,20 +615,22 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	}
 
 	public void finishTransaction(boolean restore) throws RemoteException {
-
+		System.err.println("FINISH TRANSACTION " + restore + " " + tid);
 		if (readThread != Thread.currentThread() && mode == Mode.READ_ONLY) { // 65
 			// empty
 		} else {
 			TransactionFailureMonitor.getInstance().stopMonitoring(this);
 
 			object.finishTransaction(tid, snapshot, restore);
-	
+
 			over = true;
 			snapshot = null;
 		}
 	}
 
 	public boolean waitForSnapshot() throws RemoteException {
+		System.err.println("ATTEMPTING WAIT FOR SNAPSHOTS " + tid);
+		
 		if (readThread != Thread.currentThread() && mode == Mode.READ_ONLY) { // line
 																				// 57
 			try {
@@ -609,19 +643,23 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		} else {
 
 			if (writeThread != null) {
+				System.err.println("WAIT FOR WT " + tid);
 				try {
 					writeThread.join();
 				} catch (InterruptedException e) {
 				}
 			}
 
+			System.err.println("WAIT FOR SYNC THIS " + tid);
 			synchronized (this) {
 				if (writeRecorder != null) {
+					System.err.println("HELLO! " + tid);
+					
 					object.waitForCounter(px - 1); // 24
 					object.transactionLock(tid);
 
 					System.out.println("snapshot");
-					
+
 					// We have to make a snapshot, else it thinks we didn't read
 					// the object and in effect we don't get cv and rv.
 					snapshot = object.snapshot(); // 28
@@ -638,15 +676,20 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 					// Remove buffer.
 					buffer = null;
+					
+					object.transactionUnlock(tid);
 
 					// Release object.
 					object.setCurrentVersion(px); // 27
 					releaseTransaction(); // 29
 				}
 			}
+			System.err.println("WAIT FOR SNAPSHOT " + px + " -1, " + tid);
 
-			object.waitForSnapshot(px - 1);
-
+			object.waitForSnapshot(px - 1); // FIXME it gets stuck in here.
+			
+			System.err.println("DONE WAIT FOR SNAPSHOT " + px + " -1, " + tid);
+			
 			if (mv != 0 && mv != RELEASED && snapshot.getReadVersion() == object.getCurrentVersion())
 				object.setCurrentVersion(px);
 
