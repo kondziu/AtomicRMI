@@ -109,7 +109,6 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		public void run() {
 			synchronized (ObjectProxy.this) {
 				try {
-					System.err.println("WT WAIT " + tid);
 					object.waitForCounter(px - 1); // 24
 
 					object.transactionLock(tid);
@@ -275,7 +274,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 		ub = calls;
 		wub = writes;
-		rub = writes;
+		rub = reads;
 		over = true;
 	}
 
@@ -430,8 +429,6 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 	public boolean preRead() throws RemoteException {
 
-		System.err.println("PREREAD " + mrv + " " + mwv);
-
 		if (mode == Mode.READ_ONLY) {
 			// Read-only optimization (green).
 			// We don't check for UB etc. because we already released this
@@ -535,8 +532,6 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			return false;
 		}
 
-		System.err.println("xxx " + wub + ":" + mwv);
-
 		// If the writes already reached their upper bound, operate on buffers.
 		{
 			object.transactionLock(tid);
@@ -615,7 +610,6 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	}
 
 	public void finishTransaction(boolean restore) throws RemoteException {
-		System.err.println("FINISH TRANSACTION " + restore + " " + tid);
 		if (readThread != Thread.currentThread() && mode == Mode.READ_ONLY) { // 65
 			// empty
 		} else {
@@ -629,8 +623,6 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	}
 
 	public boolean waitForSnapshot() throws RemoteException {
-		System.err.println("ATTEMPTING WAIT FOR SNAPSHOTS " + tid);
-		
 		if (readThread != Thread.currentThread() && mode == Mode.READ_ONLY) { // line
 																				// 57
 			try {
@@ -643,22 +635,16 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		} else {
 
 			if (writeThread != null) {
-				System.err.println("WAIT FOR WT " + tid);
 				try {
 					writeThread.join();
 				} catch (InterruptedException e) {
 				}
 			}
 
-			System.err.println("WAIT FOR SYNC THIS " + tid);
 			synchronized (this) {
-				if (writeRecorder != null) {
-					System.err.println("HELLO! " + tid);
-					
+				if (writeRecorder != null) {				
 					object.waitForCounter(px - 1); // 24
 					object.transactionLock(tid);
-
-					System.out.println("snapshot");
 
 					// We have to make a snapshot, else it thinks we didn't read
 					// the object and in effect we don't get cv and rv.
@@ -684,12 +670,9 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 					releaseTransaction(); // 29
 				}
 			}
-			System.err.println("WAIT FOR SNAPSHOT " + px + " -1, " + tid);
 
 			object.waitForSnapshot(px - 1); // FIXME it gets stuck in here.
-			
-			System.err.println("DONE WAIT FOR SNAPSHOT " + px + " -1, " + tid);
-			
+					
 			if (mv != 0 && mv != RELEASED && snapshot.getReadVersion() == object.getCurrentVersion())
 				object.setCurrentVersion(px);
 

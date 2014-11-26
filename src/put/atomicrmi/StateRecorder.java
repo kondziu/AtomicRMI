@@ -70,8 +70,6 @@ public class StateRecorder implements InterceptFieldCallback {
 	}
 
 	public boolean readBoolean(Object object, String name, boolean value) {
-		System.err.println("READ " + object + " " + name + " " + value);
-
 		if (!state.containsKey(name)) {
 			throw new RuntimeException("Reading a value from a field that was not yet bufferred.");
 		}
@@ -80,8 +78,6 @@ public class StateRecorder implements InterceptFieldCallback {
 	}
 
 	public byte readByte(Object object, String name, byte value) {
-		System.err.println("READ " + object + " " + name + " " + value);
-
 		if (!state.containsKey(name)) {
 			throw new RuntimeException("Reading a value from a field that was not yet bufferred.");
 		}
@@ -90,8 +86,6 @@ public class StateRecorder implements InterceptFieldCallback {
 	}
 
 	public char readChar(Object object, String name, char value) {
-		System.err.println("READ " + object + " " + name + " " + value);
-
 		if (!state.containsKey(name)) {
 			throw new RuntimeException("Reading a value from a field that was not yet bufferred.");
 		}
@@ -100,8 +94,6 @@ public class StateRecorder implements InterceptFieldCallback {
 	}
 
 	public double readDouble(Object object, String name, double value) {
-		System.err.println("READ " + object + " " + name + " " + value);
-
 		if (!state.containsKey(name)) {
 			throw new RuntimeException("Reading a value from a field that was not yet bufferred.");
 		}
@@ -110,8 +102,6 @@ public class StateRecorder implements InterceptFieldCallback {
 	}
 
 	public float readFloat(Object object, String name, float value) {
-		System.err.println("READ " + object + " " + name + " " + value);
-
 		if (!state.containsKey(name)) {
 			throw new RuntimeException("Reading a value from a field that was not yet bufferred.");
 		}
@@ -120,8 +110,6 @@ public class StateRecorder implements InterceptFieldCallback {
 	}
 
 	public int readInt(Object object, String name, int value) {
-		System.err.println("READ " + object + " " + name + " " + value);
-
 		if (!state.containsKey(name)) {
 			throw new RuntimeException("Reading a value from a field that was not yet bufferred.");
 		}
@@ -130,8 +118,6 @@ public class StateRecorder implements InterceptFieldCallback {
 	}
 
 	public long readLong(Object object, String name, long value) {
-		System.err.println("READ " + object + " " + name + " " + value);
-
 		if (!state.containsKey(name)) {
 			throw new RuntimeException("Reading a value from a field that was not yet bufferred.");
 		}
@@ -140,8 +126,6 @@ public class StateRecorder implements InterceptFieldCallback {
 	}
 
 	public Object readObject(Object object, String name, Object value) {
-		System.err.println("READ " + object + " " + name + " " + value);
-
 		if (!state.containsKey(name)) {
 			throw new RuntimeException("Reading a value from a field that was not yet bufferred.");
 		}
@@ -150,8 +134,6 @@ public class StateRecorder implements InterceptFieldCallback {
 	}
 
 	public short readShort(Object object, String name, short value) {
-		System.err.println("READ " + object + " " + name + " " + value);
-
 		if (!state.containsKey(name)) {
 			throw new RuntimeException("Reading a value from a field that was not yet bufferred.");
 		}
@@ -160,72 +142,54 @@ public class StateRecorder implements InterceptFieldCallback {
 	}
 
 	public boolean writeBoolean(Object object, String name, boolean oldValue, boolean newValue) {
-		System.err.println("WRITE " + object + " " + name + " " + oldValue + " " + newValue);
-
 		state.put(name, new Pair<Stateful.FieldType, Object>(Stateful.FieldType.Boolean, newValue));
 
 		return newValue;
 	}
 
 	public byte writeByte(Object object, String name, byte oldValue, byte newValue) {
-		System.err.println("WRITE " + object + " " + name + " " + oldValue + " " + newValue);
-
 		state.put(name, new Pair<Stateful.FieldType, Object>(Stateful.FieldType.Byte, newValue));
 
 		return newValue;
 	}
 
 	public char writeChar(Object object, String name, char oldValue, char newValue) {
-		System.err.println("WRITE " + object + " " + name + " " + oldValue + " " + newValue);
-
 		state.put(name, new Pair<Stateful.FieldType, Object>(Stateful.FieldType.Char, newValue));
 
 		return newValue;
 	}
 
 	public double writeDouble(Object object, String name, double oldValue, double newValue) {
-		System.err.println("WRITE " + object + " " + name + " " + oldValue + " " + newValue);
-
 		state.put(name, new Pair<Stateful.FieldType, Object>(Stateful.FieldType.Double, newValue));
 
 		return newValue;
 	}
 
 	public float writeFloat(Object object, String name, float oldValue, float newValue) {
-		System.err.println("WRITE " + object + " " + name + " " + oldValue + " " + newValue);
-
 		state.put(name, new Pair<Stateful.FieldType, Object>(Stateful.FieldType.Float, newValue));
 
 		return newValue;
 	}
 
 	public int writeInt(Object object, String name, int oldValue, int newValue) {
-		System.err.println("WRITE " + object + " " + name + " " + oldValue + " " + newValue);
-
 		state.put(name, new Pair<Stateful.FieldType, Object>(Stateful.FieldType.Int, newValue));
 
 		return newValue;
 	}
 
 	public long writeLong(Object object, String name, long oldValue, long newValue) {
-		System.err.println("WRITE " + object + " " + name + " " + oldValue + " " + newValue);
-
 		state.put(name, new Pair<Stateful.FieldType, Object>(Stateful.FieldType.Long, newValue));
 
 		return newValue;
 	}
 
 	public Object writeObject(Object object, String name, Object oldValue, Object newValue) {
-		System.err.println("WRITE " + object + " " + name + " " + oldValue + " " + newValue);
-
 		state.put(name, new Pair<Stateful.FieldType, Object>(Stateful.FieldType.Object, newValue));
 
 		return newValue;
 	}
 
 	public short writeShort(Object object, String name, short oldValue, short newValue) {
-		System.err.println("WRITE " + object + " " + name + " " + oldValue + " " + newValue);
-
 		state.put(name, new Pair<Stateful.FieldType, Object>(Stateful.FieldType.Short, newValue));
 
 		return newValue;

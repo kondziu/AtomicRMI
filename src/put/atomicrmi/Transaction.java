@@ -259,7 +259,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	public <T> T accesses(T obj) throws TransactionException {
 		return accesses(obj, INF, INF, INF, Mode.ANY);
 	}
-	
+
 	/**
 	 * Adds given remote object to the list of accessed remote objects with
 	 * given upper bound on number of this object invocations. The object is
@@ -390,6 +390,32 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 *            an upper bound on number of invocation to this remote object.
 	 * @param writes
 	 *            an upper bound on the number of writes to this remote object.
+	 * @param reads
+	 *            an upper bound on the number of reads to this remote object.
+	 * @return given remote object wrapped by special object proxy that monitors
+	 *         object access.
+	 * @throws TransactionException
+	 *             when remote exception occurs during initialization of object
+	 *             proxy.
+	 */
+	public <T> T accesses(T obj, int allCalls, int reads, int writes) throws TransactionException {
+		return accesses(obj, allCalls, reads, writes, (reads == 0 ? Mode.WRITE_ONLY : (writes == 0 ? Mode.READ_ONLY
+				: Mode.ANY)));
+	}
+
+	/**
+	 * Adds given remote object to the list of accessed remote objects with
+	 * given upper bound on number of this object invocations. The object is
+	 * wrapped by special object proxy and returned. During transaction
+	 * execution only this proxy must be used to guarantee atomicity and
+	 * isolation properties.
+	 * 
+	 * @param obj
+	 *            remote object accessed by transaction.
+	 * @param calls
+	 *            an upper bound on number of invocation to this remote object.
+	 * @param writes
+	 *            an upper bound on the number of writes to this remote object.
 	 * @param mode
 	 *            object to be opened either in read-only, write-only, or
 	 *            read-write mode
@@ -401,8 +427,6 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T accesses(T obj, long allCalls, long reads, long writes, Mode mode) throws TransactionException {
-		System.err.println("ACCESSES " + allCalls + "," + reads + "," + writes + ":" + mode);
-		
 		if (allCalls != INF && allCalls < 1)
 			throw new TransactionException("Invalid upper bound: negative number of invocations (" + allCalls + ").");
 
@@ -482,7 +506,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 			} catch (RemoteException e) {
 				// Retry caused by system failure. This situation should be
 				// monitored and handled separately.
-				System.out.println(e.getMessage());
+				System.err.println(e.getMessage());
 				e.printStackTrace();
 				if (++restartsByFailure == 5)
 					throw new TransactionException("Fatal error after multiple restarts of transaction.");
@@ -528,7 +552,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 			}
 
 			for (IObjectProxy proxy : proxies) {
-				proxy.unlock();				
+				proxy.unlock();
 			}
 
 		} catch (RemoteException e) {
@@ -536,7 +560,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 		}
 
 		setState(STATE_RUNNING);
-	}	
+	}
 
 	/**
 	 * Commit changes made by this transaction and terminates transaction.
@@ -549,8 +573,6 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 *             to be rolled-back.
 	 */
 	public void commit() throws TransactionException, RollbackForcedException {
-		System.err.println("ATTEMPTING COMMIT " + id);
-		
 		if (!waitForSnapshots()) {
 			finishProxies(true);
 			setState(STATE_ROLLEDBACK);
@@ -578,8 +600,6 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 *             after transaction end.
 	 */
 	public void rollback() throws TransactionException {
-		System.err.println("ATTEMPTING ROLLBACK " + id);
-		
 		waitForSnapshots();
 		finishProxies(true);
 		setState(STATE_ROLLEDBACK);

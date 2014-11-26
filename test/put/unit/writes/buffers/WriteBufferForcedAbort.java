@@ -59,8 +59,8 @@ public class WriteBufferForcedAbort extends RMITest {
 
 				waitForTick(5);
 				System.err.println("T1 5");
-				
-				waitForTick(6);				
+
+				waitForTick(6);
 				System.err.println("T1 6");
 
 				Assert.assertEquals("T2 attempts to commit before this point.", 2, aint.get());
@@ -91,17 +91,17 @@ public class WriteBufferForcedAbort extends RMITest {
 				waitForTick(1);
 				t.start();
 				waitForTick(2);
-				System.err.println("     T2 2");
+				// System.err.println("     T2 2");
 
 				waitForTick(3);
-				System.err.println("     T2 3");
+				// System.err.println("     T2 3");
 				x.write(2);
 
 				waitForTick(4);
-				System.err.println("     T2 4");
+				// System.err.println("     T2 4");
 
 				waitForTick(5);
-				System.err.println("     T2 5");
+				// System.err.println("     T2 5");
 
 				aint.set(2);
 				t.commit();
