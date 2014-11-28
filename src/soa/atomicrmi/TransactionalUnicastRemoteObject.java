@@ -354,7 +354,7 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 * @throws TransactionException
 	 *             when error occurs during serialization.
 	 */
-	private byte[] serializeThis() throws TransactionException {
+	private synchronized byte[] serializeThis() throws TransactionException {
 		try {
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			ObjectOutputStream out = new ObjectOutputStream(bos);
