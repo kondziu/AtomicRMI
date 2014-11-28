@@ -458,7 +458,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			return preWrite();
 		case ANY:
 		default:
-			return preAny();
+			throw new RemoteException("Illegal access type: " + accessType);
 		}
 	}
 
