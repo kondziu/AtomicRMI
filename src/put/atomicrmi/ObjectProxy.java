@@ -39,7 +39,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	 * Copy of object for the purpose of buffering writes and reading from
 	 * buffer after release.
 	 */
-	private Object buffer = null;
+	protected Object buffer = null;
 
 	/**
 	 * A separate thread for performing buffering of an object that is used
@@ -176,38 +176,38 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	/**
 	 * Transaction unique identifier.
 	 */
-	private UUID tid;
+	protected UUID tid;
 
 	/**
 	 * The wrapped remote object reference.
 	 */
-	private TransactionalUnicastRemoteObject object;
+	protected TransactionalUnicastRemoteObject object;
 
 	/**
 	 * Snapshot of the wrapped remote object. If <code>null</code> then snapshot
 	 * is not present.
 	 */
-	private TransactionalUnicastRemoteObject.Snapshot snapshot;
+	protected TransactionalUnicastRemoteObject.Snapshot snapshot;
 
 	/**
 	 * Determines if transaction is finished.
 	 */
-	private boolean over = false;
+	protected boolean over = false;
 
 	/**
 	 * The value of private counter for this remote object.
 	 */
-	private long px;
+	protected long px;
 
 	/**
 	 * The minor version counter that counts remote method invocations.
 	 */
-	private long mv;
+	protected long mv;
 
 	/**
 	 * The minor write version counter that counts writes.
 	 */
-	private long mwv;
+	protected long mwv;
 
 	/**
 	 * The minor write version counter that counts reads.
@@ -747,5 +747,9 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 	public Mode getMode() throws RemoteException {
 		return mode;
+	}
+
+	public void update() throws RemoteException {
+		throw new RemoteException("Invalid operation type for general purpose proxy: update.");
 	}
 }

@@ -57,7 +57,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 * 
 	 * @author Wojciech Mruczkiewicz
 	 */
-	private class Heartbeat implements Runnable {
+	class Heartbeat implements Runnable {
 
 		/**
 		 * Delay between notifications.
@@ -152,12 +152,12 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	/**
 	 * Current transaction state.
 	 */
-	private int state;
+	protected int state;
 
 	/**
 	 * Randomly generated transaction unique identifier.
 	 */
-	private UUID id;
+	protected UUID id;
 
 	// /**
 	// * Reference to remote global lock used only for transaction startup.
@@ -167,7 +167,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	/**
 	 * List of proxies of the accessed remote objects.
 	 */
-	private List<IObjectProxy> proxies;
+	protected List<IObjectProxy> proxies;
 
 	/**
 	 * This transaction's read set.
@@ -188,12 +188,12 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	/**
 	 * Heartbeater's thread reference.
 	 */
-	private Thread heartbeatThread;
+	protected Thread heartbeatThread;
 
 	/**
 	 * Heartbeater's instance.
 	 */
-	private Heartbeat heartbeat;
+	protected Heartbeat heartbeat;
 
 	/**
 	 * Creates new transaction. The required argument is a JavaRMI registry
@@ -629,11 +629,13 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 * @return true when commit is allowed, false when roll-back operation is
 	 *         forced and must be performed.
 	 */
-	private boolean waitForSnapshots() {
+	protected boolean waitForSnapshots() {
 		boolean commit = true;
 
+		// TODO parallel for
 		for (IObjectProxy proxy : proxies) {
 			try {
+				// TODO commit = commit && proxy.waitForSnapshots(); ?
 				if (!proxy.waitForSnapshot())
 					commit = false;
 			} catch (RemoteException e) {
@@ -667,7 +669,8 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 *            determines if changes made by this transaction should be
 	 *            restored or committed.
 	 */
-	private void finishProxies(boolean restore) {
+	protected void finishProxies(boolean restore) {
+		// TODO parallel for
 		for (IObjectProxy proxy : proxies) {
 			try {
 				proxy.finishTransaction(restore);
@@ -687,7 +690,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 *             when transition to this state is invalid at given current
 	 *             transaction state.
 	 */
-	private void setState(int newState) throws TransactionException {
+	protected void setState(int newState) throws TransactionException {
 		switch (state) {
 		case STATE_PREPARING:
 			if (newState != STATE_RUNNING)
@@ -708,7 +711,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	/**
 	 * A comparator object for sorting remote object proxies by their IDs.
 	 */
-	private Comparator<IObjectProxy> comparator = new Comparator<IObjectProxy>() {
+	protected Comparator<IObjectProxy> comparator = new Comparator<IObjectProxy>() {
 		public int compare(IObjectProxy a, IObjectProxy b) {
 			try {
 				return a.getSortingKey().compareTo(b.getSortingKey());

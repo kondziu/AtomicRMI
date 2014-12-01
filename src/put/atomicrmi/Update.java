@@ -1,0 +1,156 @@
+package put.atomicrmi;
+
+import java.rmi.RemoteException;
+import java.util.Collections;
+
+import put.atomicrmi.Access.Mode;
+
+public class Update extends Transaction {
+
+	private static final long serialVersionUID = 1157466041881814566L;
+
+	public Update() throws RemoteException {
+		super();
+	}
+
+	@Override
+	public <T> T accesses(T obj) throws TransactionException {
+		return accesses(obj, Transaction.INF);
+	}
+
+	@Override
+	public <T> T accesses(T obj, int allCalls, int reads, int writes) throws TransactionException {
+		if (reads == 0 && allCalls == writes) {
+			return accesses(obj, writes);
+		}
+		throw new TransactionException("Invalid access preamble for write-only transaction");
+	}
+
+	@Override
+	public <T> T accesses(T obj, int calls) throws TransactionException {
+		return accesses(obj, calls);
+	}
+
+	@Override
+	public <T> T accesses(T obj, long allCalls, long reads, long writes, Mode mode) throws TransactionException {
+		if (mode == Mode.WRITE_ONLY && reads == 0 && allCalls == writes) {
+			return accesses(obj, writes);
+		}
+		throw new TransactionException("Invalid access preamble for write-only transaction");
+	}
+
+	@Override
+	public <T> T accesses(T obj, long calls, Mode mode) throws TransactionException {
+		if (mode == Mode.WRITE_ONLY) {
+			return accesses(obj, calls);
+		}
+		throw new TransactionException("Invalid access mode for write-only transaction: " + mode);
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> T accesses(T obj, long writes) throws TransactionException {
+		if (writes != INF && writes < 1)
+			throw new TransactionException("Invalid upper bound: negative number of writes (" + writes + ").");
+
+		if (state != STATE_PREPARING)
+			throw new TransactionException("Object access information can be added only in preparation state.");
+
+		try {
+			ITransactionalRemoteObject remote = (ITransactionalRemoteObject) obj;
+			IObjectProxy proxy = (IObjectProxy) remote.createUpdateProxy(this, id, writes);
+			proxies.add(proxy);
+
+			// XXX possibly remove until actually starting writes?
+			heartbeat.addFailureMonitor(remote.getFailureMonitor());
+			return (T) proxy;
+		} catch (RemoteException e) {
+			throw new TransactionException("Unable to create proxy for an object.", e);
+		}
+	}
+
+	@Override
+	public void start() throws TransactionException {
+		// public void start() throws TransactionException {
+
+		// }
+	}
+	
+	@Override
+	protected boolean waitForSnapshots() {
+		boolean commit = true;
+
+		// TODO parallel for
+		for (IObjectProxy proxy : proxies) {
+			try {
+				// TODO commit = commit && proxy.waitForSnapshots(); ?
+				proxy.update(); // UPDATE
+				
+				// wait for snapshot does not need to check access condition
+				if (!proxy.waitForSnapshot())
+					commit = false;
+			} catch (RemoteException e) {
+				commit = false;
+			}
+		}
+
+		return commit;
+	}
+
+	public void commit() throws TransactionException, RollbackForcedException {
+
+		// Start begin
+		try {
+			heartbeatThread = new Thread(heartbeat, "Heartbeat for " + id);
+			heartbeatThread.start();
+
+			Collections.sort(proxies, comparator);
+
+			for (IObjectProxy proxy : proxies) {
+				proxy.lock();
+			}
+
+			for (IObjectProxy proxy : proxies) {
+				proxy.startTransaction();
+			}
+
+			for (IObjectProxy proxy : proxies) {
+				proxy.unlock();
+			}
+
+		} catch (RemoteException e) {
+			throw new TransactionException("Unable to initialize transaction.", e);
+		}
+		
+		setState(STATE_RUNNING);
+		// Start end
+
+		// Update and wait for snapshots
+		boolean commit = waitForSnapshots();
+		
+		// Commit begin
+		if (!commit) {
+			finishProxies(true);
+			setState(STATE_ROLLEDBACK);
+			throw new RollbackForcedException("Rollback forced during commit.");
+		}
+
+		finishProxies(false);
+		setState(STATE_COMMITED);
+
+		// Signal heartbeater to stop.
+		synchronized (heartbeat) {
+			heartbeat.notify();
+		}
+		// Commit end
+	}
+	
+	@Override
+	public void rollback() throws TransactionException {
+		// nothing?
+	}
+	
+	@Override
+	public <T> void release(T object) throws TransactionException, RemoteException {
+		// nothing?
+	}
+}

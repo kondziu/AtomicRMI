@@ -60,6 +60,22 @@ public interface ITransactionalRemoteObject extends Remote {
 			throws RemoteException;
 
 	/**
+	 * Creates and gives a remote object proxy to a write-only object in a
+	 * write-only transaction.
+	 * 
+	 * @param transaction
+	 *            a transaction remote object.
+	 * @param tid
+	 *            transaction unique identifier.
+	 * @param writes
+	 *            upper bound on number of writes.
+	 * @return an instance of object proxy that wraps this remote object.
+	 * @throws RemoteException
+	 *             when remote execution failed.
+	 */
+	IObjectProxy createUpdateProxy(ITransaction transaction, UUID tid, long writes) throws RemoteException;
+
+	/**
 	 * Gives a transaction failure monitor used at specific node where this
 	 * remote object is placed.
 	 * 

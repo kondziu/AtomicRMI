@@ -45,7 +45,8 @@ import put.atomicrmi.Access.Mode;
  * 
  * @author Wojciech Mruczkiewicz
  */
-public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implements ITransactionalRemoteObject, Stateful  {
+public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implements ITransactionalRemoteObject,
+		Stateful {
 
 	/**
 	 * Stores snapshot of particular remote object together with snapshot
@@ -156,9 +157,15 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	public Object clone() throws CloneNotSupportedException {
 		return super.clone();
 	}
-	
-	public IObjectProxy createProxy(ITransaction transaction, UUID tid, long calls, long reads, long writes, Mode mode) throws RemoteException {
-		return (IObjectProxy) ObjectProxyHandler.create(new ObjectProxy(transaction, tid, this, calls, reads, writes, mode));
+
+	public IObjectProxy createProxy(ITransaction transaction, UUID tid, long calls, long reads, long writes, Mode mode)
+			throws RemoteException {
+		return (IObjectProxy) ObjectProxyHandler.create(new ObjectProxy(transaction, tid, this, calls, reads, writes,
+				mode));
+	}
+
+	public IObjectProxy createUpdateProxy(ITransaction transaction, UUID tid, long writes) throws RemoteException {
+		return (IObjectProxy) ObjectProxyHandler.create(new UpdateObjectProxy(transaction, tid, this, writes));
 	}
 
 	public ITransactionFailureMonitor getFailureMonitor() throws RemoteException {
@@ -336,7 +343,7 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 		}
 
 		if (restore && snapshot.getReadVersion() < getCurrentVersion()) {
-			
+
 			// Lock before restoring.
 			transactionLock(tid);
 
@@ -417,11 +424,11 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 			throw new TransactionException("Unable to restore snapshot.", e);
 		}
 	}
-	
+
 	public UUID getSortingKey() throws RemoteException {
 		return id;
 	}
-	
+
 	public void set(String fieldName, FieldType type, Object value) throws RemoteException {
 		try {
 			Field field = this.getClass().getDeclaredField(fieldName);

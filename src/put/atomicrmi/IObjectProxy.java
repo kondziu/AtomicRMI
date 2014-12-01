@@ -160,4 +160,7 @@ public interface IObjectProxy extends Remote {
 	 * @throws RemoteException
 	 */
 	Mode getMode() throws RemoteException;
+
+	// XXX
+	void update() throws RemoteException;
 }
