@@ -28,7 +28,7 @@ public class Update extends Transaction {
 
 	@Override
 	public <T> T accesses(T obj, int calls) throws TransactionException {
-		return accesses(obj, calls);
+		return accesses(obj, calls, Mode.WRITE_ONLY);
 	}
 
 	@Override
@@ -152,5 +152,16 @@ public class Update extends Transaction {
 	@Override
 	public <T> void release(T object) throws TransactionException, RemoteException {
 		// nothing?
+	}
+	
+	/**
+	 * Stop heartbeat monitor due to an emergency.
+	 */
+	public void stopHeartbeat() {
+		if (heartbeatThread == null || !heartbeatThread.isAlive()) {
+			return;
+		}
+		heartbeat.shutdown = true;
+		heartbeatThread.interrupt();
 	}
 }

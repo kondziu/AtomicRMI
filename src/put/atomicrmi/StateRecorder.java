@@ -1,6 +1,5 @@
 package put.atomicrmi;
 
-import java.lang.reflect.Field;
 import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Map;
@@ -57,15 +56,10 @@ public class StateRecorder implements InterceptFieldCallback {
 		//final Class<?> cls = object.getClass();
 		for (String fieldName : state.keySet()) {
 			
-			
-			for (Field f : object.getClass().getFields()){
-				System.out.println(f.getName());
-			}
-			
 			Pair<Stateful.FieldType, Object> pair = state.get(fieldName);
 			//System.err.println("apply: " + fieldName + "=" + pair.left + "," + pair.right);
 			
-			((Stateful) object).set(fieldName, pair.left, pair.right);			
+			((Stateful) object).set(fieldName, pair.left, pair.right);	
 		}
 	}
 

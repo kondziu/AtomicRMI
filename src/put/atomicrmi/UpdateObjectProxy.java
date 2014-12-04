@@ -116,6 +116,7 @@ class UpdateObjectProxy extends ObjectProxy {
 			// Release object.
 			object.setCurrentVersion(px);
 			releaseTransaction(); // 29
+
 		} catch (Exception e) {
 			// FIXME the client-side should see the exceptions from this thread.
 			e.printStackTrace();

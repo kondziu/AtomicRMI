@@ -75,7 +75,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 		 */
 		private List<ITransactionFailureMonitor> monitors = new ArrayList<ITransactionFailureMonitor>();
 
-		private boolean shutdown = false;
+		boolean shutdown = false;
 
 		public void run() {
 			while (state != STATE_COMMITED && state != STATE_ROLLEDBACK) {
