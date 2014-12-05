@@ -1,0 +1,163 @@
+package put.unit.writes.writeonly;
+
+import java.rmi.RemoteException;
+
+import org.junit.Assert;
+import org.junit.Test;
+
+import put.atomicrmi.RollbackForcedException;
+import put.atomicrmi.Transaction;
+import put.atomicrmi.TransactionFailureMonitor;
+import put.atomicrmi.Update;
+import put.unit.InvasiveMultithreadedTest;
+import put.unit.RMITest;
+import put.unit.vars.Variable;
+import edu.umd.cs.mtc.TestFramework;
+
+/**
+ * R/W transaction simultaneous with a write-only transaction, write-only is
+ * forced to abort because R/W aborts.
+ * 
+ * <pre>
+ *     [  w(x)2 w(x)3 w(y)1           -------------------! # forced
+ *      [              r(x)0 w(x)1                    !
+ *       							  [  r(x)3 w(x)4   ---! # forced
+ * </pre>
+ * 
+ * T2 has to release early. T1 has to update x before T2 aborts. Then T2 has to
+ * release before attempting to finish the commit. T3 has to grab and access x
+ * before T2 finishes the commit.
+ */
+public class WriteOnlyTransactionInCascadingAbort extends RMITest {
+	class Threads extends InvasiveMultithreadedTest {
+
+		public void thread1() {
+			Update t = null;
+			try {
+				t = new Update();
+				Variable x = t.accesses((Variable) registry.lookup("x"));
+				Variable y = t.accesses((Variable) registry.lookup("y"));
+
+				t.start();
+				waitForTick(1);
+				waitForTick(2);
+
+				x.write(2);
+
+				x.write(3);
+
+				y.write(1);
+
+				waitForTick(4);
+				t.commitInterrupted(createWaiterForTick(5), createWaiterForTick(6,7));
+
+				waitForTick(8);
+				waitForTick(9);
+
+				Assert.fail("Transaction comitted when it should have aborted");
+
+			} catch (RollbackForcedException e) {
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
+			} finally {
+				t.stopHeartbeat();
+			}
+
+			waitForTick(99);
+			try {
+				TransactionFailureMonitor.getInstance().emergencyStop();
+			} catch (RemoteException e) {
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
+			}
+		}
+
+		public void thread2() {
+			Transaction t = null;
+			try {
+				t = new Transaction();
+				Variable x = t.accesses((Variable) registry.lookup("x"), 2);
+
+				waitForTick(1);
+				t.start();
+				waitForTick(2);
+
+				int v1 = x.read();
+				Assert.assertEquals(0, v1);
+
+				x.write(v1 + 1); // early release
+
+				waitForTick(3);
+				waitForTick(5);
+				waitForTick(6);
+				t.rollback();
+				waitForTick(7);
+
+				waitForTick(8);
+
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
+			} finally {
+				t.stopHeartbeat();
+			}
+
+			waitForTick(99);
+			try {
+				TransactionFailureMonitor.getInstance().emergencyStop();
+			} catch (RemoteException e) {
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
+			}
+		}
+
+		public void thread3() {
+			Transaction t = null;
+			try {
+				t = new Transaction();
+				Variable x = t.accesses((Variable) registry.lookup("x"), 2);
+
+				waitForTick(5);
+				t.start();
+
+				int v1 = x.read();
+				Assert.assertEquals(3, v1);
+
+				x.write(v1 + 1); // early release
+
+
+				t.commit();
+				waitForTick(6);
+				waitForTick(7);
+
+				waitForTick(8);
+
+				Assert.fail("Transaction comitted when it should have aborted");
+
+			} catch (RollbackForcedException e) {
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
+			} finally {
+				t.stopHeartbeat();
+			}
+
+			waitForTick(99);
+			try {
+				TransactionFailureMonitor.getInstance().emergencyStop();
+			} catch (RemoteException e) {
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e.getCause());
+			}
+		}
+	}
+
+	@Test
+	public void simultaneousReadWriteAndWriteOnly() throws Throwable {
+		TestFramework.runOnce(new Threads());
+
+		Assert.assertEquals(0, state("x"));
+		Assert.assertEquals(0, state("y"));
+	}
+}

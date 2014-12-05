@@ -2,6 +2,7 @@ package put.atomicrmi;
 
 import java.rmi.RemoteException;
 import java.util.Collections;
+import java.util.concurrent.Callable;
 
 import put.atomicrmi.Access.Mode;
 
@@ -74,7 +75,7 @@ public class Update extends Transaction {
 
 		// }
 	}
-	
+
 	@Override
 	protected boolean waitForSnapshots() {
 		boolean commit = true;
@@ -84,7 +85,7 @@ public class Update extends Transaction {
 			try {
 				// TODO commit = commit && proxy.waitForSnapshots(); ?
 				proxy.update(); // UPDATE
-				
+
 				// wait for snapshot does not need to check access condition
 				if (!proxy.waitForSnapshot())
 					commit = false;
@@ -120,13 +121,13 @@ public class Update extends Transaction {
 		} catch (RemoteException e) {
 			throw new TransactionException("Unable to initialize transaction.", e);
 		}
-		
+
 		setState(STATE_RUNNING);
 		// Start end
 
 		// Update and wait for snapshots
 		boolean commit = waitForSnapshots();
-		
+
 		// Commit begin
 		if (!commit) {
 			finishProxies(true);
@@ -143,17 +144,97 @@ public class Update extends Transaction {
 		}
 		// Commit end
 	}
-	
+
+	/**
+	 * I need this for testing cascading aborts, but I don't want to put it into
+	 * the original commit, so this is the same code as commit (or it should
+	 * be).
+	 * 
+	 * <p>
+	 * Sorry, future developer.
+	 * 
+	 * @param postStart
+	 * @param postSnapshots
+	 * @throws TransactionException
+	 * @throws RollbackForcedException
+	 */
+	public <T> void commitInterrupted(Callable<T> postStart, Callable<T> postSnapshots) throws TransactionException,
+			RollbackForcedException {
+
+		// Start begin
+		try {
+			heartbeatThread = new Thread(heartbeat, "Heartbeat for " + id);
+			heartbeatThread.start();
+
+			Collections.sort(proxies, comparator);
+
+			for (IObjectProxy proxy : proxies) {
+				proxy.lock();
+			}
+
+			for (IObjectProxy proxy : proxies) {
+				proxy.startTransaction();
+			}
+
+			for (IObjectProxy proxy : proxies) {
+				proxy.unlock();
+			}
+
+		} catch (RemoteException e) {
+			throw new TransactionException("Unable to initialize transaction.", e);
+		}
+
+		setState(STATE_RUNNING);
+		// Start end
+
+		if (postStart != null) {
+			try {
+				postStart.call();
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new TransactionException(e.getLocalizedMessage(), e.getCause());
+			}
+		}
+
+		// Update and wait for snapshots
+		boolean commit = waitForSnapshots();
+
+		if (postSnapshots != null) {
+			try {
+				postSnapshots.call();
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new TransactionException(e.getLocalizedMessage(), e.getCause());
+			}
+		}
+
+		// Commit begin
+		if (!commit) {
+			finishProxies(true);
+			setState(STATE_ROLLEDBACK);
+			throw new RollbackForcedException("Rollback forced during commit.");
+		}
+
+		finishProxies(false);
+		setState(STATE_COMMITED);
+
+		// Signal heartbeater to stop.
+		synchronized (heartbeat) {
+			heartbeat.notify();
+		}
+		// Commit end
+	}
+
 	@Override
 	public void rollback() throws TransactionException {
 		// nothing?
 	}
-	
+
 	@Override
 	public <T> void release(T object) throws TransactionException, RemoteException {
 		// nothing?
 	}
-	
+
 	/**
 	 * Stop heartbeat monitor due to an emergency.
 	 */

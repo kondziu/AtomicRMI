@@ -13,7 +13,7 @@ import put.unit.vars.Variable;
 import put.unit.vars.VariableImpl;
 
 public class RMITest {
-	protected  Registry registry;
+	protected Registry registry;
 
 	/**
 	 * Helper function to get the state of a variable (non-transacitonally).
