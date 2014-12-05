@@ -111,7 +111,7 @@ public class SimultaneousReadWriteAndWriteOnlyForcedAbort extends RMITest {
 	}
 
 	@Test
-	public void simultaneousReadWriteAndWriteOnly() throws Throwable {
+	public void simultaneousReadWriteAndWriteOnlyForcedAbort() throws Throwable {
 		TestFramework.runOnce(new Threads());
 
 		Assert.assertEquals(0, state("x"));

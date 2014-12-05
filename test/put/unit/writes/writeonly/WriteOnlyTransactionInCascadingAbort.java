@@ -154,7 +154,7 @@ public class WriteOnlyTransactionInCascadingAbort extends RMITest {
 	}
 
 	@Test
-	public void simultaneousReadWriteAndWriteOnly() throws Throwable {
+	public void writeOnlyTransactionInCascadingAbort() throws Throwable {
 		TestFramework.runOnce(new Threads());
 
 		Assert.assertEquals(0, state("x"));
