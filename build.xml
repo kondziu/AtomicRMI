@@ -319,15 +319,16 @@
 	<target name="javadoc" description="generate API documentation for Atomic RMI">
 		<javadoc destdir="${dir.javadoc}" author="true" version="true" use="true" windowtitle="${javadoc.title.window}" classpathref="project.class.path">
 			<packageset dir="${dir.src}" defaultexcludes="yes">
-				<include name="soa/atomicrmi/**" />
+				<include name="put/**" />
 			</packageset>
 			<packageset dir="${dir.test}" defaultexcludes="yes">
-				<include name="soa/atomicrmi/test/**" />
+				<include name="put/unit/**" />					
 			</packageset>
 			<doctitle>${javadoc.title.document}</doctitle>
 			<bottom>${javadoc.bottom}</bottom>
-			<group title="Core" packages="soa.atomicrmi" />
-			<group title="Examples" packages="soa.atomicrmi.test:soa.atomicrmi.test.*:crash:crash.*" />
+			<group title="Core" packages="put.atomicrmi.*" />
+			<group title="Tests" packages="put.unit.*" />
+			<group title="Utils" packages="put.sync.*" />
 		</javadoc>
 	</target>
 
