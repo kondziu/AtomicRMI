@@ -428,9 +428,10 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	@SuppressWarnings("unchecked")
 	public <T> T accesses(T obj, long allCalls, long reads, long writes, Mode mode) throws TransactionException {
 		if (allCalls != INF && allCalls < 1)
-			throw new TransactionException("Invalid upper bound: negative number of invocations (" + allCalls + ").");
+			throw new TransactionException("Invalid upper bound: zero or negative number of invocations (" + allCalls
+					+ ").");
 
-		if (writes != INF && writes < 1)
+		if (writes != INF && writes < 0)
 			throw new TransactionException("Invalid upper bound: negative number of writes (" + writes + ").");
 
 		if (allCalls != INF && writes == INF)

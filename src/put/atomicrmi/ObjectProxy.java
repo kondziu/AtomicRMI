@@ -83,7 +83,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			try {
 				commit = waitForSnapshot(); // 19 & 20
 				// line 21 will be taken care of in wait for snapshots
-				finishTransaction(commit); // 22
+				finishTransaction(!commit); // 22
 			} catch (RemoteException e) {
 				throw new RuntimeException(e);
 			}
@@ -500,7 +500,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 				object.waitForCounter(px - 1); // 24
 
-				snapshot = object.snapshot(); 
+				snapshot = object.snapshot();
 
 				try {
 					writeRecorder.applyChanges(object);
@@ -642,7 +642,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			}
 
 			synchronized (this) {
-				if (writeRecorder != null) {				
+				if (writeRecorder != null) {
 					object.waitForCounter(px - 1); // 24
 					object.transactionLock(tid);
 
@@ -662,18 +662,25 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 					// Remove buffer.
 					buffer = null;
-					
-					object.transactionUnlock(tid);
 
 					// Release object.
 					object.setCurrentVersion(px); // 27
 					releaseTransaction(); // 29
+					
+					object.transactionUnlock(tid);
 				}
 			}
 
 			object.waitForSnapshot(px - 1); // FIXME it gets stuck in here.
-					
-			if (mv != 0 && mv != RELEASED && snapshot.getReadVersion() == object.getCurrentVersion())
+
+			if (mv != 0 && mv != RELEASED && snapshot.getReadVersion() == object.getCurrentVersion()/*
+																									 * &&
+																									 * mode
+																									 * !=
+																									 * Mode
+																									 * .
+																									 * READ_ONLY
+																									 */)
 				object.setCurrentVersion(px);
 
 			releaseTransaction();
@@ -682,6 +689,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 				return true;
 
 			boolean commit = snapshot.getReadVersion() <= object.getCurrentVersion();
+
 			return commit;
 		}
 	}

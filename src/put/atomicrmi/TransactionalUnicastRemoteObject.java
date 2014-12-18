@@ -341,6 +341,8 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 			lt.release(1);
 			return;
 		}
+		
+		
 
 		if (restore && snapshot.getReadVersion() < getCurrentVersion()) {
 
