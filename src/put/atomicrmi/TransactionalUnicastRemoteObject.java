@@ -35,6 +35,8 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.UUID;
 
 import put.atomicrmi.Access.Mode;
+import put.hpcbench.bank.atomicrmi.optsva.Account;
+import put.utils.UniversalTranslator;
 
 /**
  * Base class for all remote object implementations that are part of some
@@ -191,6 +193,12 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 */
 	void setCurrentVersion(long value) {
 		synchronized (cv) {
+			try {
+				System.out.println("setting current version to " + value + " at " + ((Account) this).getID());
+			} catch (RemoteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			cv.value = value;
 		}
 	}
@@ -265,6 +273,14 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 *             when error occurs during snapshot creation.
 	 */
 	Snapshot snapshot() throws TransactionException {
+		try {
+			System.out.println(UniversalTranslator.byKey(" Creating anew snapshot with rv = " + cv.value + " of "
+					+ ((Account) this).getID()));
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		return new Snapshot(serializeThis(), cv.value);
 	}
 
@@ -285,6 +301,12 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 * other transactions to start the execution.
 	 */
 	void releaseTransaction() {
+		try {
+			System.out.println(" set LV to  " + (lv.getAvailable() - 1) + " for " + ((Account) this).getID());
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		lv.release(1);
 	}
 
@@ -338,11 +360,10 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 */
 	void finishTransaction(UUID tid, Snapshot snapshot, boolean restore) throws TransactionException {
 		if (snapshot == null) {
+			System.out.println(UniversalTranslator.byKey(tid) + " finishTransaction, null snapshot");
 			lt.release(1);
 			return;
 		}
-		
-		
 
 		if (restore && snapshot.getReadVersion() < getCurrentVersion()) {
 
@@ -350,6 +371,13 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 			transactionLock(tid);
 
 			restoreThis(snapshot.getImage());
+			try {
+				System.out.println(UniversalTranslator.byKey(tid) + " finishTransacton set cv to "
+						+ snapshot.getReadVersion() + " " + ((Account) this).getID());
+			} catch (RemoteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			setCurrentVersion(snapshot.getReadVersion());
 
 			// Forced unlock is necessary because of possible failures.

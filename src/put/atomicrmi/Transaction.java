@@ -32,6 +32,8 @@ import java.util.Set;
 import java.util.UUID;
 
 import put.atomicrmi.Access.Mode;
+import put.hpcbench.bank.atomicrmi.optsva.Account;
+import put.utils.UniversalTranslator;
 
 /**
  * The main class for controlling transaction life time. Provides methods to
@@ -574,13 +576,18 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 *             to be rolled-back.
 	 */
 	public void commit() throws TransactionException, RollbackForcedException {
+		System.out.println(UniversalTranslator.byKey(id) + " committing");
+		
 		if (!waitForSnapshots()) {
+			System.out.println(UniversalTranslator.byKey(id) + " committing, not snapshots");
 			finishProxies(true);
 			setState(STATE_ROLLEDBACK);
 			throw new RollbackForcedException("Rollback forced during commit.");
 		}
 
+		System.out.println(UniversalTranslator.byKey(id) + " committing, snapshots");
 		finishProxies(false);
+		
 		setState(STATE_COMMITED);
 
 		// Signal heartbeater to stop.
@@ -637,13 +644,24 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 		for (IObjectProxy proxy : proxies) {
 			try {
 				// TODO commit = commit && proxy.waitForSnapshots(); ?
-				if (!proxy.waitForSnapshot())
+				if (!proxy.waitForSnapshot()) {
+					System.out.println(UniversalTranslator.byKey(id) + " wait for snapshots, forced abort at " + proxy.getSortingKey() + " " + ((Account)proxy.getWrapped(false)).getID());
 					commit = false;
+				} else {
+					System.out.println(UniversalTranslator.byKey(id) + " wait for snapshots, success at " + proxy.getSortingKey() + " " + ((Account)proxy.getWrapped(false)).getID());
+				}
 			} catch (RemoteException e) {
+				try {
+					System.out.println(UniversalTranslator.byKey(id) + " wait for snapshots, failure" + " " + ((Account)proxy.getWrapped(false)).getID());
+				} catch (RemoteException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				commit = false;
 			}
 		}
 
+		System.out.println(UniversalTranslator.byKey(id) + " done wait for snapshots, result " + commit);
 		return commit;
 	}
 
@@ -674,6 +692,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 		// TODO parallel for
 		for (IObjectProxy proxy : proxies) {
 			try {
+				System.out.println(UniversalTranslator.byKey(id) + " finish proxies, restore: " + restore + " " + ((Account)proxy.getWrapped(false)).getID());
 				proxy.finishTransaction(restore);
 			} catch (RemoteException e) {
 				// Do nothing. This situation is treated as remote object
