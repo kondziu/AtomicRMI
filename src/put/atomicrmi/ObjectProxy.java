@@ -78,9 +78,9 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 				System.out.println(UniversalTranslator.byKey(tid) + " ReadThread is set cv to "
 						+ object.getCurrentVersion() + " " + ((Account) object).getID());
 
-//				System.out.println(UniversalTranslator.byKey(tid) + " ReadThread release  " + px + " for " + ((Account) object).getID());
-//				releaseTransaction(); // 16
-//				System.out.println(UniversalTranslator.byKey(tid) + " ReadThread released  " + px + " for " + ((Account) object).getID());
+				System.out.println(UniversalTranslator.byKey(tid) + " ReadThread release  " + px + " for " + ((Account) object).getID());
+				releaseTransaction(); // 16
+				System.out.println(UniversalTranslator.byKey(tid) + " ReadThread released  " + px + " for " + ((Account) object).getID());
 
 				
 			} catch (Exception e) {
