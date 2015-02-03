@@ -81,7 +81,9 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 			// dismiss
 			try {
+//				object.transactionLock(tid);
 				commit = waitForSnapshot(); // 19 & 20
+//				object.transactionUnlock(tid);
 				// line 21 will be taken care of in wait for snapshots
 				finishTransaction(!commit); // 22
 			} catch (RemoteException e) {
@@ -673,17 +675,11 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 			object.waitForSnapshot(px - 1); // FIXME it gets stuck in here.
 
-			if (mv != 0 && mv != RELEASED && snapshot.getReadVersion() == object.getCurrentVersion()/*
-																									 * &&
-																									 * mode
-																									 * !=
-																									 * Mode
-																									 * .
-																									 * READ_ONLY
-																									 */)
+			if (mv != 0 && mv != RELEASED && snapshot.getReadVersion() == object.getCurrentVersion())
 				object.setCurrentVersion(px);
 
-			releaseTransaction();
+			if (readThread != Thread.currentThread())
+				releaseTransaction();
 
 			if (snapshot == null)
 				return true;
