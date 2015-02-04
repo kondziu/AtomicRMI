@@ -443,7 +443,15 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 				throw new RemoteException(e.getMessage(), e.getCause());
 			}
 
-			mv++;
+			/**
+			 * Read only mode sets mv=RELEASED in a separate thread prior to
+			 * reading, so, if we increment it here, it will cause mv to be
+			 * incremented AFTER it's been set to RELEASED, and cause trouble
+			 * during commit. In that situation commit will think that the
+			 * variable was not yet released (because mv > RELEASED) and release
+			 * it again. Hillarity will then ensue.
+			 */
+			// mv++;
 			mrv++;
 
 			return true;
