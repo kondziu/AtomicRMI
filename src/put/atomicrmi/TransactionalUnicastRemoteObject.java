@@ -194,7 +194,7 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	void setCurrentVersion(long value) {
 		synchronized (cv) {
 			try {
-				System.out.println("setting current version to " + value + " at " + ((Account) this).getID());
+				System.out.println("[" + System.nanoTime() + "] " + "setting current version to " + value + " at " + ((Account) this).getID());
 			} catch (RemoteException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -274,7 +274,7 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 */
 	Snapshot snapshot() throws TransactionException {
 		try {
-			System.out.println(UniversalTranslator.byKey(" Creating anew snapshot with rv = " + cv.value + " of "
+			System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(" Creating anew snapshot with rv = " + cv.value + " of "
 					+ ((Account) this).getID()));
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
@@ -302,7 +302,7 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 */
 	void releaseTransaction() {
 		try {
-			System.out.println(" set LV to  " + (lv.getAvailable() - 1) + " for " + ((Account) this).getID());
+			System.out.println("[" + System.nanoTime() + "] " + " set LV to  " + (lv.getAvailable() - 1) + " for " + ((Account) this).getID());
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -360,7 +360,7 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 */
 	void finishTransaction(UUID tid, Snapshot snapshot, boolean restore) throws TransactionException {
 		if (snapshot == null) {
-			System.out.println(UniversalTranslator.byKey(tid) + " finishTransaction, null snapshot");
+			System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid) + " finishTransaction, null snapshot");
 			lt.release(1);
 			return;
 		}
@@ -372,7 +372,7 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 
 			restoreThis(snapshot.getImage());
 			try {
-				System.out.println(UniversalTranslator.byKey(tid) + " finishTransacton set cv to "
+				System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid) + " finishTransacton set cv to "
 						+ snapshot.getReadVersion() + " " + ((Account) this).getID());
 			} catch (RemoteException e) {
 				// TODO Auto-generated catch block

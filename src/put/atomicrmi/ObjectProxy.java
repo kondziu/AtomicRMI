@@ -62,27 +62,31 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		@Override
 		public void run() {
 			try {
-				System.out.println(UniversalTranslator.byKey(tid) + " ReadThread wait for counter px-1  " + (px -1) + " for " + ((Account) object).getID());
+				System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+						+ " ReadThread wait for counter px-1  " + (px - 1) + " for " + ((Account) object).getID());
 				object.waitForCounter(px - 1); // 12
-				System.out.println(UniversalTranslator.byKey(tid) + " ReadThread end wait for counter px-1  " + (px -1) + " for " + ((Account) object).getID());
+				System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+						+ " ReadThread end wait for counter px-1  " + (px - 1) + " for " + ((Account) object).getID());
 				object.transactionLock(tid);
 				// we have to make a snapshot, else it thinks we didn't read the
 				// object and in effect we don't get cv and rv
 				snapshot = object.snapshot(); // 15
-				System.out.println(UniversalTranslator.byKey(tid) + " ReadThread made snapshot with rv "
-						+ snapshot.getReadVersion() + " " + ((Account) object).getID());
-				buffer = object.clone(); // 13
-				System.out.println(UniversalTranslator.byKey(tid) + " ReadThread set cv to " + px + " "
+				System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+						+ " ReadThread made snapshot with rv " + snapshot.getReadVersion() + " "
 						+ ((Account) object).getID());
+				buffer = object.clone(); // 13
+				System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+						+ " ReadThread set cv to " + px + " " + ((Account) object).getID());
 				object.setCurrentVersion(px); // 14
-				System.out.println(UniversalTranslator.byKey(tid) + " ReadThread is set cv to "
-						+ object.getCurrentVersion() + " " + ((Account) object).getID());
+				System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+						+ " ReadThread is set cv to " + object.getCurrentVersion() + " " + ((Account) object).getID());
 
-				System.out.println(UniversalTranslator.byKey(tid) + " ReadThread release  " + px + " for " + ((Account) object).getID());
+				System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+						+ " ReadThread release  " + px + " for " + ((Account) object).getID());
 				releaseTransaction(); // 16
-				System.out.println(UniversalTranslator.byKey(tid) + " ReadThread released  " + px + " for " + ((Account) object).getID());
+				System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+						+ " ReadThread released  " + px + " for " + ((Account) object).getID());
 
-				
 			} catch (Exception e) {
 				// FIXME the client-side should see the exceptions from this
 				// thread.
@@ -99,8 +103,8 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 				commit = waitForSnapshot(); // 19 & 20
 				// line 21 will be taken care of in wait for snapshots
 
-				System.out.println(UniversalTranslator.byKey(tid) + " comitting in read-only mode, success? " + commit
-						+ " " + ((Account) object).getID());
+				System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+						+ " comitting in read-only mode, success? " + commit + " " + ((Account) object).getID());
 				finishTransaction(!commit); // 22
 			} catch (RemoteException e) {
 				throw new RuntimeException(e);
@@ -127,10 +131,12 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		public void run() {
 			synchronized (ObjectProxy.this) {
 				try {
-					System.out.println(UniversalTranslator.byKey(tid) + " WriteThread wait for counter px-1  " + (px -1) + " for " + ((Account) object).getID());
-					object.waitForCounter(px - 1); //24
-					System.out.println(UniversalTranslator.byKey(tid) + " WriteThread end wait for counter px-1  " + (px -1) + " for " + ((Account) object).getID());
-
+					System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+							+ " WriteThread wait for counter px-1  " + (px - 1) + " for " + ((Account) object).getID());
+					object.waitForCounter(px - 1); // 24
+					System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+							+ " WriteThread end wait for counter px-1  " + (px - 1) + " for "
+							+ ((Account) object).getID());
 
 					object.transactionLock(tid);
 
@@ -143,8 +149,9 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 					// We have to make a snapshot, else it thinks we didn't read
 					// the object and in effect we don't get cv and rv.
 					snapshot = object.snapshot(); // 28
-					System.out.println(UniversalTranslator.byKey(tid) + " writeThread made snapshot with rv "
-							+ snapshot.getReadVersion() + " " + ((Account) object).getID());
+					System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+							+ " writeThread made snapshot with rv " + snapshot.getReadVersion() + " "
+							+ ((Account) object).getID());
 
 					writeRecorder.applyChanges(object); // 24-25
 
@@ -167,11 +174,12 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 					}
 
 					// Release object.
-					System.out.println(UniversalTranslator.byKey(tid) + " WriteThread set cv to " + px + " "
-							+ ((Account) object).getID());
+					System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+							+ " WriteThread set cv to " + px + " " + ((Account) object).getID());
 					object.setCurrentVersion(px); // 27
-					
-					System.out.println(UniversalTranslator.byKey(tid) +  " writeThread release  " + px + " for " + ((Account) object).getID());
+
+					System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+							+ " writeThread release  " + px + " for " + ((Account) object).getID());
 					releaseTransaction(); // 29
 				} catch (Exception e) {
 					// FIXME the client-side should see the exceptions from this
@@ -336,8 +344,8 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		TransactionFailureMonitor.getInstance().startMonitoring(this);
 		px = object.startTransaction(tid);
 
-		System.out.println(UniversalTranslator.byKey(tid) + " gets pv for " + ((Account) object).getID() + " equal to "
-				+ px);
+		System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid) + " gets pv for "
+				+ ((Account) object).getID() + " equal to " + px);
 
 		mv = 0;
 		mwv = 0;
@@ -444,13 +452,15 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 				}
 
 				// Release.
-				System.out.println(UniversalTranslator.byKey(tid) + " postWrite set cv to " + px + " "
-						+ ((Account) object).getID());
+				System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+						+ " postWrite set cv to " + px + " " + ((Account) object).getID());
 				object.setCurrentVersion(px); // 27
-				
-				System.out.println(UniversalTranslator.byKey(tid) +  "postWrite release  " + px + " for " + ((Account) object).getID());
+
+				System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+						+ "postWrite release  " + px + " for " + ((Account) object).getID());
 				releaseTransaction(); // 29
-				System.out.println(UniversalTranslator.byKey(tid) +  "postWrite released  " + px + " for " + ((Account) object).getID());
+				System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+						+ "postWrite released  " + px + " for " + ((Account) object).getID());
 
 			} else {
 				writeThread = new WriteThread();
@@ -476,7 +486,15 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 				throw new RemoteException(e.getMessage(), e.getCause());
 			}
 
-			mv++;
+			/**
+			 * Read only mode sets mv=RELEASED in a separate thread prior to
+			 * reading, so, if we increment it here, it will cause mv to be
+			 * incremented AFTER it's been set to RELEASED, and cause trouble
+			 * during commit. In that situation commit will think that the
+			 * variable was not yet released (because mv > RELEASED) and release
+			 * it again. Hillarity will then ensue.
+			 */
+			// mv++;
 			mrv++;
 
 			return true;
@@ -500,15 +518,18 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 			// If there were no reads, wait for access and make snapshot.
 			if (mrv == 0) {
-				System.out.println(UniversalTranslator.byKey(tid) + " ReadThread wait for counter px-1  " + (px -1) + " for " + ((Account) object).getID());
-				object.waitForCounter(px - 1); 
-				System.out.println(UniversalTranslator.byKey(tid) + " ReadThread end wait for counter px-1  " + (px -1) + " for " + ((Account) object).getID());
+				System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+						+ " ReadThread wait for counter px-1  " + (px - 1) + " for " + ((Account) object).getID());
+				object.waitForCounter(px - 1);
+				System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+						+ " ReadThread end wait for counter px-1  " + (px - 1) + " for " + ((Account) object).getID());
 
 				object.transactionLock(tid);
 
 				snapshot = object.snapshot();
-				System.out.println(UniversalTranslator.byKey(tid) + " preRead (1) made snapshot with rv "
-						+ snapshot.getReadVersion() + " " + ((Account) object).getID());
+				System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+						+ " preRead (1) made snapshot with rv " + snapshot.getReadVersion() + " "
+						+ ((Account) object).getID());
 			} else {
 				object.transactionLock(tid);
 			}
@@ -538,14 +559,16 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 				// Twist! Actually there were no reads! Synchronize with write
 				// buffer.
 				object.transactionLock(tid);
-				System.out.println(UniversalTranslator.byKey(tid) + " preRead wait for counter px-1  " + (px -1) + " for " + ((Account) object).getID());
-				object.waitForCounter(px - 1);  //24
-				System.out.println(UniversalTranslator.byKey(tid) + " preRead end wait for counter px-1  " + (px -1) + " for " + ((Account) object).getID());
-
+				System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+						+ " preRead wait for counter px-1  " + (px - 1) + " for " + ((Account) object).getID());
+				object.waitForCounter(px - 1); // 24
+				System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+						+ " preRead end wait for counter px-1  " + (px - 1) + " for " + ((Account) object).getID());
 
 				snapshot = object.snapshot();
-				System.out.println(UniversalTranslator.byKey(tid) + " preRead (2) made snapshot with rv "
-						+ snapshot.getReadVersion() + " " + ((Account) object).getID());
+				System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+						+ " preRead (2) made snapshot with rv " + snapshot.getReadVersion() + " "
+						+ ((Account) object).getID());
 
 				try {
 					writeRecorder.applyChanges(object);
@@ -620,17 +643,21 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			// Empty.
 		} else {
 			if (mv == ub) {
-				System.out.println(UniversalTranslator.byKey(tid) + " postRead wait for counter px-1  " + (px -1) + " for " + ((Account) object).getID());
-				object.waitForCounter(px - 1); 
-				System.out.println(UniversalTranslator.byKey(tid) + " postRead end wait for counter px-1  " + (px -1) + " for " + ((Account) object).getID());
-	
-				System.out.println(UniversalTranslator.byKey(tid) + " postRead set cv to " + px + " "
-						+ ((Account) object).getID());
+				System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+						+ " postRead wait for counter px-1  " + (px - 1) + " for " + ((Account) object).getID());
+				object.waitForCounter(px - 1);
+				System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+						+ " postRead end wait for counter px-1  " + (px - 1) + " for " + ((Account) object).getID());
+
+				System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+						+ " postRead set cv to " + px + " " + ((Account) object).getID());
 				object.setCurrentVersion(px);
-				
-				System.out.println(UniversalTranslator.byKey(tid) +  "postRead release  " + px + " for " + ((Account) object).getID());
+
+				System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+						+ "postRead release  " + px + " for " + ((Account) object).getID());
 				releaseTransaction();
-				System.out.println(UniversalTranslator.byKey(tid) +  "postRead released  " + px + " for " + ((Account) object).getID());
+				System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+						+ "postRead released  " + px + " for " + ((Account) object).getID());
 			}
 			object.transactionUnlock(tid);
 		}
@@ -656,12 +683,13 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 	public void releaseTransaction() throws RemoteException {
 		if (mv != RELEASED) {
-			System.out.println(UniversalTranslator.byKey(tid) + " actually release "	+ ((Account) object).getID());
+			System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid) + " actually release "
+					+ ((Account) object).getID());
 			object.releaseTransaction();
 			mv = RELEASED;
 		} else {
-			System.out.println(UniversalTranslator.byKey(tid) + " not actually release "	+ ((Account) object).getID());
-
+			System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+					+ " not actually release " + ((Account) object).getID());
 		}
 	}
 
@@ -671,8 +699,8 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		} else {
 			TransactionFailureMonitor.getInstance().stopMonitoring(this);
 
-			System.out.println(UniversalTranslator.byKey(tid) + " finish transaction, restore? " + restore + " "
-					+ ((Account) object).getID());
+			System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+					+ " finish transaction, restore? " + restore + " " + ((Account) object).getID());
 			object.finishTransaction(tid, snapshot, restore);
 
 			over = true;
@@ -689,8 +717,8 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 				throw new RemoteException(e.getMessage(), e.getCause());
 			}
 
-			System.out.println(UniversalTranslator.byKey(tid) + " return (1) " + readThread.commit + " "
-					+ ((Account) object).getID());
+			System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid) + " return (1) "
+					+ readThread.commit + " " + ((Account) object).getID());
 
 			return readThread.commit; // line 21
 		} else {
@@ -704,17 +732,22 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 			synchronized (this) {
 				if (writeRecorder != null) {
-					System.out.println(UniversalTranslator.byKey(tid) + " waitForSnapshot wait for counter px-1  " + (px -1) + " for " + ((Account) object).getID());
-					object.waitForCounter(px - 1); //24
-					System.out.println(UniversalTranslator.byKey(tid) + " waitForSnapshot end wait for counter px-1  " + (px -1) + " for " + ((Account) object).getID());
+					System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+							+ " waitForSnapshot wait for counter px-1  " + (px - 1) + " for "
+							+ ((Account) object).getID());
+					object.waitForCounter(px - 1); // 24
+					System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+							+ " waitForSnapshot end wait for counter px-1  " + (px - 1) + " for "
+							+ ((Account) object).getID());
 
 					object.transactionLock(tid);
 
 					// We have to make a snapshot, else it thinks we didn't read
 					// the object and in effect we don't get cv and rv.
 					snapshot = object.snapshot(); // 28
-					System.out.println(UniversalTranslator.byKey(tid) + " waitForSnapshot made snapshot with rv "
-							+ snapshot.getReadVersion() + " " + ((Account) object).getID());
+					System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+							+ " waitForSnapshot made snapshot with rv " + snapshot.getReadVersion() + " "
+							+ ((Account) object).getID());
 
 					try {
 						writeRecorder.applyChanges(object); // 24-25
@@ -730,19 +763,23 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 					buffer = null;
 
 					// Release object.
-					System.out.println(UniversalTranslator.byKey(tid) + " waitForSnapshot (1) set cv to " + px + " "
-							+ ((Account) object).getID());
+					System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+							+ " waitForSnapshot (1) set cv to " + px + " " + ((Account) object).getID());
 					object.setCurrentVersion(px); // 27
-					
-					System.out.println(UniversalTranslator.byKey(tid) +  " waitForSnapshot release  " + px + " for " + ((Account) object).getID());
+
+					System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+							+ " waitForSnapshot release  " + px + " for " + ((Account) object).getID());
 					releaseTransaction(); // 29
-					System.out.println(UniversalTranslator.byKey(tid) +  " waitForSnapshot released  " + px + " for " + ((Account) object).getID());
+					System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+							+ " waitForSnapshot released  " + px + " for " + ((Account) object).getID());
 
 					object.transactionUnlock(tid);
 				}
 			}
 
-			object.waitForSnapshot(px - 1); 
+			object.waitForSnapshot(px - 1);
+
+			// object.transactionLock(tid);
 
 			if (mv != 0 && mv != RELEASED && snapshot.getReadVersion() == object.getCurrentVersion()) {
 				/*
@@ -750,28 +787,31 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 				 */
 				// object.transactionLock(tid);
 
-				System.out.println(UniversalTranslator.byKey(tid) + " waitForSnapshot (2) set cv" + px + " "
-						+ ((Account) object).getID());
+				System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+						+ " waitForSnapshot (2) set cv" + px + " " + ((Account) object).getID());
 				object.setCurrentVersion(px);
 
 				// object.transactionUnlock(tid);
 			}
 
-			System.out.println(UniversalTranslator.byKey(tid) +  " waitForSnapshot (2) release  " + px + " for " + ((Account) object).getID());
+			System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+					+ " waitForSnapshot (2) release  " + px + " for " + ((Account) object).getID());
 			releaseTransaction();
-			System.out.println(UniversalTranslator.byKey(tid) +  " waitForSnapshot (2) released  " + px + " for " + ((Account) object).getID());
-
+			System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+					+ " waitForSnapshot (2) released  " + px + " for " + ((Account) object).getID());
 
 			if (snapshot == null)
 				return true;
 
-			System.out.println(UniversalTranslator.byKey(tid) + " rv, cv: " + snapshot.getReadVersion() + " <= "
-					+ object.getCurrentVersion() + " = " + (snapshot.getReadVersion() <= object.getCurrentVersion())
-					+ " " + ((Account) object).getID());
+			System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid) + " rv, cv: "
+					+ snapshot.getReadVersion() + " <= " + object.getCurrentVersion() + " = "
+					+ (snapshot.getReadVersion() <= object.getCurrentVersion()) + " " + ((Account) object).getID());
 			boolean commit = snapshot.getReadVersion() <= object.getCurrentVersion();
 
-			System.out.println(UniversalTranslator.byKey(tid) + " return (2) " + commit + " "
-					+ ((Account) object).getID());
+			System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid) + " return (2) "
+					+ commit + " " + ((Account) object).getID());
+
+			// object.transactionUnlock(tid);
 
 			return commit;
 		}
@@ -800,9 +840,11 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	 */
 	public void free() throws RemoteException {
 		if (mv == 0) {
-			System.out.println(UniversalTranslator.byKey(tid) + " free wait for counter px-1  " + (px -1) + " for " + ((Account) object).getID());
-			object.waitForCounter(px - 1); 
-			System.out.println(UniversalTranslator.byKey(tid) + " free end wait for counter px-1  " + (px -1) + " for " + ((Account) object).getID());
+			System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+					+ " free wait for counter px-1  " + (px - 1) + " for " + ((Account) object).getID());
+			object.waitForCounter(px - 1);
+			System.out.println("[" + System.nanoTime() + "] " + UniversalTranslator.byKey(tid)
+					+ " free end wait for counter px-1  " + (px - 1) + " for " + ((Account) object).getID());
 
 			object.transactionLock(tid);
 			snapshot = object.snapshot();
