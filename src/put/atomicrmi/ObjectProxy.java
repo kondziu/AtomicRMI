@@ -81,9 +81,9 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 			// dismiss
 			try {
-//				object.transactionLock(tid);
+				// object.transactionLock(tid);
 				commit = waitForSnapshot(); // 19 & 20
-//				object.transactionUnlock(tid);
+				// object.transactionUnlock(tid);
 				// line 21 will be taken care of in wait for snapshots
 				finishTransaction(!commit); // 22
 			} catch (RemoteException e) {
@@ -327,7 +327,8 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	 * While currently preWrite is just a copy of preAny. I have not started
 	 * doing serious stuff here.
 	 * 
-	 * Best regards and sincere comiserations, Past me
+	 * Best regards and sincere comiserations, 
+	 * Past me
 	 */
 	public boolean preWrite() throws RemoteException {
 		if (over) {
@@ -676,7 +677,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 					// Release object.
 					object.setCurrentVersion(px); // 27
 					releaseTransaction(); // 29
-					
+
 					object.transactionUnlock(tid);
 				}
 			}
