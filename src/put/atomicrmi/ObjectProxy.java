@@ -507,10 +507,10 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			if (mrv == 0) {
 				// Twist! Actually there were no reads! Synchronize with write
 				// buffer.
-				object.transactionLock(tid);
-
 				object.waitForCounter(px - 1); // 24
-
+				
+				object.transactionLock(tid);
+				
 				snapshot = object.snapshot();
 
 				try {
@@ -586,7 +586,8 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			// Empty.
 		} else {
 			if (mv == ub) {
-				object.waitForCounter(px - 1);
+				object.waitForCounter(px - 1); // TODO is this necessary?
+				                               // TODO can this cause a deadlock, because waiting while transaction lock is acquired?
 				object.setCurrentVersion(px);
 				releaseTransaction();
 			}
