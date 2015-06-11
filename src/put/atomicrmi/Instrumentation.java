@@ -14,8 +14,8 @@ import net.sf.cglib.transform.impl.InterceptFieldTransformer;
  * Instrumentation toolkit.
  * 
  * <p>
- * Uses CGlib to intercept field accesses. The purpose
- * of the majority of the code is to get CGlib to do my bidding.
+ * Uses CGlib to intercept field accesses. The purpose of the majority of the
+ * code is to get CGlib to do my bidding.
  * 
  * @author Konrad Siek
  */
@@ -75,20 +75,24 @@ public class Instrumentation {
 	 * @throws IllegalAccessException
 	 * @throws InstantiationException
 	 */
-	synchronized static public final <T> Object transform(final Class<?> cls, final T object, InterceptFieldCallback callback)
+	static public final <T> Object transform(final Class<?> cls, final T object, InterceptFieldCallback callback)
 			throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-		final ClassLoader loader = new TransformingClassLoader(Instrumentation.class.getClassLoader(),
-				new ClassFilter() {
-					public boolean accept(String name) {
-						return name.equals(cls.getName());
-					}
-				}, transformerFactory);
 
-		// System.out.println("Loading " + cls.getName());
-		Class<?> newClass = loader.loadClass(cls.getName());
-		Object instance = newClass.newInstance();
+		final Class<?> newClass;
 
-		InterceptFieldEnabled instanceCast = (InterceptFieldEnabled) instance;
+		synchronized (Instrumentation.class) {
+			final ClassLoader loader = new TransformingClassLoader(Instrumentation.class.getClassLoader(),
+					new ClassFilter() {
+						public boolean accept(String name) {
+							return name.equals(cls.getName());
+						}
+					}, transformerFactory);
+			newClass = loader.loadClass(cls.getName());
+		}
+
+		final Object instance = newClass.newInstance();
+
+		final InterceptFieldEnabled instanceCast = (InterceptFieldEnabled) instance;
 		instanceCast.setInterceptFieldCallback(callback);
 
 		return instance;
