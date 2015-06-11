@@ -75,7 +75,7 @@ public class Instrumentation {
 	 * @throws IllegalAccessException
 	 * @throws InstantiationException
 	 */
-	static public final <T> Object transform(final Class<?> cls, final T object, InterceptFieldCallback callback)
+	synchronized static public final <T> Object transform(final Class<?> cls, final T object, InterceptFieldCallback callback)
 			throws ClassNotFoundException, InstantiationException, IllegalAccessException {
 		final ClassLoader loader = new TransformingClassLoader(Instrumentation.class.getClassLoader(),
 				new ClassFilter() {
@@ -84,7 +84,7 @@ public class Instrumentation {
 					}
 				}, transformerFactory);
 
-		System.out.println("Loading " + cls.getName());
+		// System.out.println("Loading " + cls.getName());
 		Class<?> newClass = loader.loadClass(cls.getName());
 		Object instance = newClass.newInstance();
 
