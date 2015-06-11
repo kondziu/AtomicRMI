@@ -25,7 +25,7 @@ public class StateRecorder implements InterceptFieldCallback {
 	 * @param <T2>
 	 *            right field type
 	 */
-	class Pair<T1, T2> {
+	private class Pair<T1, T2> {
 		public Pair(T1 left, T2 right) {
 			this.left = left;
 			this.right = right;
@@ -38,7 +38,7 @@ public class StateRecorder implements InterceptFieldCallback {
 	/**
 	 * The state recorded by the instrumented accesses.
 	 */
-	Map<String, Pair<Stateful.FieldType, Object>> state = new HashMap<String, Pair<Stateful.FieldType, Object>>();
+	private Map<String, Pair<Stateful.FieldType, Object>> state = new HashMap<String, Pair<Stateful.FieldType, Object>>();
 
 	/**
 	 * Apply changes registered during the instrumented execution to object.

@@ -1,0 +1,9 @@
+1. If experiencing errors with instrumentation such as:
+
+		Class Instrumentation can not access a member of class ... with modifiers "public"
+		Class Instrumentation can not access a member of class ... with modifiers ""
+	
+		Make sure that the class that implements shared objects is 
+			a) public
+			b) has public constructor
+			c) the constructor is parameterless

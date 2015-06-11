@@ -84,6 +84,7 @@ public class Instrumentation {
 					}
 				}, transformerFactory);
 
+		System.out.println("Loading " + cls.getName());
 		Class<?> newClass = loader.loadClass(cls.getName());
 		Object instance = newClass.newInstance();
 
