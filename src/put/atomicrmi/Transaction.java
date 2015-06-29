@@ -175,7 +175,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 * <p>
 	 * It is assumed that read set and write set are disjoint.
 	 */
-	private Set<IObjectProxy> readonly;
+//	private Set<IObjectProxy> readonly;
 
 	/**
 	 * This transaction's write set.
@@ -183,7 +183,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 * <p>
 	 * It is assumed that read set and write set are disjoint.
 	 */
-	private Set<IObjectProxy> writeonly;
+//	private Set<IObjectProxy> writeonly;
 
 	/**
 	 * Heartbeater's thread reference.
@@ -220,8 +220,8 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 		proxies = new ArrayList<IObjectProxy>();
 
 		// XXX probably redundant
-		readonly = new HashSet<IObjectProxy>();
-		writeonly = new HashSet<IObjectProxy>();
+//		readonly = new HashSet<IObjectProxy>();
+//		writeonly = new HashSet<IObjectProxy>();
 
 		heartbeat = new Heartbeat();
 	}
@@ -450,16 +450,16 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 			proxies.add(proxy);
 
 			// XXX probably unnecessary
-			switch (mode) {
-			case READ_ONLY:
-				assert (!writeonly.contains(proxy));
-				readonly.add(proxy);
-				break;
-			case WRITE_ONLY:
-				assert (!readonly.contains(proxy));
-				writeonly.add(proxy);
-				break;
-			}
+//			switch (mode) {
+//			case READ_ONLY:
+//				assert (!writeonly.contains(proxy));
+//				readonly.add(proxy);
+//				break;
+//			case WRITE_ONLY:
+//				assert (!readonly.contains(proxy));
+//				writeonly.add(proxy);
+//				break;
+//			}
 
 			heartbeat.addFailureMonitor(remote.getFailureMonitor());
 			return (T) proxy;
@@ -537,7 +537,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 */
 	public void start() throws TransactionException {
 		try {
-			heartbeatThread = new Thread(heartbeat, "Heartbeat for " + id);
+			heartbeatThread = new Thread(heartbeat);
 			heartbeatThread.start();
 
 			// Arrays.sort(proxies);
