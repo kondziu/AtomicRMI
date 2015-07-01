@@ -113,13 +113,13 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 * The versioning counter for this remote object. The value of this
 	 * semaphore determines the actual versioning counter value.
 	 */
-	private transient Semaphore lv = new Semaphore("lv", 0);
+	private transient Semaphore lv = new Semaphore(0);
 
 	/**
 	 * The checkpoint counter for this remote object. The value of this
 	 * semaphore determines the actual checkpoint counter value.
 	 */
-	private transient Semaphore lt = new Semaphore("lt", 0);
+	private transient Semaphore lt = new Semaphore(0);
 
 	/**
 	 * Current version of this remote object. This value can be decreased during

@@ -46,7 +46,7 @@ public class Semaphore {
 	 * Number of permissions currently available.
 	 */
 	private long available;
-	private String name;
+//	private String name;
 
 	/**
 	 * Initializes new semaphore.
@@ -54,9 +54,9 @@ public class Semaphore {
 	 * @param initial
 	 *            initial number of permits
 	 */
-	public Semaphore(String name, long initial) {
+	public Semaphore(long initial) {
 		available = initial;
-		this.name = name;
+//		this.name = name;
 	}
 
 	/**
@@ -67,7 +67,7 @@ public class Semaphore {
 	 *            number of permits to release
 	 */
 	public synchronized void release(long perm) {
-		System.out.println(name + " rel");
+//		System.out.println(name + " rel");
 		
 		available += perm;
 		notifyAll();
@@ -84,7 +84,7 @@ public class Semaphore {
 	 * @throws InterruptedException
 	 */
 	public synchronized void acquire(long perm) throws InterruptedException {
-		System.out.println(name + " acq");
+//		System.out.println(name + " acq");
 		
 		while (perm > available)
 			wait();

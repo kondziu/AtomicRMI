@@ -637,7 +637,6 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 		for (IObjectProxy proxy : proxies) {
 			try {
 				// TODO commit = commit && proxy.waitForSnapshots(); ?
-				System.out.println("finishing");
 				if (!proxy.waitForSnapshot(false))
 					commit = false;
 			} catch (RemoteException e) {
