@@ -77,6 +77,7 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 		Snapshot(byte[] image, long readVersion) {
 			this.image = image;
 			rv = readVersion;
+			System.out.println("Setting rv " + rv);
 		}
 
 		/**
@@ -112,13 +113,13 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 * The versioning counter for this remote object. The value of this
 	 * semaphore determines the actual versioning counter value.
 	 */
-	private transient Semaphore lv = new Semaphore(0);
+	private transient Semaphore lv = new Semaphore("lv", 0);
 
 	/**
 	 * The checkpoint counter for this remote object. The value of this
 	 * semaphore determines the actual checkpoint counter value.
 	 */
-	private transient Semaphore lt = new Semaphore(0);
+	private transient Semaphore lt = new Semaphore("lt", 0);
 
 	/**
 	 * Current version of this remote object. This value can be decreased during
@@ -306,6 +307,25 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	}
 
 	/**
+	 * Checks if the counter value reaches the required value. Does not block,
+	 * but returns <code>false</code> if not.
+	 * 
+	 * @param value
+	 *            the required versioning counter value.
+	 * @returns <code>true</code> if acquired, <code>false</code> otherwise.
+	 */
+	boolean tryWaitForCounter(long value) throws TransactionException {
+		System.out.println("acquire " + lv.getAvailable());
+		boolean acquired = lv.tryAcquire(value);
+		System.out.println("acquire " + acquired);
+		if (!acquired)
+			return false;
+		else
+			lv.release(value);
+		return true;
+	}
+
+	/**
 	 * Blocks until checkpoint counter reaches the required value.
 	 * 
 	 * @param value
@@ -315,11 +335,24 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 */
 	void waitForSnapshot(long value) throws TransactionException {
 		try {
+			System.out.println("acquire xxx " + lt.getAvailable());
 			lt.acquire(value);
 			lt.release(value);
+			System.out.println("acquired xxx ");
 		} catch (InterruptedException e) {
 			throw new TransactionException("Error waiting for object version", e);
 		}
+	}
+	
+	boolean tryWaitForSnapshot(long value) throws TransactionException {
+		System.out.println("acquire " + lt.getAvailable());
+		boolean acquired = lt.tryAcquire(value);
+		System.out.println("acquire " + acquired);
+		if (!acquired)
+			return false;
+		else
+			lt.release(value);
+		return true;
 	}
 
 	/**
@@ -341,8 +374,6 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 			lt.release(1);
 			return;
 		}
-		
-		
 
 		if (restore && snapshot.getReadVersion() < getCurrentVersion()) {
 

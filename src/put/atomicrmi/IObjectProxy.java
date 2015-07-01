@@ -108,7 +108,7 @@ public interface IObjectProxy extends Remote {
 	 * @throws RemoteException
 	 *             when remote invocation fails.
 	 */
-	void finishTransaction(boolean restore) throws RemoteException;
+	void finishTransaction(boolean restore, boolean readThread) throws RemoteException;
 
 	/**
 	 * Waits for checkpoint counter to reach this object's private counter
@@ -119,7 +119,7 @@ public interface IObjectProxy extends Remote {
 	 * @throws RemoteException
 	 *             when remote invocation fails.
 	 */
-	boolean waitForSnapshot() throws RemoteException;
+	boolean waitForSnapshot(boolean readThread) throws RemoteException;
 
 	/**
 	 * Declare that the object will no longer be used by the current transaction

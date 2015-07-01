@@ -46,6 +46,7 @@ public class Semaphore {
 	 * Number of permissions currently available.
 	 */
 	private long available;
+	private String name;
 
 	/**
 	 * Initializes new semaphore.
@@ -53,8 +54,9 @@ public class Semaphore {
 	 * @param initial
 	 *            initial number of permits
 	 */
-	public Semaphore(long initial) {
+	public Semaphore(String name, long initial) {
 		available = initial;
+		this.name = name;
 	}
 
 	/**
@@ -65,6 +67,8 @@ public class Semaphore {
 	 *            number of permits to release
 	 */
 	public synchronized void release(long perm) {
+		System.out.println(name + " rel");
+		
 		available += perm;
 		notifyAll();
 	}
@@ -80,6 +84,8 @@ public class Semaphore {
 	 * @throws InterruptedException
 	 */
 	public synchronized void acquire(long perm) throws InterruptedException {
+		System.out.println(name + " acq");
+		
 		while (perm > available)
 			wait();
 
@@ -93,5 +99,22 @@ public class Semaphore {
 	 */
 	public synchronized long getAvailable() {
 		return available;
+	}
+	
+	/**
+	 * Tries to acquire specified number of permits. If there is enough permits
+	 * available, the number of permits is decreased and thread execution
+	 * continues. Otherwise the thread does not wait, but returns <code>false</code>.
+	 * 
+	 * @param perm
+	 *            number of permits to acquire
+	 * @throws InterruptedException
+	 */
+	public synchronized boolean tryAcquire(long perm) {
+		if (perm > available)
+			return false;
+
+		available -= perm;
+		return true;
 	}
 }

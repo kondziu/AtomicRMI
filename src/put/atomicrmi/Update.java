@@ -87,7 +87,7 @@ public class Update extends Transaction {
 				proxy.update(); // UPDATE
 
 				// wait for snapshot does not need to check access condition
-				if (!proxy.waitForSnapshot())
+				if (!proxy.waitForSnapshot(false))
 					commit = false;
 			} catch (RemoteException e) {
 				commit = false;

@@ -637,7 +637,8 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 		for (IObjectProxy proxy : proxies) {
 			try {
 				// TODO commit = commit && proxy.waitForSnapshots(); ?
-				if (!proxy.waitForSnapshot())
+				System.out.println("finishing");
+				if (!proxy.waitForSnapshot(false))
 					commit = false;
 			} catch (RemoteException e) {
 				commit = false;
@@ -674,7 +675,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 		// TODO parallel for
 		for (IObjectProxy proxy : proxies) {
 			try {
-				proxy.finishTransaction(restore);
+				proxy.finishTransaction(restore, false);
 			} catch (RemoteException e) {
 				// Do nothing. This situation is treated as remote object
 				// failure would occur after this operation.

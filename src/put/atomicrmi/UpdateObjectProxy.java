@@ -78,7 +78,7 @@ class UpdateObjectProxy extends ObjectProxy {
 	// }
 
 	@Override
-	public void finishTransaction(boolean restore) throws RemoteException {
+	public void finishTransaction(boolean restore, boolean readThread) throws RemoteException {
 		TransactionFailureMonitor.getInstance().stopMonitoring(this);
 
 		object.finishTransaction(tid, snapshot, restore);
