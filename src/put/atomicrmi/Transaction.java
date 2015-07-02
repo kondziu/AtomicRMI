@@ -449,18 +449,6 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 			IObjectProxy proxy = (IObjectProxy) remote.createProxy(this, id, allCalls, reads, writes, mode);
 			proxies.add(proxy);
 
-			// XXX probably unnecessary
-//			switch (mode) {
-//			case READ_ONLY:
-//				assert (!writeonly.contains(proxy));
-//				readonly.add(proxy);
-//				break;
-//			case WRITE_ONLY:
-//				assert (!readonly.contains(proxy));
-//				writeonly.add(proxy);
-//				break;
-//			}
-
 			heartbeat.addFailureMonitor(remote.getFailureMonitor());
 			return (T) proxy;
 		} catch (RemoteException e) {
