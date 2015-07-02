@@ -103,7 +103,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			while (true) {
 				
 				try {
-					Thread.sleep(5);
+					Thread.sleep(2);
 				} catch (InterruptedException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
