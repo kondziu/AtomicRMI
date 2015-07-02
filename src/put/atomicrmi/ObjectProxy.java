@@ -101,6 +101,13 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		public void run() {
 
 			while (true) {
+				
+				try {
+					Thread.sleep(5);
+				} catch (InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 
 				// FIXME this is a mess... all these lists!
 
