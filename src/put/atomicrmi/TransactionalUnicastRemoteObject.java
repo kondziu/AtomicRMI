@@ -77,7 +77,7 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 		Snapshot(byte[] image, long readVersion) {
 			this.image = image;
 			rv = readVersion;
-			System.out.println("Setting rv " + rv);
+//			System.out.println("Setting rv " + rv);
 		}
 
 		/**
@@ -315,9 +315,9 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 * @returns <code>true</code> if acquired, <code>false</code> otherwise.
 	 */
 	boolean tryWaitForCounter(long value) throws TransactionException {
-		System.out.println("acquire " + lv.getAvailable());
+//		System.out.println("acquire " + lv.getAvailable());
 		boolean acquired = lv.tryAcquire(value);
-		System.out.println("acquire " + acquired);
+//		System.out.println("acquire " + acquired);
 		if (!acquired)
 			return false;
 		else
@@ -335,19 +335,19 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 */
 	void waitForSnapshot(long value) throws TransactionException {
 		try {
-			System.out.println("acquire xxx " + lt.getAvailable());
+//			System.out.println("acquire xxx " + lt.getAvailable());
 			lt.acquire(value);
 			lt.release(value);
-			System.out.println("acquired xxx ");
+//			System.out.println("acquired xxx ");
 		} catch (InterruptedException e) {
 			throw new TransactionException("Error waiting for object version", e);
 		}
 	}
 	
 	boolean tryWaitForSnapshot(long value) throws TransactionException {
-		System.out.println("acquire " + lt.getAvailable());
+//		System.out.println("acquire " + lt.getAvailable());
 		boolean acquired = lt.tryAcquire(value);
-		System.out.println("acquire " + acquired);
+//		System.out.println("acquire " + acquired);
 		if (!acquired)
 			return false;
 		else
