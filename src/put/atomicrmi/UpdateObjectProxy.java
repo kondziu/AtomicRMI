@@ -44,7 +44,7 @@ class UpdateObjectProxy extends ObjectProxy {
 	@Override
 	public boolean preSync(Mode accessType) throws RemoteException {
 
-		object.transactionLock(tid);
+		object.transactionLock(uid);
 		if (mwv == 0 && mv == 0) {
 			writeRecorder = new StateRecorder();
 			try {
@@ -63,7 +63,7 @@ class UpdateObjectProxy extends ObjectProxy {
 
 	@Override
 	public void postSync(Mode accessType) throws RemoteException {
-		object.transactionUnlock(tid);
+		object.transactionUnlock(uid);
 	}
 
 	// @Override
@@ -81,7 +81,7 @@ class UpdateObjectProxy extends ObjectProxy {
 	public void finishTransaction(boolean restore, boolean readThread) throws RemoteException {
 		TransactionFailureMonitor.getInstance().stopMonitoring(this);
 
-		object.finishTransaction(tid, snapshot, restore);
+		object.finishTransaction(uid, snapshot, restore);
 
 		over = true;
 		snapshot = null;		
@@ -92,11 +92,11 @@ class UpdateObjectProxy extends ObjectProxy {
 		try {
 			object.waitForCounter(px - 1);
 
-			object.transactionLock(tid);
+			object.transactionLock(uid);
 
 			// Short circuit, if no writes.
 			if (writeRecorder == null) {
-				object.transactionUnlock(tid);
+				object.transactionUnlock(uid);
 				return;
 			}
 
@@ -122,7 +122,7 @@ class UpdateObjectProxy extends ObjectProxy {
 			e.printStackTrace();
 			throw new RuntimeException(e);
 		} finally {
-			object.transactionUnlock(tid);
+			object.transactionUnlock(uid);
 		}
 
 	}

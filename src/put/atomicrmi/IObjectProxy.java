@@ -21,9 +21,7 @@
  */
 package put.atomicrmi;
 
-import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.util.UUID;
 
 import put.atomicrmi.Access.Mode;
 
@@ -33,7 +31,7 @@ import put.atomicrmi.Access.Mode;
  * 
  * @author Wojciech Mruczkiewicz, Konrad Siek
  */
-public interface IObjectProxy extends Remote {
+public interface IObjectProxy extends IdentifiableRemote {
 
 	/**
 	 * Gives the remote reference to the remote object that is being wrapped.
@@ -145,13 +143,6 @@ public interface IObjectProxy extends Remote {
 	 * @throws RemoteException
 	 */
 	void unlock() throws RemoteException;
-
-	/**
-	 * TODO
-	 * 
-	 * @throws RemoteException
-	 */
-	UUID getSortingKey() throws RemoteException;
 
 	/**
 	 * Return specified access mode for this proxy object.

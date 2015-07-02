@@ -701,9 +701,10 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 * A comparator object for sorting remote object proxies by their IDs.
 	 */
 	protected Comparator<IObjectProxy> comparator = new Comparator<IObjectProxy>() {
+//		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public int compare(IObjectProxy a, IObjectProxy b) {
 			try {
-				return a.getSortingKey().compareTo(b.getSortingKey());
+				return (a.getUID().compareTo(b.getUID()));
 			} catch (RemoteException e) {
 				// Nasty hack
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -721,5 +722,10 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 		}
 		heartbeat.shutdown = true;
 		heartbeatThread.interrupt();
+	}
+
+	@Override
+	public UUID getUID() throws RemoteException {
+		return id;
 	}
 }

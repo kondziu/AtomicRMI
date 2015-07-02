@@ -33,7 +33,7 @@ import put.atomicrmi.Access.Mode;
  * 
  * @author Wojciech Mruczkiewicz
  */
-public interface ITransactionalRemoteObject extends Remote {
+public interface ITransactionalRemoteObject extends IdentifiableRemote {
 
 	/**
 	 * Creates and gives a remote object proxy. Object proxy wraps an instance
@@ -84,4 +84,6 @@ public interface ITransactionalRemoteObject extends Remote {
 	 *             when remote execution failed.
 	 */
 	ITransactionFailureMonitor getFailureMonitor() throws RemoteException;
+	
+
 }

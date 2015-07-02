@@ -180,7 +180,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 	void readThreadStuff() {
 		try {
-			object.transactionLock(tid);
+			object.transactionLock(uid);
 			
 			// we have to make a snapshot, else it thinks we didn't read the
 			// object and in effect we don't get cv and rv
@@ -194,7 +194,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			e.printStackTrace();
 			throw new RuntimeException(e);
 		} finally {
-			object.transactionUnlock(tid);
+			object.transactionUnlock(uid);
 		}
 
 		readSemaphore.release(1); // 17 & 18		
@@ -218,11 +218,11 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	void writeThreadStuff() {
 		// At this point must be past object.waitForCounter(px - 1); // 24
 		try {
-			object.transactionLock(tid);
+			object.transactionLock(uid);
 
 			// Short circuit, if pre-empted.
 			if (writeRecorder == null) {
-				object.transactionUnlock(tid);
+				object.transactionUnlock(uid);
 				return;
 			}
 
@@ -261,7 +261,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			e.printStackTrace();
 			throw new RuntimeException(e);
 		} finally {
-			object.transactionUnlock(tid);
+			object.transactionUnlock(uid);
 		}
 	}
 
@@ -283,7 +283,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	/**
 	 * Transaction unique identifier.
 	 */
-	protected UUID tid;
+	protected UUID uid;
 
 	/**
 	 * The wrapped remote object reference.
@@ -368,7 +368,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		super();
 		this.transaction = transaction;
 		this.object = object;
-		this.tid = tid;
+		this.uid = tid;
 		this.mode = mode;
 
 		ub = calls;
@@ -383,8 +383,8 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	 * 
 	 * @return transaction unique identifier.
 	 */
-	UUID getTransactionId() {
-		return tid;
+	protected UUID getTransactionId() {
+		return uid;
 	}
 
 	public Object getWrapped(boolean useBuffer) throws RemoteException {
@@ -407,7 +407,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 	public void startTransaction() throws RemoteException {
 		TransactionFailureMonitor.getInstance().startMonitoring(this);
-		px = object.startTransaction(tid);
+		px = object.startTransaction(uid);
 
 		mv = 0;
 		mwv = 0;
@@ -440,7 +440,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		if (mv == 0 /* mwv == 0 && mrv == 0 */) {
 			// The transaction was neither writing nor reading yet.
 			// Create a buffer for writing and proceed to use the buffer.
-			object.transactionLock(tid);
+			object.transactionLock(uid);
 
 			writeRecorder = new StateRecorder();
 			try {
@@ -461,7 +461,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			// create one.
 			// Use the buffer.
 
-			object.transactionLock(tid);
+			object.transactionLock(uid);
 
 			mv++;
 			mwv++;
@@ -473,10 +473,10 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			// to it.
 			// There's no need to buffer writes for now, so proceed as normal.
 
-			object.transactionLock(tid);
+			object.transactionLock(uid);
 
 			if (snapshot.getReadVersion() != object.getCurrentVersion()) {
-				object.transactionUnlockForce(tid);
+				object.transactionUnlockForce(uid);
 				transaction.rollback();
 				throw new RollbackForcedException("Rollback forced during invocation.");
 			}
@@ -501,7 +501,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 					buffer = object.clone();
 				} catch (CloneNotSupportedException e) {
 					e.printStackTrace();
-					object.transactionUnlock(tid);
+					object.transactionUnlock(uid);
 					throw new RemoteException(e.getLocalizedMessage(), e.getCause());
 				}
 
@@ -516,7 +516,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		}
 
 		// in all cases
-		object.transactionUnlock(tid);
+		object.transactionUnlock(uid);
 	}
 
 	public boolean preRead() throws RemoteException {
@@ -566,15 +566,15 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			// If there were no reads, wait for access and make snapshot.
 			if (mrv == 0) {
 				object.waitForCounter(px - 1);
-				object.transactionLock(tid);
+				object.transactionLock(uid);
 				snapshot = object.snapshot();
 			} else {
-				object.transactionLock(tid);
+				object.transactionLock(uid);
 			}
 
 			// Check for inconsistent state and rollback if necessary.
 			if (snapshot.getReadVersion() != object.getCurrentVersion()) {
-				object.transactionUnlockForce(tid);
+				object.transactionUnlockForce(uid);
 				transaction.rollback();
 				throw new RollbackForcedException("Rollback forced during invocation.");
 			}
@@ -598,7 +598,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 				// buffer.
 				object.waitForCounter(px - 1); // 24
 
-				object.transactionLock(tid);
+				object.transactionLock(uid);
 
 				snapshot = object.snapshot();
 
@@ -616,12 +616,12 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 				// or remove buffer. Maybe?
 
 			} else {
-				object.transactionLock(tid);
+				object.transactionLock(uid);
 			}
 
 			// Check for inconsistent state and rollback if necessary.
 			if (snapshot.getReadVersion() != object.getCurrentVersion()) {
-				object.transactionUnlockForce(tid);
+				object.transactionUnlockForce(uid);
 				transaction.rollback();
 				throw new RollbackForcedException("Rollback forced during invocation.");
 			}
@@ -634,7 +634,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 		// If the writes already reached their upper bound, operate on buffers.
 		{
-			object.transactionLock(tid);
+			object.transactionLock(uid);
 
 			// If this is the first read after write was released then
 			// synchronize with the release thread, to make sure that access to
@@ -686,7 +686,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 				releaseTransaction();
 			}
 
-			object.transactionUnlock(tid);
+			object.transactionUnlock(uid);
 		}
 	}
 
@@ -721,7 +721,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		} else {
 			TransactionFailureMonitor.getInstance().stopMonitoring(this);
 
-			object.finishTransaction(tid, snapshot, restore);
+			object.finishTransaction(uid, snapshot, restore);
 
 			over = true;
 			snapshot = null;
@@ -752,7 +752,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			synchronized (this) {
 				if (writeRecorder != null) {
 					object.waitForCounter(px - 1); // 24
-					object.transactionLock(tid);
+					object.transactionLock(uid);
 
 					// We have to make a snapshot, else it thinks we didn't read
 					// the object and in effect we don't get cv and rv.
@@ -775,7 +775,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 					object.setCurrentVersion(px); // 27
 					releaseTransaction(); // 29
 
-					object.transactionUnlock(tid);
+					object.transactionUnlock(uid);
 				}
 			}
 
@@ -820,27 +820,27 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	public void free() throws RemoteException {
 		if (mv == 0) {
 			object.waitForCounter(px - 1);
-			object.transactionLock(tid);
+			object.transactionLock(uid);
 			snapshot = object.snapshot();
 		} else {
-			object.transactionLock(tid);
+			object.transactionLock(uid);
 		}
 
 		object.setCurrentVersion(px);
 		releaseTransaction();
 
-		object.transactionUnlock(tid);
+		object.transactionUnlock(uid);
 
 		over = true;
 		// snapshot = null;
 	}
 
 	public void lock() throws RemoteException {
-		object.transactionLock(tid);
+		object.transactionLock(uid);
 	}
 
 	public void unlock() throws RemoteException {
-		object.transactionUnlock(tid);
+		object.transactionUnlock(uid);
 
 		// Read-only optimization.
 		// This has to be lumped in here with unlock, in order to minimize the
@@ -851,9 +851,9 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			SynchThread.get().addReader(this);
 		}
 	}
-
-	public UUID getSortingKey() throws RemoteException {
-		return object.getSortingKey();
+	
+	public UUID getUID() throws RemoteException {
+		return object.getUID();
 	}
 
 	public Mode getMode() throws RemoteException {

@@ -134,23 +134,41 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	/**
 	 * Unique identifier of a transaction that locked this object proxy.
 	 */
-	private transient UUID lockedId;
+	private transient Object lockedId;
 
 	/**
 	 * Unique identifier of this object.
 	 */
-	private UUID id = UUID.randomUUID();
+	final private UUID uid;
 
 	protected TransactionalUnicastRemoteObject() throws RemoteException {
+		uid = UUID.randomUUID();
+	}
+
+	protected TransactionalUnicastRemoteObject(UUID uniqueID) throws RemoteException {
+		this.uid = uniqueID;
 	}
 
 	protected TransactionalUnicastRemoteObject(int port) throws RemoteException {
 		super(port);
+		uid = UUID.randomUUID();
+	}
+
+	protected TransactionalUnicastRemoteObject(UUID uniqueID, int port) throws RemoteException {
+		super(port);
+		this.uid = uniqueID;
 	}
 
 	protected TransactionalUnicastRemoteObject(int port, RMIClientSocketFactory csf, RMIServerSocketFactory ssf)
 			throws RemoteException {
 		super(port, csf, ssf);
+		uid = UUID.randomUUID();
+	}
+
+	protected TransactionalUnicastRemoteObject(UUID uniqueID, int port, RMIClientSocketFactory csf,
+			RMIServerSocketFactory ssf) throws RemoteException {
+		super(port, csf, ssf);
+		this.uid = uniqueID;
 	}
 
 	@Override
@@ -203,7 +221,7 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 * @throws TransactionException
 	 *             when error occurred during waiting for lock to be released.
 	 */
-	void transactionLock(UUID tid) throws TransactionException {
+	void transactionLock(Object tid) throws TransactionException {
 		synchronized (lock) {
 			try {
 				while (lockedId != null && !lockedId.equals(tid))
@@ -246,7 +264,7 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 * @throws TransactionException
 	 *             when lock was acquired by other transaction.
 	 */
-	void transactionUnlockForce(UUID tid) throws TransactionException {
+	void transactionUnlockForce(Object tid) throws TransactionException {
 		synchronized (lock) {
 			if (lockedId.equals(tid)) {
 				lock.value = 0;
@@ -276,7 +294,7 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 *            transaction identifier.
 	 * @return the new value of global versioning counter.
 	 */
-	long startTransaction(UUID tid) {
+	long startTransaction(Object tid) {
 		return ++gx;
 	}
 
@@ -314,9 +332,9 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 * @returns <code>true</code> if acquired, <code>false</code> otherwise.
 	 */
 	boolean tryWaitForCounter(long value) throws TransactionException {
-//		System.out.println("acquire " + lv.getAvailable());
+		// System.out.println("acquire " + lv.getAvailable());
 		boolean acquired = lv.tryAcquire(value);
-//		System.out.println("acquire " + acquired);
+		// System.out.println("acquire " + acquired);
 		if (!acquired)
 			return false;
 		else
@@ -340,7 +358,7 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 			throw new TransactionException("Error waiting for object version", e);
 		}
 	}
-	
+
 	boolean tryWaitForSnapshot(long value) throws TransactionException {
 		boolean acquired = lt.tryAcquire(value);
 		if (!acquired)
@@ -364,7 +382,7 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 * @throws TransactionException
 	 *             when error occurs during snapshot restoration.
 	 */
-	void finishTransaction(UUID tid, Snapshot snapshot, boolean restore) throws TransactionException {
+	void finishTransaction(Object tid, Snapshot snapshot, boolean restore) throws TransactionException {
 		if (snapshot == null) {
 			lt.release(1);
 			return;
@@ -453,8 +471,8 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 		}
 	}
 
-	public UUID getSortingKey() throws RemoteException {
-		return id;
+	public Object getSortingKey() throws RemoteException {
+		return uid;
 	}
 
 	public void set(String fieldName, FieldType type, Object value) throws RemoteException {
@@ -493,5 +511,10 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 		} catch (Exception e) {
 			throw new RemoteException(e.getLocalizedMessage(), e.getCause());
 		}
+	}
+
+	@Override
+	public UUID getUID() throws RemoteException {
+		return uid;
 	}
 }

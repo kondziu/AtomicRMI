@@ -34,7 +34,7 @@ import java.rmi.RemoteException;
  * 
  * @author Wojciech Mruczkiewicz
  */
-public interface ITransaction extends Remote {
+public interface ITransaction extends IdentifiableRemote {
 
 	/**
 	 * Terminates remote transaction and commits all the changes made. It is
