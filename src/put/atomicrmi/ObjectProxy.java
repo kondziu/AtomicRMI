@@ -23,12 +23,10 @@ package put.atomicrmi;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.UUID;
 
 import put.atomicrmi.Access.Mode;
+import put.atomicrmi.OneThreadToRuleThemAll.Task;
 
 /**
  * An implementation of {@link IObjectProxy} interface. It is required to
@@ -43,7 +41,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	 * buffer after release.
 	 */
 	protected Object buffer = null;
-	
+
 	private Semaphore readSemaphore = new Semaphore(0);
 	private Semaphore writeSemaphore = new Semaphore(0);
 	private Semaphore commitSemaphore = new Semaphore(0);
@@ -54,170 +52,64 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	 * Used to apply those changes made in a "clean" instance of the object to a
 	 * current instance.
 	 */
-	StateRecorder writeRecorder;
+	protected StateRecorder writeRecorder;
 
 	private boolean readCommit;
 	private boolean readThreadUsed;
 
-	static final private class SynchThread extends Thread {
-		static private SynchThread evilSingleton = null;
-
-		final List<ObjectProxy> writers = new LinkedList<ObjectProxy>();
-		final List<ObjectProxy> readers = new LinkedList<ObjectProxy>();
-		final List<ObjectProxy> committers = new LinkedList<ObjectProxy>();
-
-		final List<ObjectProxy> writersQ = new LinkedList<ObjectProxy>();
-		final List<ObjectProxy> readersQ = new LinkedList<ObjectProxy>();
-		final List<ObjectProxy> committersQ = new LinkedList<ObjectProxy>();
-
-		private SynchThread() {
-			super("SynchThread");
+	private class ReadTask implements Task {
+		@Override
+		public boolean condition(OneThreadToRuleThemAll controller) throws TransactionException {
+			return object.tryWaitForCounter(px - 1);
 		}
 
-		public static final SynchThread get() {
-			if (evilSingleton == null) {
-				evilSingleton = new SynchThread();
-				evilSingleton.start();
-			}
-			return evilSingleton;
-		}
-
-		public synchronized void addWriter(ObjectProxy proxy) {
-			writersQ.add(proxy);
-		}
-
-		public synchronized void addReader(ObjectProxy proxy) {
-			readersQ.add(proxy);
-		}
-
-		public synchronized void addCommitters(ObjectProxy proxy) {
-			committersQ.add(proxy);
-		}
-
-		public void run() {
-
-			while (true) {
-				
-				try {
-					Thread.sleep(2);
-				} catch (InterruptedException e1) {
-					e1.printStackTrace();
-				}
-
-				// FIXME streamline list usage here
-
-				synchronized (this) {
-					readers.addAll(readersQ);
-					readersQ.clear();
-				}
-
-				Iterator<ObjectProxy> readerIter = readers.iterator();
-				while (readerIter.hasNext()) {
-					ObjectProxy proxy = readerIter.next();
-					synchronized (ObjectProxy.class) {
-						try {
-							boolean acquired = proxy.object.tryWaitForCounter(proxy.px - 1);
-							if (acquired) {
-								proxy.readThreadStuff();
-								addCommitters(proxy);
-								readerIter.remove();
-							}
-
-						} catch (Exception e) {
-							e.printStackTrace();
-							throw new RuntimeException("SynchThread: " + e.getMessage(), e.getCause());
-						}
-					}
-				}
-
-				synchronized (this) {
-					writers.addAll(writersQ);
-					writersQ.clear();
-				}
-
-				Iterator<ObjectProxy> writerIter = writers.iterator();
-				while (writerIter.hasNext()) {
-					ObjectProxy proxy = writerIter.next();
-					synchronized (ObjectProxy.class) {
-						try {
-							boolean acquired = proxy.object.tryWaitForCounter(proxy.px - 1);
-							if (acquired) {
-								proxy.writeThreadStuff();
-								writerIter.remove();
-							}
-
-						} catch (Exception e) {
-							throw new RuntimeException("SynchThread: " + e.getLocalizedMessage(), e.getCause());
-						}
-					}
-				}
-
-				synchronized (this) {
-					committers.addAll(committersQ);
-					committersQ.clear();
-				}
-
-				Iterator<ObjectProxy> commitIter = committers.iterator();
-				while (commitIter.hasNext()) {
-					ObjectProxy proxy = commitIter.next();
-					synchronized (ObjectProxy.class) {
-						try {
-							boolean acquired = proxy.object.tryWaitForSnapshot(proxy.px - 1);
-							if (acquired) {
-								proxy.commitThreadStuff();
-								commitIter.remove();
-							}
-
-						} catch (Exception e) {
-							throw new RuntimeException("SynchThread: " + e.getLocalizedMessage(), e.getCause());
-						}
-					}
-				}
-
-			}
-		}
-	}
-
-	void readThreadStuff() {
-		try {
+		@Override
+		public void run(OneThreadToRuleThemAll controller) throws TransactionException, CloneNotSupportedException,
+				RemoteException {
 			object.transactionLock(uid);
-			
+
 			// we have to make a snapshot, else it thinks we didn't read the
 			// object and in effect we don't get cv and rv
 			snapshot = object.snapshot(); // 15
 			buffer = object.clone(); // 13
 			object.setCurrentVersion(px); // 14
 			releaseTransaction(); // 16
-		} catch (Exception e) {
-			// FIXME the client-side should see the exceptions from this
-			// thread.
-			e.printStackTrace();
-			throw new RuntimeException(e);
-		} finally {
+
 			object.transactionUnlock(uid);
-		}
 
-		readSemaphore.release(1); // 17 & 18		
+			readSemaphore.release(1); // 17 & 18
+
+			controller.add("lt", new ReadCommitTask());
+		}
 	}
 
-	void commitThreadStuff() {
-		// dismiss
-		try {
-			boolean commit = waitForSnapshot(true); // 19 & 20
+	private class ReadCommitTask implements Task {
+		@Override
+		public boolean condition(OneThreadToRuleThemAll controller) throws Exception {
+			return object.tryWaitForSnapshot(px - 1);
+		}
+
+		@Override
+		public void run(OneThreadToRuleThemAll controller) throws Exception {
+			// dismiss
+			readCommit = waitForSnapshot(true); // 19 & 20
 			// line 21 will be taken care of in wait for snapshots
-			finishTransaction(!commit, true); // 22
+			finishTransaction(!readCommit, true); // 22
 
-			this.readCommit = commit;
-		} catch (RemoteException e) {
-			throw new RuntimeException(e);
+			commitSemaphore.release(1);
+		}
+	}
+	
+	private class WriteTask implements Task {
+		@Override
+		public boolean condition(OneThreadToRuleThemAll controller) throws TransactionException {
+			return object.tryWaitForCounter(px - 1);
 		}
 
-		commitSemaphore.release(1);
-	}
-
-	void writeThreadStuff() {
-		// At this point must be past object.waitForCounter(px - 1); // 24
-		try {
+		@Override
+		public void run(OneThreadToRuleThemAll controller) throws TransactionException, CloneNotSupportedException,
+				RemoteException, SecurityException, IllegalArgumentException, NoSuchFieldException, IllegalAccessException {
+			// At this point must be past object.waitForCounter(px - 1); // 24
 			object.transactionLock(uid);
 
 			// Short circuit, if pre-empted.
@@ -254,15 +146,10 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			object.setCurrentVersion(px); // 27
 			releaseTransaction(); // 29
 			writeSemaphore.release(1);
-
-		} catch (Exception e) {
-			// FIXME the client-side should see the exceptions from this
-			// thread.
-			e.printStackTrace();
-			throw new RuntimeException(e);
-		} finally {
+			
 			object.transactionUnlock(uid);
 		}
+
 	}
 
 	/**
@@ -511,7 +398,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 			} else {
 				writeThreadExists = true;
-				SynchThread.get().addWriter(this);
+				OneThreadToRuleThemAll.theOneThread.add("lv", new WriteTask());
 			}
 		}
 
@@ -520,7 +407,6 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	}
 
 	public boolean preRead() throws RemoteException {
-
 		if (mode == Mode.READ_ONLY) {
 			// Read-only optimization (green).
 			// We don't check for UB etc. because we already released this
@@ -713,6 +599,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			object.releaseTransaction();
 			mv = RELEASED;
 		}
+		OneThreadToRuleThemAll.theOneThread.ping("lv");
 	}
 
 	public void finishTransaction(boolean restore, boolean readThread) throws RemoteException {
@@ -722,6 +609,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			TransactionFailureMonitor.getInstance().stopMonitoring(this);
 
 			object.finishTransaction(uid, snapshot, restore);
+			OneThreadToRuleThemAll.theOneThread.ping("lt");
 
 			over = true;
 			snapshot = null;
@@ -740,12 +628,12 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 			return readCommit; // line 21
 		} else {
-			if (writeThreadExists) {						
+			if (writeThreadExists) {
 				try {
 					writeSemaphore.acquire(1);
 					writeSemaphore.release(1);
 				} catch (InterruptedException e) {
-					//FIXME WTF? something should go here, surely
+					// FIXME WTF? something should go here, surely
 				}
 			}
 
@@ -786,12 +674,12 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 
 			if (!readThread)
 				releaseTransaction();
-			
+
 			if (snapshot == null)
 				return true;
 
 			boolean commit = snapshot.getReadVersion() <= object.getCurrentVersion();
-			
+
 			return commit;
 		}
 	}
@@ -848,10 +736,10 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		if (mode == Mode.READ_ONLY) {
 			// readThread = new ReadThread();
 			// readThread.start();
-			SynchThread.get().addReader(this);
+			OneThreadToRuleThemAll.theOneThread.add("lv", new ReadTask());
 		}
 	}
-	
+
 	public UUID getUID() throws RemoteException {
 		return object.getUID();
 	}

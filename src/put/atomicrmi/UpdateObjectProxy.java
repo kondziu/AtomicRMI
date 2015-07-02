@@ -82,6 +82,7 @@ class UpdateObjectProxy extends ObjectProxy {
 		TransactionFailureMonitor.getInstance().stopMonitoring(this);
 
 		object.finishTransaction(uid, snapshot, restore);
+		OneThreadToRuleThemAll.theOneThread.ping("lt");
 
 		over = true;
 		snapshot = null;		

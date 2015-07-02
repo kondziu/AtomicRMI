@@ -1,9 +1,9 @@
 package put.atomicrmi;
 
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class OneThreadToRuleThemAll extends Thread {
 
@@ -13,36 +13,40 @@ public class OneThreadToRuleThemAll extends Thread {
 		theOneThread.start();
 	}
 
-	private final Map<Object, Task> tasks = new HashMap<Object, Task>();
+	private final Map<Object, Set<Task>> tasks = new HashMap<Object, Set<Task>>();
 
-	private final List<Object> activeParents = new LinkedList<Object>();
+	private final Set<Object> activeCategories = new HashSet<Object>();
 
 	/**
 	 * Controller thread is waiting, as opposed to executing some task.
 	 */
-//	private boolean waiting = false;
+	// private boolean waiting = false;
 
 	public interface Task {
-		boolean condition(OneThreadToRuleThemAll controller);
+		boolean condition(OneThreadToRuleThemAll controller) throws Exception;
 
-		void run(OneThreadToRuleThemAll controller);
+		void run(OneThreadToRuleThemAll controller) throws Exception;
+
+		// Object category();
 	}
 
-	public synchronized boolean add(Object parent, Task task) {
-		if (tasks.containsKey(parent)) {
-			return false;
+	public synchronized boolean add(Object category, Task task) {
+		Set<Task> set = tasks.get(category);
+		if (set == null) {
+			set = new HashSet<Task>();
+			tasks.put(category, set);
 		}
 
-		tasks.put(parent, task);
+		set.add(task);
 
-		activeParents.add(parent);
+		activeCategories.add(category);
 		notify();
 
 		return true;
 	}
 
-	public synchronized void ping(Object parent) {
-		activeParents.add(parent);
+	public synchronized void ping(Object category) {
+		activeCategories.add(category);
 		notify();
 	}
 
@@ -56,15 +60,8 @@ public class OneThreadToRuleThemAll extends Thread {
 			 */
 			synchronized (this) {
 				try {
-					if (activeParents.isEmpty()) {
-						// TODO synchronize around assignment?
-//						waiting = true;
-
+					if (activeCategories.isEmpty())
 						wait();
-
-						// TODO synchronize around assignment?
-//						waiting = false;
-					}
 				} catch (InterruptedException e) {
 					// Intentionally left blank.
 				}
@@ -74,16 +71,20 @@ public class OneThreadToRuleThemAll extends Thread {
 			 * Somebody woke us up, we see whom it was, and check his task.
 			 */
 			synchronized (this) {
-				for (Object parent : activeParents) {
-					Task task = tasks.get(parent);
-					if (task.condition(this)) {
-						task.run(this);
+				for (Object category : activeCategories) {
+					for (Task task : tasks.get(category)) {
+						try {
+							if (task.condition(this))
+								task.run(this);
+						} catch (Exception e) {
+							throw new RuntimeException(e.getMessage(), e.getCause());
+						}
 					}
 				}
 			}
 
 			/**
-			 * Go back to waiting.
+			 * Aaand... go back to waiting.
 			 */
 		}
 	}
