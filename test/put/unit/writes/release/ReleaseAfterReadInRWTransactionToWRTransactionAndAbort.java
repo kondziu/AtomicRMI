@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import put.atomicrmi.OneThreadToRuleThemAll;
 import put.atomicrmi.RollbackForcedException;
 import put.atomicrmi.Transaction;
 import put.atomicrmi.TransactionFailureMonitor;
@@ -33,7 +34,7 @@ public class ReleaseAfterReadInRWTransactionToWRTransactionAndAbort extends RMIT
 				t.start();
 				waitForTick(1);
 				waitForTick(2);
-				
+
 				int v0 = x.read();
 				Assert.assertEquals(0, v0);
 
@@ -44,7 +45,7 @@ public class ReleaseAfterReadInRWTransactionToWRTransactionAndAbort extends RMIT
 
 				waitForTick(3);
 				waitForTick(4);
-				
+
 				waitForTick(5);
 
 				t.rollback();
@@ -59,6 +60,7 @@ public class ReleaseAfterReadInRWTransactionToWRTransactionAndAbort extends RMIT
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -76,18 +78,18 @@ public class ReleaseAfterReadInRWTransactionToWRTransactionAndAbort extends RMIT
 				waitForTick(2);
 
 				waitForTick(3);
-				
+
 				x.write(2);
 
 				waitForTick(4);
 
 				int v = x.read();
 				Assert.assertEquals(2, v);
-				
+
 				waitForTick(5);
 
 				t.commit();
-				Assert.fail("Transaction comitted when it should have aborted");				
+				Assert.fail("Transaction comitted when it should have aborted");
 
 			} catch (RollbackForcedException e) {
 				// everything is fine
@@ -101,6 +103,7 @@ public class ReleaseAfterReadInRWTransactionToWRTransactionAndAbort extends RMIT
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -109,8 +112,7 @@ public class ReleaseAfterReadInRWTransactionToWRTransactionAndAbort extends RMIT
 	}
 
 	@Test
-	public void releaseAfterReadInRWTransactionToWRTransactionAndAbort
-	() throws Throwable {
+	public void releaseAfterReadInRWTransactionToWRTransactionAndAbort() throws Throwable {
 		TestFramework.runOnce(new Threads());
 
 		Assert.assertEquals(0, state("x"));

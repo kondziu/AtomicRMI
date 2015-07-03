@@ -56,7 +56,7 @@ public class Instrument {
 			assertEquals(ite.getCause().getClass(), RuntimeException.class);
 		}
 	}
-	
+
 	@Test
 	public void writeByte() throws ClassNotFoundException, InstantiationException, IllegalAccessException,
 			NoSuchMethodException, SecurityException, IllegalArgumentException, InvocationTargetException {
@@ -79,7 +79,7 @@ public class Instrument {
 			assertEquals(ite.getCause().getClass(), RuntimeException.class);
 		}
 	}
-	
+
 	@Test
 	public void writeChar() throws ClassNotFoundException, InstantiationException, IllegalAccessException,
 			NoSuchMethodException, SecurityException, IllegalArgumentException, InvocationTargetException {
@@ -102,7 +102,7 @@ public class Instrument {
 			assertEquals(ite.getCause().getClass(), RuntimeException.class);
 		}
 	}
-	
+
 	@Test
 	public void writeDouble() throws ClassNotFoundException, InstantiationException, IllegalAccessException,
 			NoSuchMethodException, SecurityException, IllegalArgumentException, InvocationTargetException {
@@ -125,7 +125,7 @@ public class Instrument {
 			assertEquals(ite.getCause().getClass(), RuntimeException.class);
 		}
 	}
-	
+
 	@Test
 	public void writeFloat() throws ClassNotFoundException, InstantiationException, IllegalAccessException,
 			NoSuchMethodException, SecurityException, IllegalArgumentException, InvocationTargetException {
@@ -148,7 +148,7 @@ public class Instrument {
 			assertEquals(ite.getCause().getClass(), RuntimeException.class);
 		}
 	}
-	
+
 	@Test
 	public void writeInt() throws ClassNotFoundException, InstantiationException, IllegalAccessException,
 			NoSuchMethodException, SecurityException, IllegalArgumentException, InvocationTargetException {
@@ -171,7 +171,7 @@ public class Instrument {
 			assertEquals(ite.getCause().getClass(), RuntimeException.class);
 		}
 	}
-	
+
 	@Test
 	public void writeLong() throws ClassNotFoundException, InstantiationException, IllegalAccessException,
 			NoSuchMethodException, SecurityException, IllegalArgumentException, InvocationTargetException {
@@ -194,7 +194,7 @@ public class Instrument {
 			assertEquals(ite.getCause().getClass(), RuntimeException.class);
 		}
 	}
-	
+
 	@Test
 	public void writeShort() throws ClassNotFoundException, InstantiationException, IllegalAccessException,
 			NoSuchMethodException, SecurityException, IllegalArgumentException, InvocationTargetException {
@@ -217,7 +217,7 @@ public class Instrument {
 			assertEquals(ite.getCause().getClass(), RuntimeException.class);
 		}
 	}
-	
+
 	@Test
 	public void writeObject() throws ClassNotFoundException, InstantiationException, IllegalAccessException,
 			NoSuchMethodException, SecurityException, IllegalArgumentException, InvocationTargetException {

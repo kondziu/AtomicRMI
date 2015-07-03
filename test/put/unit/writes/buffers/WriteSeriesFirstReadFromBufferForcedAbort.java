@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Assert;
 import org.junit.Test;
 
+import put.atomicrmi.OneThreadToRuleThemAll;
 import put.atomicrmi.RollbackForcedException;
 import put.atomicrmi.Transaction;
 import put.atomicrmi.TransactionFailureMonitor;
@@ -70,6 +71,7 @@ public class WriteSeriesFirstReadFromBufferForcedAbort extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -120,6 +122,7 @@ public class WriteSeriesFirstReadFromBufferForcedAbort extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());

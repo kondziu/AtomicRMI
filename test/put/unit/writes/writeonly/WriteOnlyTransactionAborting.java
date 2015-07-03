@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import put.atomicrmi.OneThreadToRuleThemAll;
 import put.atomicrmi.Transaction;
 import put.atomicrmi.TransactionFailureMonitor;
 import put.atomicrmi.Update;
@@ -14,7 +15,7 @@ import edu.umd.cs.mtc.MultithreadedTest;
 import edu.umd.cs.mtc.TestFramework;
 
 /**
- * Write only transaction aborts. A R/W transaction simultaneously commits.  
+ * Write only transaction aborts. A R/W transaction simultaneously commits.
  * 
  * <pre>
  *     [  w(x)2 w(x)3 !
@@ -59,6 +60,7 @@ public class WriteOnlyTransactionAborting extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -96,6 +98,7 @@ public class WriteOnlyTransactionAborting extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());

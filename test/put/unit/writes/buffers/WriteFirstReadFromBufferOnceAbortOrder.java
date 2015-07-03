@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import put.atomicrmi.OneThreadToRuleThemAll;
 import put.atomicrmi.Transaction;
 import put.atomicrmi.TransactionFailureMonitor;
 import put.unit.RMITest;
@@ -20,8 +21,8 @@ import edu.umd.cs.mtc.TestFramework;
  * T2  [      w(x)2        r(x)2  ---!
  * </pre>
  * 
- * Checks whether a read will use the buffer and whether the state is
- * reverted on abort.
+ * Checks whether a read will use the buffer and whether the state is reverted
+ * on abort.
  */
 public class WriteFirstReadFromBufferOnceAbortOrder extends RMITest {
 	class Threads extends MultithreadedTest {
@@ -38,7 +39,7 @@ public class WriteFirstReadFromBufferOnceAbortOrder extends RMITest {
 
 				int v1 = x.read();
 				Assert.assertEquals(0, v1);
-				
+
 				waitForTick(3);
 
 				waitForTick(4);
@@ -58,6 +59,7 @@ public class WriteFirstReadFromBufferOnceAbortOrder extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -80,11 +82,11 @@ public class WriteFirstReadFromBufferOnceAbortOrder extends RMITest {
 				waitForTick(5);
 				int v1 = x.read();
 				Assert.assertEquals(2, v1);
-				
+
 				waitForTick(8);
 
 				t.rollback();
-				
+
 				waitForTick(9);
 
 			} catch (Exception e) {
@@ -97,6 +99,7 @@ public class WriteFirstReadFromBufferOnceAbortOrder extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());

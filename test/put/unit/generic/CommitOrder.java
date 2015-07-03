@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Assert;
 import org.junit.Test;
 
+import put.atomicrmi.OneThreadToRuleThemAll;
 import put.atomicrmi.Transaction;
 import put.atomicrmi.TransactionFailureMonitor;
 import put.unit.RMITest;
@@ -21,8 +22,8 @@ import edu.umd.cs.mtc.TestFramework;
  * T2  [            r(x)1 w(x)2 ] ----------> ]
  * </pre>
  * 
- * Specifically checks whether T2 is free to operate on X while T1 operates
- * on y.
+ * Specifically checks whether T2 is free to operate on X while T1 operates on
+ * y.
  */
 public class CommitOrder extends RMITest {
 	class Threads extends MultithreadedTest {
@@ -54,7 +55,7 @@ public class CommitOrder extends RMITest {
 
 				int vz = z.read();
 				z.write(vz + 1);
-				
+
 				waitForTick(4);
 
 				// T2 should not be able to set aint to 2, because it should not
@@ -73,6 +74,7 @@ public class CommitOrder extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -93,10 +95,9 @@ public class CommitOrder extends RMITest {
 				x.write(vx + 1);
 
 				aint.set(1);
-				
+
 				waitForTick(3);
 				t.commit();
-
 
 				aint.set(2);
 
@@ -110,6 +111,7 @@ public class CommitOrder extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());

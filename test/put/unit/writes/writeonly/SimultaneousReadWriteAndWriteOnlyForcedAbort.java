@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import put.atomicrmi.OneThreadToRuleThemAll;
 import put.atomicrmi.RollbackForcedException;
 import put.atomicrmi.Transaction;
 import put.atomicrmi.TransactionFailureMonitor;
@@ -50,7 +51,7 @@ public class SimultaneousReadWriteAndWriteOnlyForcedAbort extends RMITest {
 
 				waitForTick(7);
 				waitForTick(8);
-				
+
 				Assert.fail("Transaction comitted when it should have aborted");
 
 			} catch (RollbackForcedException e) {
@@ -64,6 +65,7 @@ public class SimultaneousReadWriteAndWriteOnlyForcedAbort extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -103,6 +105,7 @@ public class SimultaneousReadWriteAndWriteOnlyForcedAbort extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());

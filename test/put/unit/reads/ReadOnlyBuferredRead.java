@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Assert;
 import org.junit.Test;
 
+import put.atomicrmi.OneThreadToRuleThemAll;
 import put.atomicrmi.Transaction;
 import put.atomicrmi.TransactionFailureMonitor;
 import put.unit.RMITest;
@@ -21,9 +22,8 @@ import edu.umd.cs.mtc.TestFramework;
  * T2  [      r(x)1 w(x)2       ]
  * </pre>
  * 
- * Specifically checks whether T2 is free to operate on x while T1 operates
- * on x at the same time, and whether T1 sees a consistent value of x
- * regardless.
+ * Specifically checks whether T2 is free to operate on x while T1 operates on x
+ * at the same time, and whether T1 sees a consistent value of x regardless.
  */
 public class ReadOnlyBuferredRead extends RMITest {
 	class Threads extends MultithreadedTest {
@@ -80,6 +80,7 @@ public class ReadOnlyBuferredRead extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -117,6 +118,7 @@ public class ReadOnlyBuferredRead extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());

@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import put.atomicrmi.OneThreadToRuleThemAll;
 import put.atomicrmi.Transaction;
 import put.atomicrmi.TransactionException;
 import put.atomicrmi.TransactionFailureMonitor;
@@ -44,6 +45,7 @@ public class DetectInvalidAccessModeRead extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());

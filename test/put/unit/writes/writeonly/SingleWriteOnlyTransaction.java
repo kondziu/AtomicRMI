@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import put.atomicrmi.OneThreadToRuleThemAll;
 import put.atomicrmi.Transaction;
 import put.atomicrmi.TransactionFailureMonitor;
 import put.atomicrmi.Update;
@@ -31,7 +32,7 @@ public class SingleWriteOnlyTransaction extends RMITest {
 				Variable y = t.accesses((Variable) registry.lookup("y"));
 
 				t.start();
-		
+
 				x.write(1);
 				x.write(2);
 				y.write(1);
@@ -48,6 +49,7 @@ public class SingleWriteOnlyTransaction extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());

@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import put.atomicrmi.OneThreadToRuleThemAll;
 import put.atomicrmi.Transaction;
 import put.atomicrmi.TransactionFailureMonitor;
 import put.unit.RMITest;
@@ -22,7 +23,7 @@ import edu.umd.cs.mtc.TestFramework;
  */
 public class ReleaseAfterReadInRWTransactionToRWTransaction extends RMITest {
 	class Threads extends MultithreadedTest {
-		
+
 		public void thread1() {
 			Transaction t = null;
 			try {
@@ -35,17 +36,16 @@ public class ReleaseAfterReadInRWTransactionToRWTransaction extends RMITest {
 
 				int v0 = x.read();
 				Assert.assertEquals(0, v0);
-		
+
 				x.write(1);
 
 				int v = x.read();
 				Assert.assertEquals(1, v);
-				
+
 				waitForTick(3);
 
 				waitForTick(4);
 
-				
 				waitForTick(5);
 
 				t.commit();
@@ -60,6 +60,7 @@ public class ReleaseAfterReadInRWTransactionToRWTransaction extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -75,19 +76,19 @@ public class ReleaseAfterReadInRWTransactionToRWTransaction extends RMITest {
 				waitForTick(1);
 				t.start();
 				waitForTick(2);
-				
+
 				waitForTick(3);
 
 				int v1 = x.read();
 				Assert.assertEquals(1, v1);
 
 				waitForTick(4);
-				
+
 				x.write(2);
-				
+
 				int v2 = x.read();
 				Assert.assertEquals(2, v2);
-				
+
 				waitForTick(5);
 
 				t.commit();
@@ -102,6 +103,7 @@ public class ReleaseAfterReadInRWTransactionToRWTransaction extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());

@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Assert;
 import org.junit.Test;
 
+import put.atomicrmi.OneThreadToRuleThemAll;
 import put.atomicrmi.Transaction;
 import put.atomicrmi.TransactionFailureMonitor;
 import put.unit.RMITest;
@@ -23,7 +24,7 @@ import edu.umd.cs.mtc.TestFramework;
  */
 public class ReleaseAfterReadAndWriteToRWTransaction extends RMITest {
 	class Threads extends MultithreadedTest {
-		
+
 		AtomicInteger aint;
 
 		@Override
@@ -43,7 +44,7 @@ public class ReleaseAfterReadAndWriteToRWTransaction extends RMITest {
 
 				int v0 = x.read();
 				Assert.assertEquals(0, v0);
-		
+
 				x.write(1);
 				aint.set(1);
 
@@ -53,7 +54,7 @@ public class ReleaseAfterReadAndWriteToRWTransaction extends RMITest {
 				int v = x.read();
 				Assert.assertEquals(1, v);
 				aint.set(2);
-				
+
 				waitForTick(5);
 
 				t.commit();
@@ -68,6 +69,7 @@ public class ReleaseAfterReadAndWriteToRWTransaction extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -85,18 +87,18 @@ public class ReleaseAfterReadAndWriteToRWTransaction extends RMITest {
 				waitForTick(2);
 
 				waitForTick(3);
-				
+
 				Assert.assertEquals("T1 should release after write not after read.", 1, aint.get());
 				int v1 = x.read();
 				Assert.assertEquals(1, v1);
 
 				waitForTick(4);
-				
+
 				x.write(2);
-				
+
 				int v2 = x.read();
 				Assert.assertEquals(2, v2);
-				
+
 				waitForTick(5);
 
 				t.commit();
@@ -111,6 +113,7 @@ public class ReleaseAfterReadAndWriteToRWTransaction extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());

@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Assert;
 import org.junit.Test;
 
+import put.atomicrmi.OneThreadToRuleThemAll;
 import put.atomicrmi.Transaction;
 import put.atomicrmi.TransactionFailureMonitor;
 import put.unit.RMITest;
@@ -23,7 +24,7 @@ import edu.umd.cs.mtc.TestFramework;
  */
 public class ReleaseAfterMoreBufferedWritesToWRTransaction extends RMITest {
 	class Threads extends MultithreadedTest {
-		
+
 		AtomicInteger aint;
 
 		@Override
@@ -51,7 +52,7 @@ public class ReleaseAfterMoreBufferedWritesToWRTransaction extends RMITest {
 				int v = x.read();
 				Assert.assertEquals(3, v);
 				aint.set(2);
-				
+
 				waitForTick(5);
 
 				t.commit();
@@ -66,6 +67,7 @@ public class ReleaseAfterMoreBufferedWritesToWRTransaction extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -83,7 +85,7 @@ public class ReleaseAfterMoreBufferedWritesToWRTransaction extends RMITest {
 				waitForTick(2);
 
 				waitForTick(3);
-				
+
 				Assert.assertEquals("T1 should release after write not after read.", 1, aint.get());
 				x.write(2);
 
@@ -91,7 +93,7 @@ public class ReleaseAfterMoreBufferedWritesToWRTransaction extends RMITest {
 
 				int v = x.read();
 				Assert.assertEquals(2, v);
-				
+
 				waitForTick(5);
 
 				t.commit();
@@ -106,6 +108,7 @@ public class ReleaseAfterMoreBufferedWritesToWRTransaction extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());

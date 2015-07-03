@@ -13,7 +13,7 @@ public interface Variable extends Remote {
 
 	@Access(Mode.WRITE_ONLY)
 	void write(int v) throws RemoteException;
-	
+
 	@Access(Mode.ANY)
 	void increment() throws RemoteException;
 

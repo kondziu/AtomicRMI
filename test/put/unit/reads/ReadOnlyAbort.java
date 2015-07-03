@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import put.atomicrmi.OneThreadToRuleThemAll;
 import put.atomicrmi.RollbackForcedException;
 import put.atomicrmi.Transaction;
 import put.atomicrmi.TransactionFailureMonitor;
@@ -25,37 +26,38 @@ import edu.umd.cs.mtc.TestFramework;
  */
 public class ReadOnlyAbort extends RMITest {
 	class Threads extends MultithreadedTest {
-		
+
 		public void thread1() {
 			Transaction t = null;
 			try {
 				t = new Transaction();
 				Variable x = t.accesses((Variable) registry.lookup("x"), 1);
-				
+
 				t.start();
 				waitForTick(1);
 				waitForTick(2);
-				
+
 				x.write(1);
-				
+
 				waitForTick(3);
-				
+
 				waitForTick(4);
-				
-			t.rollback();
-				
+
+				t.rollback();
+
 				waitForTick(5);
-				
+
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
 			} finally {
 				t.stopHeartbeat();
 			}
-			
+
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -95,13 +97,13 @@ public class ReadOnlyAbort extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
 			}
 		}
 	}
-
 
 	@Test
 	public void readOnlyAbort() throws Throwable {

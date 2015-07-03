@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import put.atomicrmi.OneThreadToRuleThemAll;
 import put.atomicrmi.Transaction;
 import put.atomicrmi.TransactionException;
 import put.atomicrmi.TransactionFailureMonitor;
@@ -26,9 +27,9 @@ public class ValidAccessModeAny extends RMITest {
 				Variable x = t.accesses((Variable) registry.lookup("x"));
 				t.start();
 				x.increment();
-				
+
 				Assert.fail("Transaction attempted to commit, when it should have aborted on invoke.");
-				
+
 				t.commit();
 			} catch (TransactionException e) {
 				e.printStackTrace();
@@ -44,6 +45,7 @@ public class ValidAccessModeAny extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());

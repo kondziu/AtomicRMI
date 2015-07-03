@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Assert;
 import org.junit.Test;
 
+import put.atomicrmi.OneThreadToRuleThemAll;
 import put.atomicrmi.RollbackForcedException;
 import put.atomicrmi.Transaction;
 import put.atomicrmi.TransactionFailureMonitor;
@@ -24,7 +25,7 @@ import edu.umd.cs.mtc.TestFramework;
  */
 public class ReleaseAfterOneBufferedWriteToWRTransactionAndAbort extends RMITest {
 	class Threads extends MultithreadedTest {
-		
+
 		AtomicInteger aint;
 
 		@Override
@@ -51,7 +52,7 @@ public class ReleaseAfterOneBufferedWriteToWRTransactionAndAbort extends RMITest
 				int v = x.read();
 				Assert.assertEquals(1, v);
 				aint.set(2);
-				
+
 				waitForTick(5);
 
 				t.rollback();
@@ -66,6 +67,7 @@ public class ReleaseAfterOneBufferedWriteToWRTransactionAndAbort extends RMITest
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -83,7 +85,7 @@ public class ReleaseAfterOneBufferedWriteToWRTransactionAndAbort extends RMITest
 				waitForTick(2);
 
 				waitForTick(3);
-				
+
 				Assert.assertEquals("T1 should release after write not after read.", 1, aint.get());
 				x.write(2);
 
@@ -91,11 +93,11 @@ public class ReleaseAfterOneBufferedWriteToWRTransactionAndAbort extends RMITest
 
 				int v = x.read();
 				Assert.assertEquals(2, v);
-				
+
 				waitForTick(5);
 
 				t.commit();
-				Assert.fail("Transaction comitted when it should have aborted");				
+				Assert.fail("Transaction comitted when it should have aborted");
 
 			} catch (RollbackForcedException e) {
 				// everything is fine
@@ -109,6 +111,7 @@ public class ReleaseAfterOneBufferedWriteToWRTransactionAndAbort extends RMITest
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -117,8 +120,7 @@ public class ReleaseAfterOneBufferedWriteToWRTransactionAndAbort extends RMITest
 	}
 
 	@Test
-	public void releaseAfterOneBufferedWriteToWRTransactionAndAbort
-	() throws Throwable {
+	public void releaseAfterOneBufferedWriteToWRTransactionAndAbort() throws Throwable {
 		TestFramework.runOnce(new Threads());
 
 		Assert.assertEquals(0, state("x"));

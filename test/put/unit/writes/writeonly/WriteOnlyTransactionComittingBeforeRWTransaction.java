@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import put.atomicrmi.OneThreadToRuleThemAll;
 import put.atomicrmi.Transaction;
 import put.atomicrmi.TransactionFailureMonitor;
 import put.atomicrmi.Update;
@@ -14,8 +15,7 @@ import edu.umd.cs.mtc.MultithreadedTest;
 import edu.umd.cs.mtc.TestFramework;
 
 /**
- * Write only transaction commits. A R/W transaction subsequently
- * commits.
+ * Write only transaction commits. A R/W transaction subsequently commits.
  * 
  * <pre>
  *     [  w(x)2 w(x)3 ]
@@ -61,6 +61,7 @@ public class WriteOnlyTransactionComittingBeforeRWTransaction extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -75,15 +76,15 @@ public class WriteOnlyTransactionComittingBeforeRWTransaction extends RMITest {
 
 				waitForTick(4);
 				t.start();
-//				waitForTick(2);
-//				waitForTick(3);
-//				waitForTick(4);
-				
+				// waitForTick(2);
+				// waitForTick(3);
+				// waitForTick(4);
+
 				int v1 = x.read();
 				Assert.assertEquals(3, v1);
 
 				x.write(v1 + 1);
-			
+
 				t.commit();
 
 				waitForTick(8);
@@ -98,6 +99,7 @@ public class WriteOnlyTransactionComittingBeforeRWTransaction extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());

@@ -14,18 +14,20 @@ public class VariableImpl extends TransactionalUnicastRemoteObject implements Va
 	private static final long serialVersionUID = 8037219139497925795L;
 	private int value;
 	private String name;
-	//private List<String> log = null;
+
+	// private List<String> log = null;
 
 	public VariableImpl() throws RemoteException {
 
 	}
 
-//	public VariableImpl(String name, int value, List<String> log) throws RemoteException {
-//		super();
-//		this.name = name;
-//		this.value = value;
-//		//this.log = log;
-//	}
+	// public VariableImpl(String name, int value, List<String> log) throws
+	// RemoteException {
+	// super();
+	// this.name = name;
+	// this.value = value;
+	// //this.log = log;
+	// }
 
 	public VariableImpl(String name, int value) throws RemoteException {
 		super();

@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import put.atomicrmi.OneThreadToRuleThemAll;
 import put.atomicrmi.RollbackForcedException;
 import put.atomicrmi.Transaction;
 import put.atomicrmi.TransactionFailureMonitor;
@@ -60,6 +61,7 @@ public class ForcedRetryOnInvoke extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -77,7 +79,6 @@ public class ForcedRetryOnInvoke extends RMITest {
 					Variable y = t.accesses((Variable) registry.lookup("y"), 2);
 					Variable z = t.accesses((Variable) registry.lookup("z"), 2);
 
-
 					waitForTick(i + 1);
 					System.out.println("starting");
 					t.start();
@@ -89,10 +90,10 @@ public class ForcedRetryOnInvoke extends RMITest {
 
 					waitForTick(i + 4);
 					int vy = y.read();
-					
-					waitForTick(i + 5);					
+
+					waitForTick(i + 5);
 					waitForTick(i + 6);
-					
+
 					y.write(vy + 1);
 
 					int vz = z.read();
@@ -118,6 +119,7 @@ public class ForcedRetryOnInvoke extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());

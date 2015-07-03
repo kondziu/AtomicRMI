@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import put.atomicrmi.OneThreadToRuleThemAll;
 import put.atomicrmi.Transaction;
 import put.atomicrmi.TransactionFailureMonitor;
 import put.unit.RMITest;
@@ -48,7 +49,7 @@ public class WriteSeriesFirstReadFromBufferAbortOrder extends RMITest {
 				waitForTick(13);
 
 				t.commit();
-				
+
 				waitForTick(14);
 
 			} catch (Exception e) {
@@ -61,6 +62,7 @@ public class WriteSeriesFirstReadFromBufferAbortOrder extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -94,7 +96,7 @@ public class WriteSeriesFirstReadFromBufferAbortOrder extends RMITest {
 				waitForTick(12);
 
 				t.rollback();
-				
+
 				waitForTick(13);
 
 			} catch (Exception e) {
@@ -107,6 +109,7 @@ public class WriteSeriesFirstReadFromBufferAbortOrder extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());

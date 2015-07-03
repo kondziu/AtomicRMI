@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Assert;
 import org.junit.Test;
 
+import put.atomicrmi.OneThreadToRuleThemAll;
 import put.atomicrmi.RollbackForcedException;
 import put.atomicrmi.Transaction;
 import put.atomicrmi.TransactionFailureMonitor;
@@ -28,7 +29,7 @@ import edu.umd.cs.mtc.TestFramework;
  */
 public class WriteFirstReadFromBufferOnceForcedAbort extends RMITest {
 	class Threads extends MultithreadedTest {
-		
+
 		AtomicInteger aint;
 
 		@Override
@@ -40,7 +41,7 @@ public class WriteFirstReadFromBufferOnceForcedAbort extends RMITest {
 			Transaction t = null;
 			try {
 				t = new Transaction();
-				Variable x = t.accesses((Variable) registry.lookup("x"),2);
+				Variable x = t.accesses((Variable) registry.lookup("x"), 2);
 
 				t.start();
 				waitForTick(1);
@@ -69,6 +70,7 @@ public class WriteFirstReadFromBufferOnceForcedAbort extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -115,6 +117,7 @@ public class WriteFirstReadFromBufferOnceForcedAbort extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());

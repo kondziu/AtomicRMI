@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import put.atomicrmi.OneThreadToRuleThemAll;
 import put.atomicrmi.Transaction;
 import put.atomicrmi.TransactionFailureMonitor;
 import put.unit.RMITest;
@@ -20,8 +21,8 @@ import edu.umd.cs.mtc.TestFramework;
  * T2  [      w(x)2       ---!
  * </pre>
  * 
- * Checks whether the write is performed to a buffer and the state is
- * reverted on abort.
+ * Checks whether the write is performed to a buffer and the state is reverted
+ * on abort.
  */
 public class WriteBufferAbort extends RMITest {
 	class Threads extends MultithreadedTest {
@@ -58,6 +59,7 @@ public class WriteBufferAbort extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -82,7 +84,7 @@ public class WriteBufferAbort extends RMITest {
 				waitForTick(5);
 
 				t.rollback();
-				
+
 				waitForTick(6);
 
 			} catch (Exception e) {
@@ -95,6 +97,7 @@ public class WriteBufferAbort extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());

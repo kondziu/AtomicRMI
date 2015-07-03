@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import put.atomicrmi.OneThreadToRuleThemAll;
 import put.atomicrmi.RollbackForcedException;
 import put.atomicrmi.Transaction;
 import put.atomicrmi.TransactionFailureMonitor;
@@ -49,7 +50,7 @@ public class WriteOnlyTransactionInCascadingAbort extends RMITest {
 				y.write(1);
 
 				waitForTick(4);
-				t.commitInterrupted(createWaiterForTick(5), createWaiterForTick(6,7));
+				t.commitInterrupted(createWaiterForTick(5), createWaiterForTick(6, 7));
 
 				waitForTick(8);
 				waitForTick(9);
@@ -67,6 +68,7 @@ public class WriteOnlyTransactionInCascadingAbort extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -106,6 +108,7 @@ public class WriteOnlyTransactionInCascadingAbort extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -126,7 +129,6 @@ public class WriteOnlyTransactionInCascadingAbort extends RMITest {
 
 				x.write(v1 + 1); // early release
 
-
 				t.commit();
 				waitForTick(6);
 				waitForTick(7);
@@ -146,6 +148,7 @@ public class WriteOnlyTransactionInCascadingAbort extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());

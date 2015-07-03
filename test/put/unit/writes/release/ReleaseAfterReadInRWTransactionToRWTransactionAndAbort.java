@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import put.atomicrmi.OneThreadToRuleThemAll;
 import put.atomicrmi.RollbackForcedException;
 import put.atomicrmi.Transaction;
 import put.atomicrmi.TransactionFailureMonitor;
@@ -23,7 +24,7 @@ import edu.umd.cs.mtc.TestFramework;
  */
 public class ReleaseAfterReadInRWTransactionToRWTransactionAndAbort extends RMITest {
 	class Threads extends MultithreadedTest {
-		
+
 		public void thread1() {
 			Transaction t = null;
 			try {
@@ -33,7 +34,7 @@ public class ReleaseAfterReadInRWTransactionToRWTransactionAndAbort extends RMIT
 				t.start();
 				waitForTick(1);
 				waitForTick(2);
-				
+
 				int v0 = x.read();
 				Assert.assertEquals(0, v0);
 
@@ -41,11 +42,11 @@ public class ReleaseAfterReadInRWTransactionToRWTransactionAndAbort extends RMIT
 
 				int v = x.read();
 				Assert.assertEquals(1, v);
-				
+
 				waitForTick(3);
 
 				waitForTick(4);
-				
+
 				waitForTick(5);
 
 				t.rollback();
@@ -60,6 +61,7 @@ public class ReleaseAfterReadInRWTransactionToRWTransactionAndAbort extends RMIT
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -77,22 +79,21 @@ public class ReleaseAfterReadInRWTransactionToRWTransactionAndAbort extends RMIT
 				waitForTick(2);
 
 				waitForTick(3);
-				
+
 				int v1 = x.read();
 				Assert.assertEquals(1, v1);
-				
+
 				waitForTick(4);
-				
+
 				x.write(2);
-				
+
 				int v2 = x.read();
 				Assert.assertEquals(2, v2);
-				
+
 				waitForTick(5);
 
 				t.commit();
 				Assert.fail("Transaction comitted when it should have aborted");
-				
 
 			} catch (RollbackForcedException e) {
 				// everything is fine
@@ -106,6 +107,7 @@ public class ReleaseAfterReadInRWTransactionToRWTransactionAndAbort extends RMIT
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());

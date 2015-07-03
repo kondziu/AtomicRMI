@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import put.atomicrmi.OneThreadToRuleThemAll;
 import put.atomicrmi.Transaction;
 import put.atomicrmi.TransactionFailureMonitor;
 import put.atomicrmi.Update;
@@ -61,6 +62,7 @@ public class WriteOnlyTransactionAbortingOutOfTurn extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -79,12 +81,12 @@ public class WriteOnlyTransactionAbortingOutOfTurn extends RMITest {
 
 				waitForTick(3);
 				waitForTick(4);
-				
+
 				int v1 = x.read();
 				Assert.assertEquals(0, v1);
 
 				x.write(v1 + 1);
-			
+
 				t.commit();
 
 				waitForTick(8);
@@ -99,6 +101,7 @@ public class WriteOnlyTransactionAbortingOutOfTurn extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
+				OneThreadToRuleThemAll.theOneThread.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
