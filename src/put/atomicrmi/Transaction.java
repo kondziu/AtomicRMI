@@ -533,6 +533,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 			Collections.sort(proxies, comparator);
 
 			for (IObjectProxy proxy : proxies) {
+				System.out.println("xx1");
 				proxy.lock();
 			}
 
@@ -563,11 +564,13 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 */
 	public void commit() throws TransactionException, RollbackForcedException {
 		if (!waitForSnapshots()) {
+			System.out.println("FP C1");
 			finishProxies(true);
 			setState(STATE_ROLLEDBACK);
 			throw new RollbackForcedException("Rollback forced during commit.");
 		}
 
+		System.out.println("FP C2");
 		finishProxies(false);
 		setState(STATE_COMMITED);
 
@@ -590,6 +593,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 */
 	public void rollback() throws TransactionException {
 		waitForSnapshots();
+		System.out.println("FP R");
 		finishProxies(true);
 		setState(STATE_ROLLEDBACK);
 
@@ -662,6 +666,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 		// TODO parallel for
 		for (IObjectProxy proxy : proxies) {
 			try {
+				System.out.println("T finishing proxies");
 				proxy.finishTransaction(restore, false);
 			} catch (RemoteException e) {
 				// Do nothing. This situation is treated as remote object
@@ -704,7 +709,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 //		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public int compare(IObjectProxy a, IObjectProxy b) {
 			try {
-				return (a.getUID().compareTo(b.getUID()));
+				return a.getUID().compareTo(b.getUID());
 			} catch (RemoteException e) {
 				// Nasty hack
 				throw new RuntimeException(e.getMessage(), e.getCause());

@@ -44,6 +44,7 @@ class UpdateObjectProxy extends ObjectProxy {
 	@Override
 	public boolean preSync(Mode accessType) throws RemoteException {
 
+		System.out.println("ul16");
 		object.transactionLock(uid);
 		if (mwv == 0 && mv == 0) {
 			writeRecorder = new StateRecorder();
@@ -82,7 +83,7 @@ class UpdateObjectProxy extends ObjectProxy {
 		TransactionFailureMonitor.getInstance().stopMonitoring(this);
 
 		object.finishTransaction(uid, snapshot, restore);
-		OneThreadToRuleThemAll.theOneThread.ping("lt");
+		OneThreadToRuleThemAll.theOneThread.ping();
 
 		over = true;
 		snapshot = null;		
@@ -93,6 +94,7 @@ class UpdateObjectProxy extends ObjectProxy {
 		try {
 			object.waitForCounter(px - 1);
 
+			System.out.println("ul17");
 			object.transactionLock(uid);
 
 			// Short circuit, if no writes.
