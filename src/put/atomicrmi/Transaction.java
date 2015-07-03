@@ -119,7 +119,6 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	}
 
 	/**
-	 * Randomly generated serialization version UID.
 	 */
 	private static final long serialVersionUID = -1134870682188058024L;
 
@@ -533,7 +532,6 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 			Collections.sort(proxies, comparator);
 
 			for (IObjectProxy proxy : proxies) {
-				System.out.println("xx1");
 				proxy.lock();
 			}
 
@@ -564,13 +562,13 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 */
 	public void commit() throws TransactionException, RollbackForcedException {
 		if (!waitForSnapshots()) {
-			System.out.println("FP C1");
+//			System.out.println("FP C1");
 			finishProxies(true);
 			setState(STATE_ROLLEDBACK);
 			throw new RollbackForcedException("Rollback forced during commit.");
 		}
 
-		System.out.println("FP C2");
+//		System.out.println("FP C2");
 		finishProxies(false);
 		setState(STATE_COMMITED);
 
@@ -593,7 +591,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 */
 	public void rollback() throws TransactionException {
 		waitForSnapshots();
-		System.out.println("FP R");
+//		System.out.println("FP R");
 		finishProxies(true);
 		setState(STATE_ROLLEDBACK);
 
@@ -666,7 +664,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 		// TODO parallel for
 		for (IObjectProxy proxy : proxies) {
 			try {
-				System.out.println("T finishing proxies");
+//				System.out.println("T finishing proxies");
 				proxy.finishTransaction(restore, false);
 			} catch (RemoteException e) {
 				// Do nothing. This situation is treated as remote object

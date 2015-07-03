@@ -222,7 +222,7 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 *             when error occurred during waiting for lock to be released.
 	 */
 	void transactionLock(Object tid) throws TransactionException {
-		System.out.println("Locking TL " + tid + " " + uid);
+//		System.out.println("Locking TL " + tid + " " + uid);
 		synchronized (lock) {
 			try {
 				while (lockedId != null && !lockedId.equals(tid))
@@ -234,7 +234,7 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 			lockedId = tid;
 			lock.value++;
 		}
-		System.out.println("Locked TL " + tid + " " + uid);
+//		System.out.println("Locked TL " + tid + " " + uid);
 	}
 
 	/**
@@ -245,7 +245,7 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 *            transaction identifier.
 	 */
 	void transactionUnlock(UUID tid) {
-		System.out.println("Unlocking TL " + tid + " " + uid);
+//		System.out.println("Unlocking TL " + tid + " " + uid);
 		synchronized (lock) {
 			if (lockedId.equals(tid)) {
 				lock.value--;
@@ -256,7 +256,7 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 				}
 			}
 		}
-		System.out.println("Unlocked TL " + tid + " " + uid);
+//		System.out.println("Unlocked TL " + tid + " " + uid);
 	}
 
 	/**
@@ -337,7 +337,7 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 */
 	boolean tryWaitForCounter(long value) throws TransactionException {
 		// System.out.println("acquire " + lv.getAvailable());
-		System.out.println("checksies2 " + value + " vs " + lv.getAvailable());
+//		System.out.println("checksies2 " + value + " vs " + lv.getAvailable());
 		boolean acquired = lv.tryAcquire(value);
 		// System.out.println("acquire " + acquired);
 		if (!acquired)
@@ -394,9 +394,9 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 		if (restore && snapshot.getReadVersion() < getCurrentVersion()) {
 
 			// Lock before restoring.
-			System.out.println("ul15");
+//			System.out.println("ul15");
 			transactionLock(tid);
-			System.out.println("ul15b");
+//			System.out.println("ul15b");
 
 			restoreThis(snapshot.getImage());
 			setCurrentVersion(snapshot.getReadVersion());
@@ -405,7 +405,7 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 			transactionUnlockForce(tid);
 		}
 		
-		System.out.println("dafaq?!");
+//		System.out.println("dafaq?!");
 
 		lt.release(1);
 	}

@@ -23,7 +23,9 @@ public class OneThreadToRuleThemAll extends Thread {
 
 	private boolean run = true;
 
-	private boolean interrupted = false;
+	private boolean waiting;
+
+	// private boolean interrupted = false;
 
 	/**
 	 * Controller thread is waiting, as opposed to executing some task.
@@ -52,17 +54,19 @@ public class OneThreadToRuleThemAll extends Thread {
 		freshTasks = true;
 
 		// activeCategories[category.ordinal()] = true;
-		notify();
+		if (waiting)
+			notify();
 
 		return true;
 	}
 
 	public synchronized void ping() {
-		System.out.println("Pinging");
+		// System.out.println("Pinging");
 		freshTasks = true;
 
 		// activeCategories[category.ordinal()] = true;
-		notify();
+		if (waiting)
+			notify();
 	}
 
 	public synchronized void emergencyStop() {
@@ -98,7 +102,17 @@ public class OneThreadToRuleThemAll extends Thread {
 		List<Task> currentTasks;
 
 		while (run) {
-			System.out.println("Looping in OneThread (" + interrupted + ")");
+			// try {
+			// sleep(1);
+			// } catch (InterruptedException e1) {
+			// if (!run) {
+			// // interrupted = true;
+			// tasks.clear();
+			// freshTasks = false;
+			// break;
+			// }
+			// }
+			// System.out.println("Looping in OneThread (" + interrupted + ")");
 
 			/**
 			 * If nobody is doing anything, wait for someone to deposit some
@@ -106,18 +120,20 @@ public class OneThreadToRuleThemAll extends Thread {
 			 */
 			synchronized (this) {
 				try {
-					System.out.println("Fresh tasks? " + freshTasks);
+					// System.out.println("Fresh tasks? " + freshTasks);
 					if (!freshTasks) { // TODO
-						System.out.println("Waiting in OneThread");
+						// System.out.println("Waiting in OneThread");
+						waiting = true;
 						wait();
+						waiting = false;
 					} else {
-						System.out.println("Not waiting in OneThread - active categories present");
+						// System.out.println("Not waiting in OneThread - active categories present");
 					}
 				} catch (InterruptedException e) {
 					// Intentionally left blank.
 					System.out.println("OneThread interrupted");
 					if (!run) {
-						interrupted = true;
+						// interrupted = true;
 						tasks.clear();
 						freshTasks = false;
 						break;
@@ -129,7 +145,7 @@ public class OneThreadToRuleThemAll extends Thread {
 				// }
 			}
 
-			System.out.println("Activating OneThread");
+			// System.out.println("Activating OneThread");
 
 			/**
 			 * Somebody woke us up, we see whom it was, and check his task.
@@ -142,36 +158,41 @@ public class OneThreadToRuleThemAll extends Thread {
 			// System.out.println("Going through category " + category + ": " +
 			// tasks.get(category));
 
-			synchronized (this) {
-				currentTasks = new LinkedList<Task>(tasks);
-				// tasks.clear();
-				freshTasks = false;
-			}
+			while (freshTasks) {
+				synchronized (this) {
+					currentTasks = new LinkedList<Task>(tasks);
+					// tasks.clear();
+					freshTasks = false;
+				}
 
-			Iterator<Task> taskIter = currentTasks.iterator();
-			while (taskIter.hasNext()) {
-				Task task = taskIter.next();
-				System.out.println("Going through task " + task);
-				try {
-					if (task.condition(this)) {
-						System.out.println("Condition met for task " + task);
-						task.run(this);
-						// taskCount--;
-					} else {
-						System.out.println("Condition not met for task " + task);
-						// only preserve the task whose conditions were met
-						taskIter.remove();
+				Iterator<Task> taskIter = currentTasks.iterator();
+				while (taskIter.hasNext()) {
+					Task task = taskIter.next();
+					// System.out.println("Going through task " + task);
+					try {
+						if (task.condition(this)) {
+							// System.out.println("Condition met for task " +
+							// task);
+							task.run(this);
+							// taskCount--;
+						} else {
+							// System.out.println("Condition not met for task "
+							// +
+							// task);
+							// only preserve the task whose conditions were met
+							taskIter.remove();
+						}
+					} catch (Exception e) {
+						throw new RuntimeException(e.getMessage(), e.getCause());
 					}
-				} catch (Exception e) {
-					throw new RuntimeException(e.getMessage(), e.getCause());
+				}
+				synchronized (this) {
+					// currentTasks = new LinkedList<Task>(tasks);
+					tasks.removeAll(currentTasks);
 				}
 			}
-			synchronized (this) {
-				// currentTasks = new LinkedList<Task>(tasks);
-				tasks.removeAll(currentTasks);
-			}
 
-			System.out.println("OneThread going to sleep");
+			// System.out.println("OneThread going to sleep");
 
 			/**
 			 * Aaand... go back to waiting.
