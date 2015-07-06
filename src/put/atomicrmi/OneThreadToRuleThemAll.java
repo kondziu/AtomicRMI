@@ -49,7 +49,9 @@ public class OneThreadToRuleThemAll extends Thread {
 		// tasks.put(category, set);
 		// }
 
-		tasks.add(task);
+		synchronized (tasks) {
+			tasks.add(task);
+		}
 		// taskCount++;
 		freshTasks = true;
 
@@ -126,15 +128,19 @@ public class OneThreadToRuleThemAll extends Thread {
 						waiting = true;
 						wait();
 						waiting = false;
-					} else {
-						// System.out.println("Not waiting in OneThread - active categories present");
 					}
+					// else {
+					// //
+					// System.out.println("Not waiting in OneThread - active categories present");
+					// }
 				} catch (InterruptedException e) {
 					// Intentionally left blank.
-					System.out.println("OneThread interrupted");
+					// System.out.println("OneThread interrupted");
 					if (!run) {
 						// interrupted = true;
-						tasks.clear();
+						synchronized (tasks) {
+							tasks.clear();
+						}
 						freshTasks = false;
 						break;
 					}
@@ -158,39 +164,40 @@ public class OneThreadToRuleThemAll extends Thread {
 			// System.out.println("Going through category " + category + ": " +
 			// tasks.get(category));
 
-			while (freshTasks) {
-				synchronized (this) {
-					currentTasks = new LinkedList<Task>(tasks);
-					// tasks.clear();
-					freshTasks = false;
-				}
+			// while (freshTasks) {
+			synchronized (tasks) {
+				currentTasks = new LinkedList<Task>(tasks);
+				// tasks.clear();
+				freshTasks = false;
+			}
 
-				Iterator<Task> taskIter = currentTasks.iterator();
-				while (taskIter.hasNext()) {
-					Task task = taskIter.next();
-					// System.out.println("Going through task " + task);
-					try {
-						if (task.condition(this)) {
-							// System.out.println("Condition met for task " +
-							// task);
-							task.run(this);
-							// taskCount--;
-						} else {
-							// System.out.println("Condition not met for task "
-							// +
-							// task);
-							// only preserve the task whose conditions were met
-							taskIter.remove();
-						}
-					} catch (Exception e) {
-						throw new RuntimeException(e.getMessage(), e.getCause());
+			Iterator<Task> taskIter = currentTasks.iterator();
+			while (taskIter.hasNext()) {
+				Task task = taskIter.next();
+				// System.out.println("Going through task " + task);
+				try {
+					if (task.condition(this)) {
+						// System.out.println("Condition met for task " +
+						// task);
+						task.run(this);
+						// taskCount--;
+					} else {
+						// System.out.println("Condition not met for task "
+						// +
+						// task);
+						// only preserve the task whose conditions were met
+						taskIter.remove();
 					}
-				}
-				synchronized (this) {
-					// currentTasks = new LinkedList<Task>(tasks);
-					tasks.removeAll(currentTasks);
+				} catch (Exception e) {
+					throw new RuntimeException(e.getMessage(), e.getCause());
 				}
 			}
+
+			synchronized (tasks) {
+				// currentTasks = new LinkedList<Task>(tasks);
+				tasks.removeAll(currentTasks);
+			}
+			// }
 
 			// System.out.println("OneThread going to sleep");
 
