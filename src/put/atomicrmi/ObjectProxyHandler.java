@@ -26,9 +26,10 @@ import java.rmi.RemoteException;
 import java.util.HashSet;
 import java.util.Set;
 
-import put.atomicrmi.Access.Mode;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.InvocationHandler;
+import put.atomicrmi.Access.Mode;
+import put.atomicrmi.IObjectProxy.BufferType;
 
 /**
  * Wrapper used to intercept remote object invocations. This is an
@@ -86,7 +87,7 @@ class ObjectProxyHandler implements InvocationHandler {
 	 *             when remote execution failed.
 	 */
 	static Object create(IObjectProxy proxy) throws RemoteException {
-		return Enhancer.create(null, getArrayOfRemoteInterfaces(proxy.getWrapped(false).getClass()), new ObjectProxyHandler(
+		return Enhancer.create(null, getArrayOfRemoteInterfaces(proxy.getWrapped().getClass()), new ObjectProxyHandler(
 				proxy));
 	}
 
@@ -119,8 +120,7 @@ class ObjectProxyHandler implements InvocationHandler {
 					+ proxy.getMode());
 		}
 
-		
-		boolean bufferred;
+		BufferType bufferred;
 		try {
 			bufferred = proxy.preSync(mode);
 		} catch (RemoteException e) {
@@ -135,8 +135,19 @@ class ObjectProxyHandler implements InvocationHandler {
 			}
 		}
 
-		method.setAccessible(true);
-		Object result = method.invoke(proxy.getWrapped(bufferred), args);
+		Object result = null;
+		switch (bufferred) {
+		case LOG_ONLY:
+			proxy.log(method.getName(), method.getParameterTypes(), args);
+			break;
+		case NONE:
+			method.setAccessible(true);
+			result = method.invoke(proxy.getWrapped(), args);
+			break;
+		case BUFFER:
+			method.setAccessible(true);
+			result = method.invoke(proxy.getBuffer(), args);
+		}
 
 		proxy.postSync(mode);
 

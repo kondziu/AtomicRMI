@@ -21,6 +21,7 @@
  */
 package put.atomicrmi;
 
+import java.lang.reflect.Method;
 import java.rmi.RemoteException;
 
 import put.atomicrmi.Access.Mode;
@@ -32,6 +33,8 @@ import put.atomicrmi.Access.Mode;
  * @author Wojciech Mruczkiewicz, Konrad Siek
  */
 public interface IObjectProxy extends IdentifiableRemote {
+	
+	enum BufferType {LOG_ONLY, BUFFER, NONE}
 
 	/**
 	 * Gives the remote reference to the remote object that is being wrapped.
@@ -40,7 +43,9 @@ public interface IObjectProxy extends IdentifiableRemote {
 	 * @throws RemoteException
 	 *             when remote execution fails.
 	 */
-	Object getWrapped(boolean bufferred) throws RemoteException;
+	Object getWrapped() throws RemoteException;
+	
+	Object getBuffer() throws RemoteException;
 
 	/**
 	 * Notifies this object proxy that transaction is starting. The failure
@@ -66,7 +71,7 @@ public interface IObjectProxy extends IdentifiableRemote {
 	 * @throws RemoteException
 	 *             when remote execution fails.
 	 */
-	boolean preSync(Mode accessType) throws RemoteException;
+	BufferType preSync(Mode accessType) throws RemoteException;
 
 	/**
 	 * Action performed after every remote method invocation. It should update
@@ -154,4 +159,6 @@ public interface IObjectProxy extends IdentifiableRemote {
 
 	// XXX
 	void update() throws RemoteException;
+
+	void log(String methodName, Class<?>[] argTypes, Object[] args) throws RemoteException;
 }

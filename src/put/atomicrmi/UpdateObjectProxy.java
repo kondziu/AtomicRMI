@@ -22,6 +22,7 @@
 package put.atomicrmi;
 
 import java.rmi.RemoteException;
+import java.util.LinkedList;
 import java.util.UUID;
 
 import net.sf.cglib.transform.impl.InterceptFieldCallback;
@@ -43,24 +44,25 @@ class UpdateObjectProxy extends ObjectProxy {
 	}
 
 	@Override
-	public boolean preSync(Mode accessType) throws RemoteException {
+	public BufferType preSync(Mode accessType) throws RemoteException {
 
 		System.out.println("ul16");
 		object.transactionLock(uid);
 		if (mwv == 0 && mv == 0) {
-			writeRecorder = new FieldStateRecorder();
-			try {
-				buffer = Instrumentation.transform(object.getClass(), object, (InterceptFieldCallback) writeRecorder);
-			} catch (Exception e) {
-				e.printStackTrace();
-				throw new RemoteException(e.getLocalizedMessage(), e.getCause());
-			}
+//			writeRecorder = new FieldStateRecorder();
+			log = new LinkedList<Invocation>();
+//			try {
+//				buffer = Instrumentation.transform(object.getClass(), object, (InterceptFieldCallback) writeRecorder);
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//				throw new RemoteException(e.getLocalizedMessage(), e.getCause());
+//			}
 		}
 
 		mv++;
 		mwv++;
 
-		return true;
+		return BufferType.LOG_ONLY;
 	}
 
 	@Override
@@ -99,7 +101,7 @@ class UpdateObjectProxy extends ObjectProxy {
 			object.transactionLock(uid);
 
 			// Short circuit, if no writes.
-			if (writeRecorder == null) {
+			if (log == null) {
 				object.transactionUnlock(uid);
 				return;
 			}
@@ -108,10 +110,11 @@ class UpdateObjectProxy extends ObjectProxy {
 			// the object and in effect we don't get cv and rv.
 			snapshot = object.snapshot();
 
-			writeRecorder.applyChanges(object);
+//			writeRecorder.applyChanges(object);
+			applyWriteLog();
 
 			// Prevent recorder from being used again
-			writeRecorder = null;
+			log = null;
 
 			// Create buffer for accessing objects after release or
 			// remove buffer.
