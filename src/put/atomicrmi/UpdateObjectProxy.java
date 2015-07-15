@@ -24,6 +24,7 @@ package put.atomicrmi;
 import java.rmi.RemoteException;
 import java.util.UUID;
 
+import net.sf.cglib.transform.impl.InterceptFieldCallback;
 import put.atomicrmi.Access.Mode;
 
 /**
@@ -47,9 +48,9 @@ class UpdateObjectProxy extends ObjectProxy {
 		System.out.println("ul16");
 		object.transactionLock(uid);
 		if (mwv == 0 && mv == 0) {
-			writeRecorder = new StateRecorder();
+			writeRecorder = new FieldStateRecorder();
 			try {
-				buffer = Instrumentation.transform(object.getClass(), object, writeRecorder);
+				buffer = Instrumentation.transform(object.getClass(), object, (InterceptFieldCallback) writeRecorder);
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RemoteException(e.getLocalizedMessage(), e.getCause());
@@ -86,7 +87,7 @@ class UpdateObjectProxy extends ObjectProxy {
 		OneThreadToRuleThemAll.theOneThread.ping();
 
 		over = true;
-		snapshot = null;		
+		snapshot = null;
 	}
 
 	@Override

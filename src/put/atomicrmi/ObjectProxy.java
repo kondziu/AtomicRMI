@@ -25,6 +25,7 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.UUID;
 
+import net.sf.cglib.transform.impl.InterceptFieldCallback;
 import put.atomicrmi.Access.Mode;
 import put.atomicrmi.OneThreadToRuleThemAll.Task;
 
@@ -112,9 +113,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 		}
 
 		@Override
-		public void run(OneThreadToRuleThemAll controller) throws TransactionException, CloneNotSupportedException,
-				RemoteException, SecurityException, IllegalArgumentException, NoSuchFieldException,
-				IllegalAccessException {
+		public void run(OneThreadToRuleThemAll controller) throws Exception {
 			// At this point must be past object.waitForCounter(px - 1); // 24
 //			System.out.println("onethread w1");
 //			System.out.println("ul14");
@@ -351,9 +350,9 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			object.transactionLock(uid);
 //			System.out.println("prewrite w4a");
 
-			writeRecorder = new StateRecorder();
+			writeRecorder = new FieldStateRecorder();
 			try {
-				buffer = Instrumentation.transform(object.getClass(), object, writeRecorder);
+				buffer = Instrumentation.transform(object.getClass(), object, (InterceptFieldCallback) writeRecorder);
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RemoteException(e.getLocalizedMessage(), e.getCause());
