@@ -25,7 +25,6 @@ import java.rmi.RemoteException;
 import java.util.LinkedList;
 import java.util.UUID;
 
-import net.sf.cglib.transform.impl.InterceptFieldCallback;
 import put.atomicrmi.Access.Mode;
 
 /**

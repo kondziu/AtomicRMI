@@ -21,7 +21,6 @@
  */
 package put.atomicrmi;
 
-import java.lang.reflect.Method;
 import java.rmi.RemoteException;
 
 import put.atomicrmi.Access.Mode;
