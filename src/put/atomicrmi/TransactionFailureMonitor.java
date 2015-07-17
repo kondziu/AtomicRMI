@@ -102,7 +102,7 @@ public class TransactionFailureMonitor extends UnicastRemoteObject implements Ru
 		proxies = new HashMap<UUID, Set<ObjectProxy>>();
 		alive = new HashMap<UUID, BooleanHolder>();
 
-		monitorThread = new Thread(this);
+		monitorThread = new Thread(this, "ARMI FailMon " + id);
 		monitorThread.setDaemon(true);
 		monitorThread.start();
 	}

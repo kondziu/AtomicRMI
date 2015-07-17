@@ -6,12 +6,17 @@ import java.util.List;
 
 public class OneThreadToRuleThemAll extends Thread {
 
-	public static final OneThreadToRuleThemAll theOneThread = new OneThreadToRuleThemAll();
+	public static final OneThreadToRuleThemAll theOneThread = new OneThreadToRuleThemAll("ARMI TheOneThread");
 
 	static {
+		theOneThread.setDaemon(true);
 		theOneThread.start();
 	}
 
+	public OneThreadToRuleThemAll(String name) {
+		super(name);
+	}
+	
 	private final List<Task> tasks = new LinkedList<Task>();
 
 	private boolean freshTasks = false;
