@@ -84,7 +84,7 @@ public class OneThreadToRuleThemAll extends Thread {
 	}
 
 	public synchronized boolean add(Task task) {
-		System.out.println("Adding task " + task);
+//		System.out.println("Adding task " + task);
 
 		// Set<Task> set = tasks.get(category);
 		// if (set == null) {
