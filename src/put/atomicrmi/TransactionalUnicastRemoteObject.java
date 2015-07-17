@@ -43,10 +43,9 @@ import put.atomicrmi.Access.Mode;
  * to be accessed by client of AtomicRMI library. Transactional remote objects
  * must only extend this class instead of {@link UnicastRemoteObject}.
  * 
- * @author Wojciech Mruczkiewicz
+ * @author Wojciech Mruczkiewicz, Konrad Siek
  */
-public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implements ITransactionalRemoteObject,
-		Stateful {
+public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implements ITransactionalRemoteObject {
 
 	/**
 	 * Stores snapshot of particular remote object together with snapshot
@@ -222,7 +221,6 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 *             when error occurred during waiting for lock to be released.
 	 */
 	void transactionLock(Object tid) throws TransactionException {
-//		System.out.println("Locking TL " + tid + " " + uid);
 		synchronized (lock) {
 			try {
 				while (lockedId != null && !lockedId.equals(tid))
@@ -234,7 +232,6 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 			lockedId = tid;
 			lock.value++;
 		}
-//		System.out.println("Locked TL " + tid + " " + uid);
 	}
 
 	/**
@@ -245,7 +242,6 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 *            transaction identifier.
 	 */
 	void transactionUnlock(UUID tid) {
-//		System.out.println("Unlocking TL " + tid + " " + uid);
 		synchronized (lock) {
 			if (lockedId.equals(tid)) {
 				lock.value--;
@@ -256,7 +252,6 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 				}
 			}
 		}
-//		System.out.println("Unlocked TL " + tid + " " + uid);
 	}
 
 	/**
@@ -336,10 +331,7 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 * @returns <code>true</code> if acquired, <code>false</code> otherwise.
 	 */
 	boolean tryWaitForCounter(long value) throws TransactionException {
-		// System.out.println("acquire " + lv.getAvailable());
-//		System.out.println("checksies2 " + value + " vs " + lv.getAvailable());
 		boolean acquired = lv.tryAcquire(value);
-		// System.out.println("acquire " + acquired);
 		if (!acquired)
 			return false;
 		lv.release(value);
@@ -394,9 +386,7 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 		if (restore && snapshot.getReadVersion() < getCurrentVersion()) {
 
 			// Lock before restoring.
-//			System.out.println("ul15");
 			transactionLock(tid);
-//			System.out.println("ul15b");
 
 			restoreThis(snapshot.getImage());
 			setCurrentVersion(snapshot.getReadVersion());
@@ -405,8 +395,6 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 			transactionUnlockForce(tid);
 		}
 		
-//		System.out.println("dafaq?!");
-
 		lt.release(1);
 	}
 
@@ -480,44 +468,6 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 
 	public Object getSortingKey() throws RemoteException {
 		return uid;
-	}
-
-	public void set(String fieldName, FieldType type, Object value) throws RemoteException {
-		try {
-			Field field = this.getClass().getDeclaredField(fieldName);
-			field.setAccessible(true);
-			switch (type) {
-			case Boolean:
-				field.setBoolean(this, ((Boolean) value).booleanValue());
-				break;
-			case Byte:
-				field.setByte(this, ((Byte) value).byteValue());
-				break;
-			case Char:
-				field.setChar(this, ((Character) value).charValue());
-				break;
-			case Double:
-				field.setDouble(this, ((Double) value).doubleValue());
-				break;
-			case Float:
-				field.setFloat(this, ((Float) value).floatValue());
-				break;
-			case Int:
-				field.setInt(this, ((Integer) value).intValue());
-				break;
-			case Long:
-				field.setLong(this, ((Long) value).longValue());
-				break;
-			case Object:
-				field.set(this, value);
-				break;
-			case Short:
-				field.setShort(this, ((Short) value).shortValue());
-				break;
-			}
-		} catch (Exception e) {
-			throw new RemoteException(e.getLocalizedMessage(), e.getCause());
-		}
 	}
 
 	@Override
