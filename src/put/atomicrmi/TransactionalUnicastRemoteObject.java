@@ -302,6 +302,7 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 * other transactions to start the execution.
 	 */
 	void releaseTransaction() {
+		System.out.println(Thread.currentThread().getName() + " releasing " + "lv=" + lv.getAvailable() + " + 1");
 		lv.release(1);
 	}
 
@@ -315,6 +316,7 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 */
 	void waitForCounter(long value) throws TransactionException {
 		try {
+			System.out.println(Thread.currentThread().getName() + " waiting " + value + " lv=" + lv.getAvailable());
 			lv.acquire(value);
 			lv.release(value);
 		} catch (InterruptedException e) {
@@ -378,6 +380,8 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 *             when error occurs during snapshot restoration.
 	 */
 	void finishTransaction(Object tid, Snapshot snapshot, boolean restore) throws TransactionException {
+		System.out.println(Thread.currentThread().getName() + " finishing " + tid);
+		
 		if (snapshot == null) {
 			lt.release(1);
 			return;

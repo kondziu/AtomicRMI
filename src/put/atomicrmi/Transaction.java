@@ -524,7 +524,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 */
 	public void start() throws TransactionException {
 		try {
-			heartbeatThread = new Thread(heartbeat);
+			heartbeatThread = new Thread(heartbeat, "Heartbeat for " + id);
 			heartbeatThread.start();
 
 			// Arrays.sort(proxies);
@@ -565,6 +565,11 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 //			System.out.println("FP C1");
 			finishProxies(true);
 			setState(STATE_ROLLEDBACK);
+			
+			synchronized (heartbeat) {
+				heartbeat.notify();
+			}
+			
 			throw new RollbackForcedException("Rollback forced during commit.");
 		}
 

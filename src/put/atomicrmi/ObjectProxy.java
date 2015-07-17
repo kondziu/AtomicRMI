@@ -121,6 +121,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 	private class WriteTask implements Task {
 		@Override
 		public boolean condition(OneThreadToRuleThemAll controller) throws TransactionException {
+			System.out.println("waitsor");
 			return object.tryWaitForCounter(px - 1);
 		}
 
@@ -456,7 +457,7 @@ class ObjectProxy extends UnicastRemoteObject implements IObjectProxy {
 			} else {
 				// System.out.println("postwrite w3b");
 				writeThreadExists = true;
-				// System.out.println("NEW WRITE THREAD");
+				System.out.println("NEW WRITE THREAD");
 				OneThreadToRuleThemAll.theOneThread.add(new WriteTask());
 				// System.out.println("postwrite w4b");
 			}

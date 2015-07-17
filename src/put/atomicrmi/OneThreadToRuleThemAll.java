@@ -1,5 +1,7 @@
 package put.atomicrmi;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -7,6 +9,42 @@ import java.util.List;
 public class OneThreadToRuleThemAll extends Thread {
 
 	public static final OneThreadToRuleThemAll theOneThread = new OneThreadToRuleThemAll("ARMI TheOneThread");
+
+	public static synchronized void emergencyStart() throws Exception {
+		if (theOneThread.isAlive())
+			return;
+		
+		Field field = OneThreadToRuleThemAll.class.getField("theOneThread");
+		
+		field.setAccessible(true);
+		Field modifiersField = Field.class.getDeclaredField("modifiers");
+		modifiersField.setAccessible(true);
+		modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+		
+		field.set(null, new OneThreadToRuleThemAll("ARMI TheOneThread"));
+	}
+	
+	public static synchronized void emergencyStop() {
+		if (!theOneThread.isAlive()) {
+			return;
+		}
+		// run = false;
+		theOneThread.tasks.clear();
+		theOneThread.freshTasks = false;
+		theOneThread.waiting = false;
+		theOneThread.interrupt();
+	}
+	
+	// public synchronized static final void reboot() {
+	// if (!theOneThread.run) {
+	// theOneThread.run = true;
+	// theOneThread.freshTasks = false;
+	// theOneThread.tasks.clear();
+	// theOneThread.waiting = false;
+	// theOneThread.setDaemon(true);
+	// theOneThread.start();
+	// }
+	// }
 
 	static {
 		theOneThread.setDaemon(true);
@@ -16,7 +54,7 @@ public class OneThreadToRuleThemAll extends Thread {
 	public OneThreadToRuleThemAll(String name) {
 		super(name);
 	}
-	
+
 	private final List<Task> tasks = new LinkedList<Task>();
 
 	private boolean freshTasks = false;
@@ -46,7 +84,7 @@ public class OneThreadToRuleThemAll extends Thread {
 	}
 
 	public synchronized boolean add(Task task) {
-		// System.out.println("Adding " + category + " task " + task);
+		System.out.println("Adding task " + task);
 
 		// Set<Task> set = tasks.get(category);
 		// if (set == null) {
@@ -68,7 +106,7 @@ public class OneThreadToRuleThemAll extends Thread {
 	}
 
 	public synchronized void ping() {
-		// System.out.println("Pinging");
+//		System.out.println("Pinging");
 		freshTasks = true;
 
 		// activeCategories[category.ordinal()] = true;
@@ -76,13 +114,6 @@ public class OneThreadToRuleThemAll extends Thread {
 			notify();
 	}
 
-	public synchronized void emergencyStop() {
-		if (!isAlive()) {
-			return;
-		}
-		run = false;
-		interrupt();
-	}
 
 	// private boolean activeCategoriesPresent() {
 	// for (Set<Object> category : activeCategories) {
@@ -119,7 +150,7 @@ public class OneThreadToRuleThemAll extends Thread {
 			// break;
 			// }
 			// }
-			// System.out.println("Looping in OneThread (" + interrupted + ")");
+//			System.out.println("Looping in OneThread");
 
 			/**
 			 * If nobody is doing anything, wait for someone to deposit some
@@ -127,20 +158,19 @@ public class OneThreadToRuleThemAll extends Thread {
 			 */
 			synchronized (this) {
 				try {
-					// System.out.println("Fresh tasks? " + freshTasks);
+//					System.out.println("Fresh tasks? " + freshTasks);
 					if (!freshTasks) { // TODO
-						// System.out.println("Waiting in OneThread");
+//						System.out.println("Waiting in OneThread");
 						waiting = true;
 						wait();
 						waiting = false;
-					}
-					// else {
-					// //
-					// System.out.println("Not waiting in OneThread - active categories present");
-					// }
+					} //else {
+						// //
+//						System.out.println("Not waiting in OneThread - active categories present");
+//					}
 				} catch (InterruptedException e) {
 					// Intentionally left blank.
-					// System.out.println("OneThread interrupted");
+//					System.out.println("OneThread interrupted");
 					if (!run) {
 						// interrupted = true;
 						synchronized (tasks) {
@@ -156,7 +186,7 @@ public class OneThreadToRuleThemAll extends Thread {
 				// }
 			}
 
-			// System.out.println("Activating OneThread");
+//			System.out.println("Activating OneThread");
 
 			/**
 			 * Somebody woke us up, we see whom it was, and check his task.
@@ -179,17 +209,14 @@ public class OneThreadToRuleThemAll extends Thread {
 			Iterator<Task> taskIter = currentTasks.iterator();
 			while (taskIter.hasNext()) {
 				Task task = taskIter.next();
-				// System.out.println("Going through task " + task);
+//				System.out.println("Going through task " + task);
 				try {
 					if (task.condition(this)) {
-						// System.out.println("Condition met for task " +
-						// task);
+//						System.out.println("Condition met for task " + task);
 						task.run(this);
 						// taskCount--;
 					} else {
-						// System.out.println("Condition not met for task "
-						// +
-						// task);
+//						System.out.println("Condition not met for task " + task);
 						// only preserve the task whose conditions were met
 						taskIter.remove();
 					}
