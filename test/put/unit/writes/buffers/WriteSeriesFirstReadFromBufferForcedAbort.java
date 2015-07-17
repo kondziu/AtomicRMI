@@ -71,7 +71,7 @@ public class WriteSeriesFirstReadFromBufferForcedAbort extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
-				OneThreadToRuleThemAll.theOneThread.emergencyStop();
+				OneThreadToRuleThemAll.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -122,7 +122,7 @@ public class WriteSeriesFirstReadFromBufferForcedAbort extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
-				OneThreadToRuleThemAll.theOneThread.emergencyStop();
+				OneThreadToRuleThemAll.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -132,6 +132,7 @@ public class WriteSeriesFirstReadFromBufferForcedAbort extends RMITest {
 
 	@Test
 	public void writeSeriesFirstReadFromBufferForcedAbort() throws Throwable {
+		OneThreadToRuleThemAll.emergencyStart();
 		TestFramework.runOnce(new Threads());
 
 		Assert.assertEquals(0, state("x"));

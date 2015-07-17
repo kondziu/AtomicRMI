@@ -57,7 +57,7 @@ public class ReadOnlyAbortCooperation extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
-				OneThreadToRuleThemAll.theOneThread.emergencyStop();
+				OneThreadToRuleThemAll.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -94,7 +94,7 @@ public class ReadOnlyAbortCooperation extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
-				OneThreadToRuleThemAll.theOneThread.emergencyStop();
+				OneThreadToRuleThemAll.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -104,7 +104,20 @@ public class ReadOnlyAbortCooperation extends RMITest {
 
 	@Test
 	public void readOnlyAbort() throws Throwable {
+		// System.out.println("START3");
+		// for (Thread i : Thread.getAllStackTraces().keySet()) {
+		// System.out.println(i.getName());
+		// }
+		// System.out.println();
+
+		OneThreadToRuleThemAll.emergencyStart();
 		TestFramework.runOnce(new Threads());
+
+		// System.out.println("POST3");
+		// for (Thread i : Thread.getAllStackTraces().keySet()) {
+		// System.out.println(i.getName());
+		// }
+		// System.out.println();
 
 		Assert.assertEquals(0, state("x"));
 	}

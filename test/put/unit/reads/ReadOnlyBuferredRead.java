@@ -80,7 +80,7 @@ public class ReadOnlyBuferredRead extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
-				OneThreadToRuleThemAll.theOneThread.emergencyStop();
+				OneThreadToRuleThemAll.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -118,7 +118,7 @@ public class ReadOnlyBuferredRead extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
-				OneThreadToRuleThemAll.theOneThread.emergencyStop();
+				OneThreadToRuleThemAll.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -128,7 +128,19 @@ public class ReadOnlyBuferredRead extends RMITest {
 
 	@Test
 	public void readOnlyBufferedRead() throws Throwable {
+//		System.out.println("START4");		
+//		for (Thread i : Thread.getAllStackTraces().keySet()) {
+//			System.out.println(i.getName());
+//		}
+//		System.out.println();
+		OneThreadToRuleThemAll.emergencyStart();
 		TestFramework.runOnce(new Threads());
+		
+//		System.out.println("POST4");		
+//		for (Thread i : Thread.getAllStackTraces().keySet()) {
+//			System.out.println(i.getName());
+//		}
+//		System.out.println();
 
 		Assert.assertEquals(1, state("x"));
 	}

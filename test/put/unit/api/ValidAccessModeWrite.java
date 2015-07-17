@@ -41,7 +41,7 @@ public class ValidAccessModeWrite extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
-				OneThreadToRuleThemAll.theOneThread.emergencyStop();
+				OneThreadToRuleThemAll.emergencyStop();
 
 			} catch (RemoteException e) {
 				e.printStackTrace();
@@ -52,6 +52,7 @@ public class ValidAccessModeWrite extends RMITest {
 
 	@Test
 	public void validAccessModeWrite() throws Throwable {
+		OneThreadToRuleThemAll.emergencyStart();
 		TestFramework.runOnce(new Threads());
 		Assert.assertEquals(1, state("x"));
 	}

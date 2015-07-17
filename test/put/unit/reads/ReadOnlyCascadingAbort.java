@@ -36,17 +36,24 @@ public class ReadOnlyCascadingAbort extends RMITest {
 				Variable x = t.accesses((Variable) registry.lookup("x"), 1);
 
 				t.start();
-				waitForTick(1);
 				waitForTick(2);
 				waitForTick(3);
 
+				// System.out.println("X1");
+
 				x.write(1);
+
+				// System.out.println("X2");
 
 				waitForTick(4);
 
 				waitForTick(10);
 
+				// System.out.println("X3");
+
 				t.rollback();
+
+				// System.out.println("X4");
 
 				waitForTick(11);
 
@@ -62,7 +69,7 @@ public class ReadOnlyCascadingAbort extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
-				OneThreadToRuleThemAll.theOneThread.emergencyStop();
+				OneThreadToRuleThemAll.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -80,14 +87,24 @@ public class ReadOnlyCascadingAbort extends RMITest {
 				waitForTick(2);
 				waitForTick(3);
 
+				// System.out.println("Y1");
+
 				waitForTick(4);
+
+				// System.out.println("Y11");
 				int v1 = x.read();
 				Assert.assertEquals(1, v1);
+
+				// System.out.println("Y2");
 
 				waitForTick(5);
 				waitForTick(6);
 
+				// System.out.println("Y3");
+
 				waitForTick(11);
+
+				// System.out.println("Y4");
 				t.commit();
 				waitForTick(12);
 				Assert.fail("Transaction comitted when it should have aborted");
@@ -105,7 +122,7 @@ public class ReadOnlyCascadingAbort extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
-				OneThreadToRuleThemAll.theOneThread.emergencyStop();
+				OneThreadToRuleThemAll.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -119,11 +136,17 @@ public class ReadOnlyCascadingAbort extends RMITest {
 				Variable x = t.accesses((Variable) registry.lookup("x"));
 
 				waitForTick(3);
+
+				// System.out.println("Z0");
+
 				t.start();
+
+				// System.out.println("Z1");
 
 				waitForTick(6);
 
 				int v = x.read();
+				// System.out.println("Z2");
 				Assert.assertEquals(1, v);
 				x.write(v + 1);
 
@@ -145,7 +168,7 @@ public class ReadOnlyCascadingAbort extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
-				OneThreadToRuleThemAll.theOneThread.emergencyStop();
+				OneThreadToRuleThemAll.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -155,7 +178,33 @@ public class ReadOnlyCascadingAbort extends RMITest {
 
 	@Test
 	public void readOnlyCascadingAbort() throws Throwable {
+
+		// System.out.println("START");
+		// for (Thread i : Thread.getAllStackTraces().keySet()) {
+		// System.out.println(i.getName());
+		// }
+		// System.out.println();
+		//
+		// try {
+		// OneThreadToRuleThemAll.reboot();
+		OneThreadToRuleThemAll.emergencyStart();
 		TestFramework.runOnce(new Threads());
+		// } catch (Throwable t) {
+		//
+		// throw t;
+		// } finally {
+		// System.out.println("POST");
+		// Map<Thread, StackTraceElement[]> th = Thread.getAllStackTraces();
+		// for (Thread i : th.keySet()) {
+		// System.out.println(i.getName());
+		// for (StackTraceElement j : th.get(i)) {
+		// System.out.println("   " + j.getClassName() + "    " +
+		// j.getMethodName() + " " + j.getLineNumber());
+		// }
+		// System.out.println();
+		// }
+		// System.out.println();
+		// }
 
 		Assert.assertEquals(0, state("x"));
 	}

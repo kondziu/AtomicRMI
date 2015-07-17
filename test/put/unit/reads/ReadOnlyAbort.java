@@ -57,7 +57,7 @@ public class ReadOnlyAbort extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
-				OneThreadToRuleThemAll.theOneThread.emergencyStop();
+				OneThreadToRuleThemAll.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -97,7 +97,7 @@ public class ReadOnlyAbort extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
-				OneThreadToRuleThemAll.theOneThread.emergencyStop();
+				OneThreadToRuleThemAll.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -107,7 +107,26 @@ public class ReadOnlyAbort extends RMITest {
 
 	@Test
 	public void readOnlyAbort() throws Throwable {
+		// System.out.println("START2");
+		// Map<Thread, StackTraceElement[]> th = Thread.getAllStackTraces();
+		// for (Thread i : th.keySet()) {
+		// System.out.println(i.getName());
+		// for (StackTraceElement j : th.get(i)) {
+		// System.out.println(j.getClassName() + "    " + j.getMethodName() +
+		// " " + j.getLineNumber());
+		// }
+		// System.out.println();
+		// }
+		// System.out.println();
+
+		OneThreadToRuleThemAll.emergencyStart();
 		TestFramework.runOnce(new Threads());
+
+		// System.out.println("POST2");
+		// for (Thread i : Thread.getAllStackTraces().keySet()) {
+		// System.out.println(i.getName());
+		// }
+		// System.out.println();
 
 		Assert.assertEquals(0, state("x"));
 	}

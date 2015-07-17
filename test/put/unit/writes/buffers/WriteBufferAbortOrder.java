@@ -58,7 +58,7 @@ public class WriteBufferAbortOrder extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
-				OneThreadToRuleThemAll.theOneThread.emergencyStop();
+				OneThreadToRuleThemAll.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -96,7 +96,7 @@ public class WriteBufferAbortOrder extends RMITest {
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
-				OneThreadToRuleThemAll.theOneThread.emergencyStop();
+				OneThreadToRuleThemAll.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -106,6 +106,7 @@ public class WriteBufferAbortOrder extends RMITest {
 
 	@Test
 	public void writeBufferCommitOrder() throws Throwable {
+		OneThreadToRuleThemAll.emergencyStart();
 		TestFramework.runOnce(new Threads());
 
 		Assert.assertEquals(1, state("x"));
