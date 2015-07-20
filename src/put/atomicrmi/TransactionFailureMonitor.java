@@ -111,7 +111,7 @@ public class TransactionFailureMonitor extends UnicastRemoteObject implements Ru
 		return id;
 	}
 
-	public synchronized void heartbeat(UUID tid) throws RemoteException {
+	public synchronized void heartbeat(Object tid) throws RemoteException {
 		BooleanHolder holder = alive.get(tid);
 		if (holder != null)
 			holder.value = true;

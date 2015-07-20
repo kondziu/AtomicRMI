@@ -26,9 +26,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import put.atomicrmi.Access.Mode;
@@ -46,77 +44,9 @@ import put.atomicrmi.Access.Mode;
  * 
  */
 public class Transaction extends UnicastRemoteObject implements ITransaction {
-	/**
-	 * Implementation of a heartbeater thread that is a part of failure
-	 * detection mechanism. This class runs thread that sends a notification
-	 * signal to every failure monitor observing this transaction. The set of
-	 * failure monitors cover the set of remote object accessed by this
-	 * transaction.
-	 * 
-	 * Notification signal is sent periodically, currently every 5s.
-	 * 
-	 * @author Wojciech Mruczkiewicz
-	 */
-	class Heartbeat implements Runnable {
 
-		/**
-		 * Delay between notifications.
-		 */
-		private static final long ESTIMATED_DELAY = 5000;
-
-		/**
-		 * Set of unique identifiers of failure monitors.
-		 */
-		private Set<UUID> ids = new HashSet<UUID>();
-
-		/**
-		 * Collection of failure monitors that should be notified about this
-		 * thread liveness.
-		 */
-		private List<ITransactionFailureMonitor> monitors = new ArrayList<ITransactionFailureMonitor>();
-
-		boolean shutdown = false;
-
-		public void run() {
-			while (state != STATE_COMMITED && state != STATE_ROLLEDBACK) {
-				try {
-					synchronized (this) {
-						this.wait(TransactionFailureMonitor.FAILURE_TIMEOUT - ESTIMATED_DELAY);
-						for (ITransactionFailureMonitor monitor : monitors) {
-							try {
-								monitor.heartbeat(id);
-							} catch (RemoteException e) {
-								// Do nothing.
-							}
-						}
-					}
-				} catch (InterruptedException e) {
-					if (shutdown) {
-						shutdown = false;
-						return;
-					}
-				}
-			}
-		}
-
-		/**
-		 * Add new failure monitor that requests notifications.
-		 * 
-		 * @param monitor
-		 *            failure monitor that will be notified.
-		 * @throws RemoteException
-		 *             when exception is thrown during retrieval of monitor's
-		 *             unique identifier.
-		 */
-		public synchronized void addFailureMonitor(ITransactionFailureMonitor monitor) throws RemoteException {
-			UUID id = monitor.getId();
-
-			if (!ids.contains(id)) {
-				ids.add(id);
-				monitors.add(monitor);
-			}
-		}
-	}
+	
+	
 
 	/**
 	 */
@@ -190,11 +120,6 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	protected Thread heartbeatThread;
 
 	/**
-	 * Heartbeater's instance.
-	 */
-	protected Heartbeat heartbeat;
-
-	/**
 	 * Creates new transaction. The required argument is a JavaRMI registry
 	 * instance. It is used to obtain global lock instance.
 	 * 
@@ -216,13 +141,12 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 		// // Sorting prevents deadlocks.
 		// Arrays.sort(globalLocks);
 
+		OneHeartbeat.thread.register(id);
 		proxies = new ArrayList<IObjectProxy>();
 
 		// XXX probably redundant
 //		readonly = new HashSet<IObjectProxy>();
 //		writeonly = new HashSet<IObjectProxy>();
-
-		heartbeat = new Heartbeat();
 	}
 
 	/**
@@ -448,7 +372,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 			IObjectProxy proxy = (IObjectProxy) remote.createProxy(this, id, allCalls, reads, writes, mode);
 			proxies.add(proxy);
 
-			heartbeat.addFailureMonitor(remote.getFailureMonitor());
+			OneHeartbeat.thread.addFailureMonitor(id, remote.getFailureMonitor());
 			return (T) proxy;
 		} catch (RemoteException e) {
 			throw new TransactionException("Unable to create proxy for an object.", e);
@@ -524,8 +448,9 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 */
 	public void start() throws TransactionException {
 		try {
-			heartbeatThread = new Thread(heartbeat, "Heartbeat for " + id);
-			heartbeatThread.start();
+//			heartbeatThread = new Thread(heartbeat, "Heartbeat for " + id);
+//			heartbeatThread.start();
+
 
 			// Arrays.sort(proxies);
 
@@ -566,9 +491,9 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 			finishProxies(true);
 			setState(STATE_ROLLEDBACK);
 			
-			synchronized (heartbeat) {
-				heartbeat.notify();
-			}
+//			synchronized (heartbeat) {
+				OneHeartbeat.thread.remove(id);
+//			}
 			
 			throw new RollbackForcedException("Rollback forced during commit.");
 		}
@@ -578,9 +503,9 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 		setState(STATE_COMMITED);
 
 		// Signal heartbeater to stop.
-		synchronized (heartbeat) {
-			heartbeat.notify();
-		}
+//		synchronized (heartbeat) {
+		OneHeartbeat.thread.remove(id);
+//		}
 
 		// heartbeatThread.stop();
 	}
@@ -601,9 +526,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 		setState(STATE_ROLLEDBACK);
 
 		// Signal heartbeater to stop.
-		synchronized (heartbeat) {
-			heartbeat.notify();
-		}
+		OneHeartbeat.thread.remove(id);
 
 		// heartbeatThread.stop();
 	}
@@ -722,14 +645,10 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	};
 
 	/**
-	 * Stop heartbeat monitor due to an emergency.
+	 * Stop heartbeat monitor for all transactions due to an emergency.
 	 */
 	public void stopHeartbeat() {
-		if (!heartbeatThread.isAlive()) {
-			return;
-		}
-		heartbeat.shutdown = true;
-		heartbeatThread.interrupt();
+		OneHeartbeat.emergencyStop();
 	}
 
 	@Override

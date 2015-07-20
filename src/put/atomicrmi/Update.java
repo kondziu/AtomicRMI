@@ -12,6 +12,8 @@ public class Update extends Transaction {
 
 	public Update() throws RemoteException {
 		super();
+		
+		OneHeartbeat.thread.register(id);
 	}
 
 	@Override
@@ -62,7 +64,7 @@ public class Update extends Transaction {
 			proxies.add(proxy);
 
 			// XXX possibly remove until actually starting writes?
-			heartbeat.addFailureMonitor(remote.getFailureMonitor());
+			OneHeartbeat.thread.addFailureMonitor(id, remote.getFailureMonitor());
 			return (T) proxy;
 		} catch (RemoteException e) {
 			throw new TransactionException("Unable to create proxy for an object.", e);
@@ -101,8 +103,9 @@ public class Update extends Transaction {
 
 		// Start begin
 		try {
-			heartbeatThread = new Thread(heartbeat, "Heartbeat for " + id);
-			heartbeatThread.start();
+//			heartbeatThread = new Thread(heartbeat, "Heartbeat for " + id);
+//			heartbeatThread.start();
+			OneHeartbeat.thread.register(id);
 
 			Collections.sort(proxies, comparator);
 
@@ -139,9 +142,7 @@ public class Update extends Transaction {
 		setState(STATE_COMMITED);
 
 		// Signal heartbeater to stop.
-		synchronized (heartbeat) {
-			heartbeat.notify();
-		}
+		OneHeartbeat.thread.remove(id);
 		// Commit end
 	}
 
@@ -162,10 +163,7 @@ public class Update extends Transaction {
 			RollbackForcedException {
 
 		// Start begin
-		try {
-			heartbeatThread = new Thread(heartbeat, "Heartbeat for " + id);
-			heartbeatThread.start();
-
+		try {			
 			Collections.sort(proxies, comparator);
 
 			for (IObjectProxy proxy : proxies) {
@@ -219,9 +217,7 @@ public class Update extends Transaction {
 		setState(STATE_COMMITED);
 
 		// Signal heartbeater to stop.
-		synchronized (heartbeat) {
-			heartbeat.notify();
-		}
+		OneHeartbeat.thread.remove(id);
 		// Commit end
 	}
 
@@ -239,10 +235,6 @@ public class Update extends Transaction {
 	 * Stop heartbeat monitor due to an emergency.
 	 */
 	public void stopHeartbeat() {
-		if (heartbeatThread == null || !heartbeatThread.isAlive()) {
-			return;
-		}
-		heartbeat.shutdown = true;
-		heartbeatThread.interrupt();
+		OneHeartbeat.emergencyStop();
 	}
 }

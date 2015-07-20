@@ -46,10 +46,10 @@ public interface ITransactionFailureMonitor extends Remote {
 	 * Sends a signal to transaction failure monitor with information that
 	 * transaction is still alive.
 	 * 
-	 * @param tid
+	 * @param id
 	 *            identifier of transaction that signals liveness.
 	 * @throws RemoteException
 	 *             when remote execution failed.
 	 */
-	void heartbeat(UUID tid) throws RemoteException;
+	void heartbeat(Object id) throws RemoteException;
 }
