@@ -43,7 +43,7 @@ import put.atomicrmi.Access.Mode;
  * @author Wojciech Mruczkiewicz, Konrad Siek
  * 
  */
-public class Transaction extends UnicastRemoteObject implements ITransaction {
+public class Transaction extends UnicastRemoteObject implements TransactionRef {
 
 	/**
 	 * Generated serial version number.
@@ -88,7 +88,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	/**
 	 * List of proxies of the accessed remote objects.
 	 */
-	protected final List<IObjectProxy> proxies;
+	protected final List<ObjectProxy> proxies;
 
 	/**
 	 * Creates new transaction. The required argument is a JavaRMI registry
@@ -105,8 +105,8 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 		state = State.PREPARING;
 		id = UUID.randomUUID();
 
-		OneHeartbeat.thread.register(id);
-		proxies = new ArrayList<IObjectProxy>();
+		Heartbeat.thread.register(id);
+		proxies = new ArrayList<ObjectProxy>();
 	}
 
 	/**
@@ -328,11 +328,11 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 			throw new TransactionException("Object access information can be added only in preparation state.");
 
 		try {
-			ITransactionalRemoteObject remote = (ITransactionalRemoteObject) obj;
-			IObjectProxy proxy = (IObjectProxy) remote.createProxy(this, id, allCalls, reads, writes, mode);
+			TransactionalRemoteObject remote = (TransactionalRemoteObject) obj;
+			ObjectProxy proxy = (ObjectProxy) remote.createProxy(this, id, allCalls, reads, writes, mode);
 			proxies.add(proxy);
 
-			OneHeartbeat.thread.addFailureMonitor(id, remote.getFailureMonitor());
+			Heartbeat.thread.addFailureMonitor(id, remote.getFailureMonitor());
 			return (T) proxy;
 		} catch (RemoteException e) {
 			throw new TransactionException("Unable to create proxy for an object.", e);
@@ -406,15 +406,15 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 
 			Collections.sort(proxies, comparator);
 
-			for (IObjectProxy proxy : proxies) {
+			for (ObjectProxy proxy : proxies) {
 				proxy.lock();
 			}
 
-			for (IObjectProxy proxy : proxies) {
+			for (ObjectProxy proxy : proxies) {
 				proxy.startTransaction();
 			}
 
-			for (IObjectProxy proxy : proxies) {
+			for (ObjectProxy proxy : proxies) {
 				proxy.unlock();
 			}
 
@@ -441,7 +441,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 			finishProxies(true);
 			setState(State.ABORTED);
 
-			OneHeartbeat.thread.remove(id);
+			Heartbeat.thread.remove(id);
 
 			throw new RollbackForcedException("Rollback forced during commit.");
 		}
@@ -450,7 +450,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 		setState(State.COMMITED);
 
 		/** Signal heartbeater to stop. */
-		OneHeartbeat.thread.remove(id);
+		Heartbeat.thread.remove(id);
 	}
 
 	/**
@@ -469,7 +469,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 		setState(State.ABORTED);
 
 		/** Signal heartbeater to stop. */
-		OneHeartbeat.thread.remove(id);
+		Heartbeat.thread.remove(id);
 	}
 
 	/**
@@ -492,7 +492,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	protected boolean waitForSnapshots() {
 		boolean commit = true;
 
-		for (IObjectProxy proxy : proxies) {
+		for (ObjectProxy proxy : proxies) {
 			try {
 				if (!proxy.waitForSnapshot(false))
 					commit = false;
@@ -512,8 +512,8 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 * @throws RemoteException
 	 */
 	public <T> void release(T object) throws TransactionException, RemoteException {
-		if (object instanceof IObjectProxy) {
-			IObjectProxy proxy = (IObjectProxy) object;
+		if (object instanceof ObjectProxy) {
+			ObjectProxy proxy = (ObjectProxy) object;
 			proxy.free();
 		} else {
 			throw new TransactionException("Not a transactional object: " + object);
@@ -528,7 +528,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 *            restored or committed.
 	 */
 	protected void finishProxies(boolean restore) {
-		for (IObjectProxy proxy : proxies) {
+		for (ObjectProxy proxy : proxies) {
 			try {
 				proxy.finishTransaction(restore, false);
 			} catch (RemoteException e) {
@@ -568,8 +568,8 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	/**
 	 * A comparator object for sorting remote object proxies by their IDs.
 	 */
-	protected Comparator<IObjectProxy> comparator = new Comparator<IObjectProxy>() {
-		public int compare(IObjectProxy a, IObjectProxy b) {
+	protected Comparator<ObjectProxy> comparator = new Comparator<ObjectProxy>() {
+		public int compare(ObjectProxy a, ObjectProxy b) {
 			try {
 				return a.getUID().compareTo(b.getUID());
 			} catch (RemoteException e) {

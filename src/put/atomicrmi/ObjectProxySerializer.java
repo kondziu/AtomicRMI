@@ -21,62 +21,24 @@
  */
 package put.atomicrmi;
 
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.rmi.RemoteException;
 
 /**
- * Serialization replacement for {@link ObjectProxyHandler} class.
+ * Interface for object proxy serialization replacement. This is necessary in
+ * order to properly serialize and deserialize object proxy. During
+ * serialization only object proxy instance without {@link ObjectProxyHandler}
+ * is written. During deserialization a {@link ObjectProxyHandler} wrapper is
+ * created and invocations of {@link ObjectProxyImpl} methods are monitored.
  * 
  * @author Wojciech Mruczkiewicz
  */
-class ObjectProxySerializer implements Serializable {
+public interface ObjectProxySerializer extends Serializable {
 
 	/**
-	 * Randomly generated serialization UID.
-	 */
-	private static final long serialVersionUID = 8509705077469171679L;
-
-	/**
-	 * An object proxy that should be serialized. This is an actual remote
-	 * object that is sent remotely.
-	 */
-	private IObjectProxy proxy;
-
-	/**
-	 * Creates new serializer that serializes a particular object proxy.
+	 * Write method replacement. Provides class with a special implementation of
+	 * serialization for {@link ObjectProxyHandler}.
 	 * 
-	 * @param proxy
-	 *            object proxy to serialize.
+	 * @return an instance of {@link ObjectProxySerializerImpl}.
 	 */
-	ObjectProxySerializer(IObjectProxy proxy) {
-		this.proxy = proxy;
-	}
-
-	/**
-	 * Write method replacement. Uses default serialization.
-	 * 
-	 * @param stream
-	 *            stream where this object should be written to.
-	 * @throws IOException
-	 *             when I/O exception occurred.
-	 * @throws IllegalAccessException
-	 *             when access exception occurred.
-	 */
-	private void writeObject(ObjectOutputStream stream) throws IOException, IllegalAccessException {
-		stream.defaultWriteObject();
-	}
-
-	/**
-	 * Read method replacement. After deserialization this object is wrapped by
-	 * {@link ObjectProxyHandler} and returned to user.
-	 * 
-	 * @return object proxy wrapped by {@link ObjectProxyHandler}.
-	 * @throws RemoteException
-	 *             when remote execution failed.
-	 */
-	private Object readResolve() throws RemoteException {
-		return ObjectProxyHandler.create(proxy);
-	}
+	Object writeReplace();
 }

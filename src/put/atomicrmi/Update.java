@@ -13,7 +13,7 @@ public class Update extends Transaction {
 	public Update() throws RemoteException {
 		super();
 		
-		OneHeartbeat.thread.register(id);
+		Heartbeat.thread.register(id);
 	}
 
 	@Override
@@ -59,12 +59,12 @@ public class Update extends Transaction {
 			throw new TransactionException("Object access information can be added only in preparation state.");
 
 		try {
-			ITransactionalRemoteObject remote = (ITransactionalRemoteObject) obj;
-			IObjectProxy proxy = (IObjectProxy) remote.createUpdateProxy(this, id, writes);
+			TransactionalRemoteObject remote = (TransactionalRemoteObject) obj;
+			ObjectProxy proxy = (ObjectProxy) remote.createUpdateProxy(this, id, writes);
 			proxies.add(proxy);
 
 			// XXX possibly remove until actually starting writes?
-			OneHeartbeat.thread.addFailureMonitor(id, remote.getFailureMonitor());
+			Heartbeat.thread.addFailureMonitor(id, remote.getFailureMonitor());
 			return (T) proxy;
 		} catch (RemoteException e) {
 			throw new TransactionException("Unable to create proxy for an object.", e);
@@ -80,7 +80,7 @@ public class Update extends Transaction {
 	protected boolean waitForSnapshots() {
 		boolean commit = true;
 
-		for (IObjectProxy proxy : proxies) {
+		for (ObjectProxy proxy : proxies) {
 			try {
 				proxy.update();
 
@@ -98,19 +98,19 @@ public class Update extends Transaction {
 
 		/** Start */
 		try {
-			OneHeartbeat.thread.register(id);
+			Heartbeat.thread.register(id);
 
 			Collections.sort(proxies, comparator);
 
-			for (IObjectProxy proxy : proxies) {
+			for (ObjectProxy proxy : proxies) {
 				proxy.lock();
 			}
 
-			for (IObjectProxy proxy : proxies) {
+			for (ObjectProxy proxy : proxies) {
 				proxy.startTransaction();
 			}
 
-			for (IObjectProxy proxy : proxies) {
+			for (ObjectProxy proxy : proxies) {
 				proxy.unlock();
 			}
 
@@ -134,7 +134,7 @@ public class Update extends Transaction {
 		setState(State.COMMITED);
 
 		/** Signal heartbeater to stop. */
-		OneHeartbeat.thread.remove(id);
+		Heartbeat.thread.remove(id);
 	}
 
 	/**
@@ -156,15 +156,15 @@ public class Update extends Transaction {
 		try {			
 			Collections.sort(proxies, comparator);
 
-			for (IObjectProxy proxy : proxies) {
+			for (ObjectProxy proxy : proxies) {
 				proxy.lock();
 			}
 
-			for (IObjectProxy proxy : proxies) {
+			for (ObjectProxy proxy : proxies) {
 				proxy.startTransaction();
 			}
 
-			for (IObjectProxy proxy : proxies) {
+			for (ObjectProxy proxy : proxies) {
 				proxy.unlock();
 			}
 
@@ -203,7 +203,7 @@ public class Update extends Transaction {
 		finishProxies(false);
 		setState(State.COMMITED);
 
-		OneHeartbeat.thread.remove(id);
+		Heartbeat.thread.remove(id);
 	}
 
 	@Override

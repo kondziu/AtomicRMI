@@ -24,21 +24,34 @@ package put.atomicrmi;
 import java.rmi.RemoteException;
 
 /**
- * Internal interface for transaction failure detector mechanism. Provides
- * methods for {@link Transaction} that allows to signal transaction liveness.
+ * Remote interface for transaction execution control. This is a public
+ * interface that provides methods to terminate transaction remotely in various
+ * ways.
+ * 
+ * This interface does not provides remote startup of a transaction. Transaction
+ * can only be started on node where they were created on.
  * 
  * @author Wojciech Mruczkiewicz
  */
-public interface TransactionFailureMonitor extends IdentifiableRemote {
-	
+public interface TransactionRef extends IdentifiableRemote {
+
 	/**
-	 * Sends a signal to transaction failure monitor with information that
-	 * transaction is still alive.
+	 * Terminates remote transaction and commits all the changes made. It is
+	 * however possible that transaction was forcibly rolled back during
+	 * execution of this method.
 	 * 
-	 * @param id
-	 *            identifier of transaction that signals liveness.
+	 * @throws RemoteException
+	 *             when remote execution failed.
+	 * @throws RollbackForcedException
+	 *             when changes were forcibly restored.
+	 */
+	void commit() throws RemoteException;
+
+	/**
+	 * Terminates remote transaction and restores all the changes made.
+	 * 
 	 * @throws RemoteException
 	 *             when remote execution failed.
 	 */
-	void heartbeat(Object id) throws RemoteException;
+	void rollback() throws RemoteException;
 }

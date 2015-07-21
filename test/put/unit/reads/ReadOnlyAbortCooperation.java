@@ -5,10 +5,10 @@ import java.rmi.RemoteException;
 import org.junit.Assert;
 import org.junit.Test;
 
-import put.atomicrmi.OneHeartbeat;
-import put.atomicrmi.OneThreadToRuleThemAll;
+import put.atomicrmi.Heartbeat;
+import put.atomicrmi.TaskController;
 import put.atomicrmi.Transaction;
-import put.atomicrmi.TransactionFailureMonitor;
+import put.atomicrmi.TransactionFailureMonitorImpl;
 import put.unit.RMITest;
 import put.unit.vars.Variable;
 import edu.umd.cs.mtc.MultithreadedTest;
@@ -55,9 +55,9 @@ public class ReadOnlyAbortCooperation extends RMITest {
 
 			waitForTick(99);
 			try {
-				TransactionFailureMonitor.getInstance().emergencyStop();
-				OneThreadToRuleThemAll.emergencyStop();
-				OneHeartbeat.emergencyStop();
+				TransactionFailureMonitorImpl.getInstance().emergencyStop();
+				TaskController.emergencyStop();
+				Heartbeat.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -91,9 +91,9 @@ public class ReadOnlyAbortCooperation extends RMITest {
 
 			waitForTick(99);
 			try {
-				TransactionFailureMonitor.getInstance().emergencyStop();
-				OneThreadToRuleThemAll.emergencyStop();
-				OneHeartbeat.emergencyStop();
+				TransactionFailureMonitorImpl.getInstance().emergencyStop();
+				TaskController.emergencyStop();
+				Heartbeat.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -109,8 +109,8 @@ public class ReadOnlyAbortCooperation extends RMITest {
 		// }
 		// System.out.println();
 
-		OneThreadToRuleThemAll.emergencyStart();
-		OneHeartbeat.emergencyStart();
+		TaskController.emergencyStart();
+		Heartbeat.emergencyStart();
 		TestFramework.runOnce(new Threads());
 
 		// System.out.println("POST3");

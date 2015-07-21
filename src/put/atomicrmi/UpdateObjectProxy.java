@@ -34,11 +34,11 @@ import put.atomicrmi.Access.Mode;
  * @author Wojciech Mruczkiewicz, Konrad Siek
  */
 // TODO only implement IObjectProxy
-class UpdateObjectProxy extends ObjectProxy {
+class UpdateObjectProxy extends ObjectProxyImpl {
 
 	private static final long serialVersionUID = 4042112660455555346L;
 
-	public UpdateObjectProxy(ITransaction transaction, UUID tid, TransactionalUnicastRemoteObject object, long writes)
+	public UpdateObjectProxy(TransactionRef transaction, UUID tid, TransactionalUnicastRemoteObject object, long writes)
 			throws RemoteException {
 		super(transaction, tid, object, writes, 0, writes, Mode.WRITE_ONLY);
 	}
@@ -72,10 +72,10 @@ class UpdateObjectProxy extends ObjectProxy {
 
 	@Override
 	public void finishTransaction(boolean restore, boolean readThread) throws RemoteException {
-		TransactionFailureMonitor.getInstance().stopMonitoring(this);
+		TransactionFailureMonitorImpl.getInstance().stopMonitoring(this);
 
 		object.finishTransaction(uid, snapshot, restore);
-		OneThreadToRuleThemAll.theOneThread.ping();
+		TaskController.theOneThread.ping();
 
 		over = true;
 		snapshot = null;

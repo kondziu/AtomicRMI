@@ -45,7 +45,7 @@ import put.atomicrmi.Access.Mode;
  * 
  * @author Wojciech Mruczkiewicz, Konrad Siek
  */
-public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implements ITransactionalRemoteObject {
+public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implements TransactionalRemoteObject {
 
 	/**
 	 * Stores snapshot of particular remote object together with snapshot
@@ -175,18 +175,18 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 		return super.clone();
 	}
 
-	public IObjectProxy createProxy(ITransaction transaction, UUID tid, long calls, long reads, long writes, Mode mode)
+	public ObjectProxy createProxy(TransactionRef transaction, UUID tid, long calls, long reads, long writes, Mode mode)
 			throws RemoteException {
-		return (IObjectProxy) ObjectProxyHandler.create(new ObjectProxy(transaction, tid, this, calls, reads, writes,
+		return (ObjectProxy) ObjectProxyHandler.create(new ObjectProxyImpl(transaction, tid, this, calls, reads, writes,
 				mode));
 	}
 
-	public IObjectProxy createUpdateProxy(ITransaction transaction, UUID tid, long writes) throws RemoteException {
-		return (IObjectProxy) ObjectProxyHandler.create(new UpdateObjectProxy(transaction, tid, this, writes));
+	public ObjectProxy createUpdateProxy(TransactionRef transaction, UUID tid, long writes) throws RemoteException {
+		return (ObjectProxy) ObjectProxyHandler.create(new UpdateObjectProxy(transaction, tid, this, writes));
 	}
 
-	public ITransactionFailureMonitor getFailureMonitor() throws RemoteException {
-		return TransactionFailureMonitor.getInstance();
+	public TransactionFailureMonitor getFailureMonitor() throws RemoteException {
+		return TransactionFailureMonitorImpl.getInstance();
 	}
 
 	/**

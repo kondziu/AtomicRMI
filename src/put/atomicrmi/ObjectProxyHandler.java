@@ -29,12 +29,12 @@ import java.util.Set;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.InvocationHandler;
 import put.atomicrmi.Access.Mode;
-import put.atomicrmi.IObjectProxy.BufferType;
+import put.atomicrmi.ObjectProxy.BufferType;
 
 /**
  * Wrapper used to intercept remote object invocations. This is an
  * implementation of cglib {@link InvocationHandler} interface. It is created
- * during {@link ObjectProxy} creation or transfer.
+ * during {@link ObjectProxyImpl} creation or transfer.
  * 
  * @author Wojciech Mruczkiewicz
  */
@@ -53,12 +53,12 @@ class ObjectProxyHandler implements InvocationHandler {
 	/**
 	 * Interfaces specific for proxy mechanism.
 	 */
-	private static Class<?>[] proxyInterfaces = new Class<?>[] { IObjectProxy.class, IObjectProxySerializer.class };
+	private static Class<?>[] proxyInterfaces = new Class<?>[] { ObjectProxy.class, ObjectProxySerializer.class };
 
 	/**
-	 * An instance of {@link ObjectProxy} or remote proxy to this object proxy.
+	 * An instance of {@link ObjectProxyImpl} or remote proxy to this object proxy.
 	 */
-	private IObjectProxy proxy;
+	private ObjectProxy proxy;
 
 	static {
 		try {
@@ -66,10 +66,10 @@ class ObjectProxyHandler implements InvocationHandler {
 			neutralMethods.add(Object.class.getMethod("hashCode", new Class<?>[] {}));
 			neutralMethods.add(Object.class.getMethod("toString", new Class<?>[] {}));
 
-			for (Method m : IObjectProxy.class.getMethods())
+			for (Method m : ObjectProxy.class.getMethods())
 				neutralMethods.add(m);
 
-			writeReplaceMethod = IObjectProxySerializer.class.getMethod("writeReplace", new Class<?>[] {});
+			writeReplaceMethod = ObjectProxySerializer.class.getMethod("writeReplace", new Class<?>[] {});
 		} catch (SecurityException e) {
 			e.printStackTrace();
 		} catch (NoSuchMethodException e) {
@@ -86,7 +86,7 @@ class ObjectProxyHandler implements InvocationHandler {
 	 * @throws RemoteException
 	 *             when remote execution failed.
 	 */
-	static Object create(IObjectProxy proxy) throws RemoteException {
+	static Object create(ObjectProxy proxy) throws RemoteException {
 		return Enhancer.create(null, getArrayOfRemoteInterfaces(proxy.getWrapped().getClass()), new ObjectProxyHandler(
 				proxy));
 	}
@@ -97,7 +97,7 @@ class ObjectProxyHandler implements InvocationHandler {
 	 * @param proxy
 	 *            object proxy that is wrapped.
 	 */
-	private ObjectProxyHandler(IObjectProxy proxy) {
+	private ObjectProxyHandler(ObjectProxy proxy) {
 		this.proxy = proxy;
 	}
 
@@ -111,7 +111,7 @@ class ObjectProxyHandler implements InvocationHandler {
 		}
 
 		if (writeReplaceMethod.equals(method)) {
-			return new ObjectProxySerializer(proxy);
+			return new ObjectProxySerializerImpl(proxy);
 		}
 
 		Mode mode = getAccessMode(method);
