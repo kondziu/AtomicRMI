@@ -1,4 +1,4 @@
-package put.atomicrmi;
+package put.util.ids;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;

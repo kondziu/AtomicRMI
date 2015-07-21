@@ -19,27 +19,29 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package put.atomicrmi;
+package put.atomicrmi.sync;
+
+import java.rmi.RemoteException;
+
+import put.atomicrmi.Transaction;
+import put.util.ids.IdentifiableRemote;
 
 /**
- * Wrapper for a single long value.
+ * Internal interface for transaction failure detector mechanism. Provides
+ * methods for {@link Transaction} that allows to signal transaction liveness.
  * 
  * @author Wojciech Mruczkiewicz
  */
-public class LongHolder {
-
+public interface TransactionFailureMonitor extends IdentifiableRemote {
+	
 	/**
-	 * Stored long value.
-	 */
-	public long value;
-
-	/**
-	 * Initializes new long wrapper.
+	 * Sends a signal to transaction failure monitor with information that
+	 * transaction is still alive.
 	 * 
-	 * @param value
-	 *            initial value stored.
+	 * @param id
+	 *            identifier of transaction that signals liveness.
+	 * @throws RemoteException
+	 *             when remote execution failed.
 	 */
-	public LongHolder(long value) {
-		this.value = value;
-	}
+	void heartbeat(Object id) throws RemoteException;
 }

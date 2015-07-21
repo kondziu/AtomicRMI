@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.concurrent.Callable;
 
 import put.atomicrmi.Access.Mode;
+import put.atomicrmi.objects.ObjectProxy;
+import put.atomicrmi.sync.Heartbeat;
 
 public class Update extends Transaction {
 

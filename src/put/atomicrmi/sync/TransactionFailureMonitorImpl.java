@@ -19,7 +19,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package put.atomicrmi;
+package put.atomicrmi.sync;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -28,6 +28,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+
+import put.atomicrmi.objects.ObjectProxyImpl;
+import put.atomicrmi.refcells.BooleanHolder;
 
 /**
  * Detects failure of transactions that locked some remote object on particular
@@ -42,7 +45,7 @@ public class TransactionFailureMonitorImpl extends UnicastRemoteObject implement
 	/**
 	 * Time between checking for failed transactions.
 	 */
-	static final long FAILURE_TIMEOUT = 15000; // 15s
+	public static final long FAILURE_TIMEOUT = 15000; // 15s
 
 	/**
 	 * Randomly generated serialization UID.
@@ -123,7 +126,7 @@ public class TransactionFailureMonitorImpl extends UnicastRemoteObject implement
 	 * @param proxy
 	 *            proxy which transaction should be monitored.
 	 */
-	synchronized void startMonitoring(ObjectProxyImpl proxy) {
+	public synchronized void startMonitoring(ObjectProxyImpl proxy) {
 		UUID tid = proxy.getTransactionId();
 
 		if (!proxies.containsKey(tid)) {
@@ -140,7 +143,7 @@ public class TransactionFailureMonitorImpl extends UnicastRemoteObject implement
 	 * @param proxy
 	 *            proxy for which transaction monitoring should be stopped.
 	 */
-	synchronized void stopMonitoring(ObjectProxyImpl proxy) {
+	public synchronized void stopMonitoring(ObjectProxyImpl proxy) {
 		UUID tid = proxy.getTransactionId();
 		Set<ObjectProxyImpl> set = proxies.get(tid);
 

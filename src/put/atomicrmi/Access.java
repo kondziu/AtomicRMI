@@ -26,7 +26,7 @@ public @interface Access {
 	 * 
 	 * @author Konrad Siek
 	 */
-	enum Mode {
+	public enum Mode {
 		READ_ONLY, WRITE_ONLY, ANY
 	}
 

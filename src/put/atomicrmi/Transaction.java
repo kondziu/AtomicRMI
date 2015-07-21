@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.UUID;
 
 import put.atomicrmi.Access.Mode;
+import put.atomicrmi.objects.ObjectProxy;
+import put.atomicrmi.sync.Heartbeat;
 
 /**
  * The main class for controlling transaction life time. Provides methods to

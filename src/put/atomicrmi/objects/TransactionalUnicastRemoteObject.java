@@ -19,7 +19,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package put.atomicrmi;
+package put.atomicrmi.objects;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -35,6 +35,13 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.UUID;
 
 import put.atomicrmi.Access.Mode;
+import put.atomicrmi.TransactionException;
+import put.atomicrmi.TransactionRef;
+import put.atomicrmi.TransactionalRemoteObject;
+import put.atomicrmi.refcells.LongHolder;
+import put.atomicrmi.sync.Semaphore;
+import put.atomicrmi.sync.TransactionFailureMonitor;
+import put.atomicrmi.sync.TransactionFailureMonitorImpl;
 
 /**
  * Base class for all remote object implementations that are part of some
@@ -46,56 +53,6 @@ import put.atomicrmi.Access.Mode;
  * @author Wojciech Mruczkiewicz, Konrad Siek
  */
 public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implements TransactionalRemoteObject {
-
-	/**
-	 * Stores snapshot of particular remote object together with snapshot
-	 * version information.
-	 * 
-	 * @author Wojciech Mruczkiewicz
-	 */
-	class Snapshot {
-
-		/**
-		 * The binary representation of remote object.
-		 */
-		private byte[] image;
-
-		/**
-		 * Version information that determines when the snapshot was taken.
-		 */
-		private long rv;
-
-		/**
-		 * Constructs the snapshot with given version and object's image.
-		 * 
-		 * @param image
-		 *            a serialized remote object.
-		 * @param readVersion
-		 *            version when the serialization occurred.
-		 */
-		Snapshot(byte[] image, long readVersion) {
-			this.image = image;
-			rv = readVersion;
-		}
-
-		/**
-		 * Gives the serialized image reference.
-		 * 
-		 * @return the serialized image.
-		 */
-		byte[] getImage() {
-			return image;
-		}
-
-		/**
-		 * Gives the version of an image when the serialization occurred.
-		 * 
-		 * @return image version.
-		 */
-		long getReadVersion() {
-			return rv;
-		}
-	}
 
 	/**
 	 * Randomly generated serialization UID.
@@ -182,7 +139,7 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	}
 
 	public ObjectProxy createUpdateProxy(TransactionRef transaction, UUID tid, long writes) throws RemoteException {
-		return (ObjectProxy) ObjectProxyHandler.create(new UpdateObjectProxy(transaction, tid, this, writes));
+		return (ObjectProxy) ObjectProxyHandler.create(new UpdateObjectProxyImpl(transaction, tid, this, writes));
 	}
 
 	public TransactionFailureMonitor getFailureMonitor() throws RemoteException {

@@ -25,6 +25,10 @@ import java.rmi.RemoteException;
 import java.util.UUID;
 
 import put.atomicrmi.Access.Mode;
+import put.atomicrmi.objects.ObjectProxy;
+import put.atomicrmi.objects.TransactionalUnicastRemoteObject;
+import put.atomicrmi.sync.TransactionFailureMonitor;
+import put.util.ids.IdentifiableRemote;
 
 /**
  * Internal transactional mechanism of {@link TransactionalUnicastRemoteObject}

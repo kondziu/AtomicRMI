@@ -19,7 +19,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package put.atomicrmi;
+package put.atomicrmi.objects;
 
 import java.lang.reflect.Method;
 import java.rmi.RemoteException;
@@ -28,8 +28,11 @@ import java.util.Set;
 
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.InvocationHandler;
+import put.atomicrmi.Access;
+import put.atomicrmi.RollbackForcedException;
+import put.atomicrmi.TransactionException;
 import put.atomicrmi.Access.Mode;
-import put.atomicrmi.ObjectProxy.BufferType;
+import put.atomicrmi.objects.ObjectProxy.BufferType;
 
 /**
  * Wrapper used to intercept remote object invocations. This is an
@@ -38,7 +41,7 @@ import put.atomicrmi.ObjectProxy.BufferType;
  * 
  * @author Wojciech Mruczkiewicz
  */
-class ObjectProxyHandler implements InvocationHandler {
+public class ObjectProxyHandler implements InvocationHandler {
 
 	/**
 	 * Methods that should not be intercepted.
@@ -86,7 +89,7 @@ class ObjectProxyHandler implements InvocationHandler {
 	 * @throws RemoteException
 	 *             when remote execution failed.
 	 */
-	static Object create(ObjectProxy proxy) throws RemoteException {
+	public static Object create(ObjectProxy proxy) throws RemoteException {
 		return Enhancer.create(null, getArrayOfRemoteInterfaces(proxy.getWrapped().getClass()), new ObjectProxyHandler(
 				proxy));
 	}

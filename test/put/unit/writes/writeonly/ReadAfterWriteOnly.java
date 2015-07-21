@@ -4,11 +4,11 @@ import java.rmi.RemoteException;
 
 import org.junit.Assert;
 
-import put.atomicrmi.Heartbeat;
-import put.atomicrmi.TaskController;
 import put.atomicrmi.Transaction;
-import put.atomicrmi.TransactionFailureMonitorImpl;
 import put.atomicrmi.Update;
+import put.atomicrmi.sync.Heartbeat;
+import put.atomicrmi.sync.TaskController;
+import put.atomicrmi.sync.TransactionFailureMonitorImpl;
 import put.unit.RMITest;
 import put.unit.vars.Variable;
 import edu.umd.cs.mtc.MultithreadedTest;

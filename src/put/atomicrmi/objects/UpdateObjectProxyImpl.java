@@ -19,13 +19,16 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package put.atomicrmi;
+package put.atomicrmi.objects;
 
 import java.rmi.RemoteException;
 import java.util.LinkedList;
 import java.util.UUID;
 
+import put.atomicrmi.TransactionRef;
 import put.atomicrmi.Access.Mode;
+import put.atomicrmi.sync.TaskController;
+import put.atomicrmi.sync.TransactionFailureMonitorImpl;
 
 /**
  * A write-only object proxy. It uses a log buffer throughout and applies
@@ -34,11 +37,11 @@ import put.atomicrmi.Access.Mode;
  * @author Wojciech Mruczkiewicz, Konrad Siek
  */
 // TODO only implement IObjectProxy
-class UpdateObjectProxy extends ObjectProxyImpl {
+public class UpdateObjectProxyImpl extends ObjectProxyImpl {
 
 	private static final long serialVersionUID = 4042112660455555346L;
 
-	public UpdateObjectProxy(TransactionRef transaction, UUID tid, TransactionalUnicastRemoteObject object, long writes)
+	public UpdateObjectProxyImpl(TransactionRef transaction, UUID tid, TransactionalUnicastRemoteObject object, long writes)
 			throws RemoteException {
 		super(transaction, tid, object, writes, 0, writes, Mode.WRITE_ONLY);
 	}

@@ -23,6 +23,8 @@ package put.atomicrmi;
 
 import java.rmi.RemoteException;
 
+import put.util.ids.IdentifiableRemote;
+
 /**
  * Remote interface for transaction execution control. This is a public
  * interface that provides methods to terminate transaction remotely in various

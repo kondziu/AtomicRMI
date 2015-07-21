@@ -19,7 +19,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package put.atomicrmi;
+package put.atomicrmi.objects;
 
 import java.lang.reflect.Method;
 import java.rmi.RemoteException;
@@ -28,7 +28,14 @@ import java.util.LinkedList;
 import java.util.UUID;
 
 import put.atomicrmi.Access.Mode;
-import put.atomicrmi.TaskController.Task;
+import put.atomicrmi.RollbackForcedException;
+import put.atomicrmi.Transaction;
+import put.atomicrmi.TransactionException;
+import put.atomicrmi.TransactionRef;
+import put.atomicrmi.sync.Semaphore;
+import put.atomicrmi.sync.TaskController;
+import put.atomicrmi.sync.TaskController.Task;
+import put.atomicrmi.sync.TransactionFailureMonitorImpl;
 
 /**
  * An implementation of {@link ObjectProxy} interface. It is required to
@@ -36,7 +43,7 @@ import put.atomicrmi.TaskController.Task;
  * 
  * @author Wojciech Mruczkiewicz, Konrad Siek
  */
-class ObjectProxyImpl extends UnicastRemoteObject implements ObjectProxy {
+public class ObjectProxyImpl extends UnicastRemoteObject implements ObjectProxy {
 
 	/**
 	 * A semaphore that is closed until read buffering is completed.
@@ -260,7 +267,7 @@ class ObjectProxyImpl extends UnicastRemoteObject implements ObjectProxy {
 	 * Snapshot of the wrapped remote object. If <code>null</code> then snapshot
 	 * is not present.
 	 */
-	protected TransactionalUnicastRemoteObject.Snapshot snapshot;
+	protected Snapshot snapshot;
 
 	/**
 	 * Determines if transaction is finished.
@@ -327,7 +334,7 @@ class ObjectProxyImpl extends UnicastRemoteObject implements ObjectProxy {
 	 * @throws RemoteException
 	 *             when remote execution fails.
 	 */
-	ObjectProxyImpl(TransactionRef transaction, UUID tid, TransactionalUnicastRemoteObject object, long calls, long reads,
+	public ObjectProxyImpl(TransactionRef transaction, UUID tid, TransactionalUnicastRemoteObject object, long calls, long reads,
 			long writes, Mode mode) throws RemoteException {
 
 		super();
@@ -349,7 +356,7 @@ class ObjectProxyImpl extends UnicastRemoteObject implements ObjectProxy {
 	 * 
 	 * @return transaction unique identifier.
 	 */
-	protected UUID getTransactionId() {
+	public UUID getTransactionId() {
 		return uid;
 	}
 
@@ -765,7 +772,7 @@ class ObjectProxyImpl extends UnicastRemoteObject implements ObjectProxy {
 	 * @throws RemoteException
 	 *             when remote execution fails.
 	 */
-	void onFailure() throws RemoteException {
+	public void onFailure() throws RemoteException {
 		System.err.println("Failure detected.");
 
 		// TODO make a fully fault tolerant variant

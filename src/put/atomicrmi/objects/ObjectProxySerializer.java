@@ -19,27 +19,26 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package put.atomicrmi;
+package put.atomicrmi.objects;
+
+import java.io.Serializable;
 
 /**
- * Wrapper for a single boolean value.
+ * Interface for object proxy serialization replacement. This is necessary in
+ * order to properly serialize and deserialize object proxy. During
+ * serialization only object proxy instance without {@link ObjectProxyHandler}
+ * is written. During deserialization a {@link ObjectProxyHandler} wrapper is
+ * created and invocations of {@link ObjectProxyImpl} methods are monitored.
  * 
  * @author Wojciech Mruczkiewicz
  */
-class BooleanHolder {
+public interface ObjectProxySerializer extends Serializable {
 
 	/**
-	 * Stored boolean value.
-	 */
-	public boolean value;
-
-	/**
-	 * Initializes new boolean wrapper.
+	 * Write method replacement. Provides class with a special implementation of
+	 * serialization for {@link ObjectProxyHandler}.
 	 * 
-	 * @param value
-	 *            initial value stored.
+	 * @return an instance of {@link ObjectProxySerializerImpl}.
 	 */
-	public BooleanHolder(boolean value) {
-		this.value = value;
-	}
+	Object writeReplace();
 }
