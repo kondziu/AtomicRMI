@@ -12,12 +12,12 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 /**
- * Implementation of a heartbeater thread that is a part of failure detection
- * mechanism. This class runs thread that sends a notification signal to every
- * failure monitor observing this transaction. The set of failure monitors cover
- * the set of remote object accessed by this transaction.
- * 
- * Notification signal is sent periodically, currently every 5s.
+ * Implementation of a heartbeat thread that is a part of failure detection
+ * mechanism. This class is a thread that sends a signal to a fault detection
+ * server on behalf of all transactions running on the same JVM per remote
+ * object in accesses. This is done repeatedly until the transaction is
+ * completed. If this signal is not received on the server-side within the
+ * specified time, the server assumes a failure of the client.
  * 
  * @author Konrad Siek, Wojciech Mruczkiewicz
  */
@@ -26,9 +26,9 @@ public class OneHeartbeat extends Thread {
 	/**
 	 * Delay between notifications.
 	 */
-	public static final OneHeartbeat thread = new OneHeartbeat("ARMI Hearbeat");
-
 	private static final long ESTIMATED_DELAY = 5000;
+	
+	public static final OneHeartbeat thread = new OneHeartbeat("ARMI Hearbeat");
 
 	public static synchronized void emergencyStart() throws Exception {
 		if (thread.isAlive())
@@ -49,9 +49,11 @@ public class OneHeartbeat extends Thread {
 			return;
 		}
 
-		thread.interrupt();		
-//		thread.monitors.clear(); // should we clean up inside the map too?
-//		thread.ids.clear();
+		thread.interrupt();
+
+		// XXX Should we clean up inside the maps too?
+		// thread.monitors.clear();
+		// thread.ids.clear();
 	}
 
 	static {
@@ -92,10 +94,10 @@ public class OneHeartbeat extends Thread {
 
 				for (ITransactionFailureMonitor monitor : queue) {
 					try {
-						System.err.println("Pinging " + monitor.getId() + " for transaction " + id + " in Heartbeat");
+//						System.err.println("Pinging " + monitor.getId() + " for transaction " + id + " in Heartbeat");
 						monitor.heartbeat(id);
 					} catch (RemoteException e) {
-						System.err.println("Ignoring " + e.getLocalizedMessage() + " in Heartbeat");
+//						System.err.println("Ignoring " + e.getLocalizedMessage() + " in Heartbeat");
 						e.printStackTrace();
 					}
 				}
@@ -108,36 +110,42 @@ public class OneHeartbeat extends Thread {
 	}
 
 	public void register(Object id) {
-		System.err.println("Registering hearbeat for " + id);
+		// System.err.println("Registering hearbeat for " + id);
 		this.monitors.put(id, new ConcurrentLinkedQueue<ITransactionFailureMonitor>());
 		this.ids.put(id, new ConcurrentSkipListSet<Object>());
 	}
 
 	public void addFailureMonitor(Object id, ITransactionFailureMonitor monitor) throws RemoteException {
-		System.err.println("Adding hearbeat monitor for " + id + " " + monitor.getId());
+		// System.err.println("Adding hearbeat monitor for " + id + " " +
+		// monitor.getId());
 
 		UUID mid = monitor.getId();
 
 		if (this.ids.get(id).add(mid)) { // returns true if added, false if
 											// already present
-			System.err.println("Actually adding hearbeat monitor for " + id + " " + monitor.getId());
+											// System.err.println("Actually adding hearbeat monitor for "
+											// + id + " " + monitor.getId());
 			this.monitors.get(id).add(monitor);
-		} else {
-			System.err.println("Not actually adding hearbeat monitor for " + id + " " + monitor.getId());
 		}
+		// else {
+		// System.err.println("Not actually adding hearbeat monitor for " + id +
+		// " " + monitor.getId());
+		// }
 	}
 
 	public void remove(Object id) {
-		System.err.println("Remove hearbeat for " + id);
+//		System.err.println("Remove hearbeat for " + id);
 
 		if (this.monitors.containsKey(id)) {
-			System.err.println("Actually remove hearbeat for " + id + " monitors");
+			// System.err.println("Actually remove hearbeat for " + id +
+			// " monitors");
 			Queue<ITransactionFailureMonitor> queue = this.monitors.remove(id);
 			queue.clear();
 		}
 
 		if (this.ids.containsKey(id)) {
-			System.err.println("Actually remove hearbeat for " + id + " ids");
+			// System.err.println("Actually remove hearbeat for " + id +
+			// " ids");
 			Set<Object> set = this.ids.remove(id);
 			set.clear();
 		}

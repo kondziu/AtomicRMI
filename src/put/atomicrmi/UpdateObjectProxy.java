@@ -45,7 +45,7 @@ class UpdateObjectProxy extends ObjectProxy {
 	@Override
 	public BufferType preSync(Mode accessType) throws RemoteException {
 
-		System.out.println("ul16");
+//		System.out.println("ul16");
 		object.transactionLock(uid);
 		if (mwv == 0 && mv == 0) {
 //			writeRecorder = new FieldStateRecorder();
@@ -96,7 +96,7 @@ class UpdateObjectProxy extends ObjectProxy {
 		try {
 			object.waitForCounter(px - 1);
 
-			System.out.println("ul17");
+//			System.out.println("ul17");
 			object.transactionLock(uid);
 
 			// Short circuit, if no writes.
