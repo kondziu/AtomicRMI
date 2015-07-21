@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import put.atomicrmi.OneHeartbeat;
 import put.atomicrmi.OneThreadToRuleThemAll;
 import put.atomicrmi.Transaction;
 import put.atomicrmi.TransactionFailureMonitor;
@@ -53,9 +54,7 @@ public class ReadOnlyReleaseAtStart extends RMITest {
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
-			} finally {
-				t.stopHeartbeat();
-			}
+			} 
 
 			// System.out.println("XX1");
 
@@ -65,6 +64,7 @@ public class ReadOnlyReleaseAtStart extends RMITest {
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
 				OneThreadToRuleThemAll.emergencyStop();
+				OneHeartbeat.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -94,9 +94,7 @@ public class ReadOnlyReleaseAtStart extends RMITest {
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
-			} finally {
-				t.stopHeartbeat();
-			}
+			} 
 
 			// System.out.println("XX2");
 
@@ -106,6 +104,7 @@ public class ReadOnlyReleaseAtStart extends RMITest {
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
 				OneThreadToRuleThemAll.emergencyStop();
+				OneHeartbeat.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -122,6 +121,7 @@ public class ReadOnlyReleaseAtStart extends RMITest {
 		// System.out.println();
 
 		OneThreadToRuleThemAll.emergencyStart();
+		OneHeartbeat.emergencyStart();
 		TestFramework.runOnce(new Threads());
 
 		// System.out.println("POST5");

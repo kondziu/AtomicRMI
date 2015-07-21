@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import put.atomicrmi.OneHeartbeat;
 import put.atomicrmi.OneThreadToRuleThemAll;
 import put.atomicrmi.Transaction;
 import put.atomicrmi.TransactionFailureMonitor;
@@ -51,14 +52,13 @@ public class AtomicityAndIsolationN extends RMITest {
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
-			} finally {
-				t.stopHeartbeat();
-			}
+			} 
 
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
 				OneThreadToRuleThemAll.emergencyStop();
+				OneHeartbeat.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -98,6 +98,7 @@ public class AtomicityAndIsolationN extends RMITest {
 	@Test
 	public void atomicityAndIsolationN() throws Throwable {
 		OneThreadToRuleThemAll.emergencyStart();
+		OneHeartbeat.emergencyStart();
 		TestFramework.runOnce(new Threads());
 
 		Assert.assertEquals(6, state("x"));

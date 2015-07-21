@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Assert;
 import org.junit.Test;
 
+import put.atomicrmi.OneHeartbeat;
 import put.atomicrmi.OneThreadToRuleThemAll;
 import put.atomicrmi.RollbackForcedException;
 import put.atomicrmi.Transaction;
@@ -62,14 +63,13 @@ public class WriteFirstReadFromBufferForcedAbort extends RMITest {
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
-			} finally {
-				t.stopHeartbeat();
-			}
+			} 
 
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
 				OneThreadToRuleThemAll.emergencyStop();
+				OneHeartbeat.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -109,14 +109,13 @@ public class WriteFirstReadFromBufferForcedAbort extends RMITest {
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
-			} finally {
-				t.stopHeartbeat();
-			}
+			} 
 
 			waitForTick(99);
 			try {
 				TransactionFailureMonitor.getInstance().emergencyStop();
 				OneThreadToRuleThemAll.emergencyStop();
+				OneHeartbeat.emergencyStop();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage(), e.getCause());
@@ -127,6 +126,7 @@ public class WriteFirstReadFromBufferForcedAbort extends RMITest {
 	@Test
 	public void writeFirstReadFromBufferForcedAbort() throws Throwable {
 		OneThreadToRuleThemAll.emergencyStart();
+		OneHeartbeat.emergencyStart();
 		TestFramework.runOnce(new Threads());
 
 		Assert.assertEquals(0, state("x"));

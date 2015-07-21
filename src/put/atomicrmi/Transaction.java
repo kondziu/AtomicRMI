@@ -644,13 +644,6 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 
 	};
 
-	/**
-	 * Stop heartbeat monitor for all transactions due to an emergency.
-	 */
-	public void stopHeartbeat() {
-		OneHeartbeat.emergencyStop();
-	}
-
 	@Override
 	public UUID getUID() throws RemoteException {
 		return id;

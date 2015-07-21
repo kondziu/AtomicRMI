@@ -230,11 +230,4 @@ public class Update extends Transaction {
 	public <T> void release(T object) throws TransactionException, RemoteException {
 		// nothing?
 	}
-
-	/**
-	 * Stop heartbeat monitor due to an emergency.
-	 */
-	public void stopHeartbeat() {
-		OneHeartbeat.emergencyStop();
-	}
 }
