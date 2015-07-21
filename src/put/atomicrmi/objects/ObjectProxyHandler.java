@@ -28,11 +28,11 @@ import java.util.Set;
 
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.InvocationHandler;
-import put.atomicrmi.Access;
-import put.atomicrmi.RollbackForcedException;
-import put.atomicrmi.TransactionException;
-import put.atomicrmi.Access.Mode;
 import put.atomicrmi.objects.ObjectProxy.BufferType;
+import put.atomicrmi.optsva.Access;
+import put.atomicrmi.optsva.RollbackForcedException;
+import put.atomicrmi.optsva.TransactionException;
+import put.atomicrmi.optsva.Access.Mode;
 
 /**
  * Wrapper used to intercept remote object invocations. This is an

@@ -25,8 +25,8 @@ import java.rmi.RemoteException;
 import java.util.LinkedList;
 import java.util.UUID;
 
-import put.atomicrmi.TransactionRef;
-import put.atomicrmi.Access.Mode;
+import put.atomicrmi.optsva.TransactionRef;
+import put.atomicrmi.optsva.Access.Mode;
 import put.atomicrmi.sync.TaskController;
 import put.atomicrmi.sync.TransactionFailureMonitorImpl;
 

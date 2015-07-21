@@ -27,11 +27,11 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.LinkedList;
 import java.util.UUID;
 
-import put.atomicrmi.Access.Mode;
-import put.atomicrmi.RollbackForcedException;
-import put.atomicrmi.Transaction;
-import put.atomicrmi.TransactionException;
-import put.atomicrmi.TransactionRef;
+import put.atomicrmi.optsva.RollbackForcedException;
+import put.atomicrmi.optsva.Transaction;
+import put.atomicrmi.optsva.TransactionException;
+import put.atomicrmi.optsva.TransactionRef;
+import put.atomicrmi.optsva.Access.Mode;
 import put.atomicrmi.sync.Semaphore;
 import put.atomicrmi.sync.TaskController;
 import put.atomicrmi.sync.TaskController.Task;

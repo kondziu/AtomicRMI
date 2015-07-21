@@ -23,7 +23,7 @@ package put.atomicrmi.objects;
 
 import java.rmi.RemoteException;
 
-import put.atomicrmi.Access.Mode;
+import put.atomicrmi.optsva.Access.Mode;
 import put.util.ids.IdentifiableRemote;
 
 /**

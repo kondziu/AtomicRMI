@@ -19,32 +19,30 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package put.atomicrmi;
+package put.atomicrmi.optsva;
 
 import java.rmi.RemoteException;
 
 /**
- * This exception is thrown when a serious problem during transaction execution
- * is detected. In most of the cases a {@link RemoteException} is wrapped by
- * this exception.
+ * Interface specifies transaction method required for retry operation support.
+ * If retry operation is necessary then class implementing this interfaces
+ * contains main transaction method. Transaction is started using
+ * {@link Transaction#start(DTransactable)} method and must be commited or
+ * rolled-back at the end.
  * 
  * @author Wojciech Mruczkiewicz
  */
-public class TransactionException extends RemoteException {
+public interface Transactional {
 
 	/**
-	 * Randomly generated serialization UID.
+	 * Implementation of main transaction thread. This method is implemented by
+	 * client of AtomicRMI library and allows to use commit, rollback and retry
+	 * operations during the execution.
+	 * 
+	 * @param transaction
+	 *            transaction instance.
+	 * @throws RemoteException
+	 *             when remote exception occur during transaction execution.
 	 */
-	private static final long serialVersionUID = 530822566931909888L;
-
-	public TransactionException() {
-	}
-
-	public TransactionException(String message) {
-		super(message);
-	}
-
-	public TransactionException(String message, Throwable cause) {
-		super(message, cause);
-	}
+	public void atomic(Transaction transaction) throws RemoteException;
 }

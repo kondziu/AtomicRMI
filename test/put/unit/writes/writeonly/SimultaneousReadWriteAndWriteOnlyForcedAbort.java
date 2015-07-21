@@ -5,9 +5,9 @@ import java.rmi.RemoteException;
 import org.junit.Assert;
 import org.junit.Test;
 
-import put.atomicrmi.RollbackForcedException;
-import put.atomicrmi.Transaction;
-import put.atomicrmi.Update;
+import put.atomicrmi.optsva.RollbackForcedException;
+import put.atomicrmi.optsva.Transaction;
+import put.atomicrmi.optsva.Update;
 import put.atomicrmi.sync.Heartbeat;
 import put.atomicrmi.sync.TaskController;
 import put.atomicrmi.sync.TransactionFailureMonitorImpl;

@@ -19,31 +19,32 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package put.atomicrmi;
+package put.atomicrmi.optsva;
 
 import java.rmi.RemoteException;
 
 /**
- * This exception is thrown when rollback action was forced during method
- * invocation or commit when running a transaction.
+ * This exception is thrown when a serious problem during transaction execution
+ * is detected. In most of the cases a {@link RemoteException} is wrapped by
+ * this exception.
  * 
  * @author Wojciech Mruczkiewicz
  */
-public class RollbackForcedException extends RemoteException {
+public class TransactionException extends RemoteException {
 
 	/**
 	 * Randomly generated serialization UID.
 	 */
-	private static final long serialVersionUID = -399169557402245639L;
+	private static final long serialVersionUID = 530822566931909888L;
 
-	public RollbackForcedException() {
+	public TransactionException() {
 	}
 
-	public RollbackForcedException(String message) {
+	public TransactionException(String message) {
 		super(message);
 	}
 
-	public RollbackForcedException(String message, Throwable cause) {
+	public TransactionException(String message, Throwable cause) {
 		super(message, cause);
 	}
 }

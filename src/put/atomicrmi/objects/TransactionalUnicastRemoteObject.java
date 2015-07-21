@@ -34,10 +34,10 @@ import java.rmi.server.RMIServerSocketFactory;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.UUID;
 
-import put.atomicrmi.Access.Mode;
-import put.atomicrmi.TransactionException;
-import put.atomicrmi.TransactionRef;
-import put.atomicrmi.TransactionalRemoteObject;
+import put.atomicrmi.optsva.TransactionException;
+import put.atomicrmi.optsva.TransactionRef;
+import put.atomicrmi.optsva.TransactionalRemoteObject;
+import put.atomicrmi.optsva.Access.Mode;
 import put.atomicrmi.refcells.LongHolder;
 import put.atomicrmi.sync.Semaphore;
 import put.atomicrmi.sync.TransactionFailureMonitor;

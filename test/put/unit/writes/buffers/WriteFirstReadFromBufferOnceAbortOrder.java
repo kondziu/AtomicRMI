@@ -5,7 +5,7 @@ import java.rmi.RemoteException;
 import org.junit.Assert;
 import org.junit.Test;
 
-import put.atomicrmi.Transaction;
+import put.atomicrmi.optsva.Transaction;
 import put.atomicrmi.sync.Heartbeat;
 import put.atomicrmi.sync.TaskController;
 import put.atomicrmi.sync.TransactionFailureMonitorImpl;

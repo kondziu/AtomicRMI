@@ -19,7 +19,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package put.atomicrmi;
+package put.atomicrmi.optsva;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -29,8 +29,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
-import put.atomicrmi.Access.Mode;
 import put.atomicrmi.objects.ObjectProxy;
+import put.atomicrmi.optsva.Access.Mode;
 import put.atomicrmi.sync.Heartbeat;
 
 /**

@@ -1,4 +1,4 @@
-package put.atomicrmi;
+package put.atomicrmi.optsva;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

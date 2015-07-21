@@ -3,8 +3,8 @@ package put.unit.vars;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
-import put.atomicrmi.Access;
-import put.atomicrmi.Access.Mode;
+import put.atomicrmi.optsva.Access;
+import put.atomicrmi.optsva.Access.Mode;
 
 public interface Variable extends Remote {
 

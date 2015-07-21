@@ -23,7 +23,7 @@ package put.atomicrmi.sync;
 
 import java.rmi.RemoteException;
 
-import put.atomicrmi.Transaction;
+import put.atomicrmi.optsva.Transaction;
 import put.util.ids.IdentifiableRemote;
 
 /**
