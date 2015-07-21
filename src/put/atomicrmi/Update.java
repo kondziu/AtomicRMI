@@ -55,7 +55,7 @@ public class Update extends Transaction {
 		if (writes != INF && writes < 1)
 			throw new TransactionException("Invalid upper bound: negative number of writes (" + writes + ").");
 
-		if (state != STATE_PREPARING)
+		if (state != State.PREPARING)
 			throw new TransactionException("Object access information can be added only in preparation state.");
 
 		try {
@@ -73,22 +73,17 @@ public class Update extends Transaction {
 
 	@Override
 	public void start() throws TransactionException {
-		// public void start() throws TransactionException {
-
-		// }
+		// Intentionally left empty.
 	}
 
 	@Override
 	protected boolean waitForSnapshots() {
 		boolean commit = true;
 
-		// TODO parallel for
 		for (IObjectProxy proxy : proxies) {
 			try {
-				// TODO commit = commit && proxy.waitForSnapshots(); ?
-				proxy.update(); // UPDATE
+				proxy.update();
 
-				// wait for snapshot does not need to check access condition
 				if (!proxy.waitForSnapshot(false))
 					commit = false;
 			} catch (RemoteException e) {
@@ -101,10 +96,8 @@ public class Update extends Transaction {
 
 	public void commit() throws TransactionException, RollbackForcedException {
 
-		// Start begin
+		/** Start */
 		try {
-//			heartbeatThread = new Thread(heartbeat, "Heartbeat for " + id);
-//			heartbeatThread.start();
 			OneHeartbeat.thread.register(id);
 
 			Collections.sort(proxies, comparator);
@@ -125,25 +118,23 @@ public class Update extends Transaction {
 			throw new TransactionException("Unable to initialize transaction.", e);
 		}
 
-		setState(STATE_RUNNING);
-		// Start end
+		setState(State.RUNNING);
 
-		// Update and wait for snapshots
+		/** Update and wait for snapshots*/
 		boolean commit = waitForSnapshots();
 
-		// Commit begin
+		/** Commit begin */
 		if (!commit) {
 			finishProxies(true);
-			setState(STATE_ROLLEDBACK);
+			setState(State.ABORTED);
 			throw new RollbackForcedException("Rollback forced during commit.");
 		}
 
 		finishProxies(false);
-		setState(STATE_COMMITED);
+		setState(State.COMMITED);
 
-		// Signal heartbeater to stop.
+		/** Signal heartbeater to stop. */
 		OneHeartbeat.thread.remove(id);
-		// Commit end
 	}
 
 	/**
@@ -162,7 +153,6 @@ public class Update extends Transaction {
 	public <T> void commitInterrupted(Callable<T> postStart, Callable<T> postSnapshots) throws TransactionException,
 			RollbackForcedException {
 
-		// Start begin
 		try {			
 			Collections.sort(proxies, comparator);
 
@@ -182,8 +172,7 @@ public class Update extends Transaction {
 			throw new TransactionException("Unable to initialize transaction.", e);
 		}
 
-		setState(STATE_RUNNING);
-		// Start end
+		setState(State.RUNNING);
 
 		if (postStart != null) {
 			try {
@@ -194,7 +183,6 @@ public class Update extends Transaction {
 			}
 		}
 
-		// Update and wait for snapshots
 		boolean commit = waitForSnapshots();
 
 		if (postSnapshots != null) {
@@ -206,28 +194,25 @@ public class Update extends Transaction {
 			}
 		}
 
-		// Commit begin
 		if (!commit) {
 			finishProxies(true);
-			setState(STATE_ROLLEDBACK);
+			setState(State.ABORTED);
 			throw new RollbackForcedException("Rollback forced during commit.");
 		}
 
 		finishProxies(false);
-		setState(STATE_COMMITED);
+		setState(State.COMMITED);
 
-		// Signal heartbeater to stop.
 		OneHeartbeat.thread.remove(id);
-		// Commit end
 	}
 
 	@Override
 	public void rollback() throws TransactionException {
-		// nothing?
+		// nothing
 	}
 
 	@Override
 	public <T> void release(T object) throws TransactionException, RemoteException {
-		// nothing?
+		// nothing
 	}
 }

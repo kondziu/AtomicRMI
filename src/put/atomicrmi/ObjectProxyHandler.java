@@ -43,7 +43,7 @@ class ObjectProxyHandler implements InvocationHandler {
 	/**
 	 * Methods that should not be intercepted.
 	 */
-	private static Set<Method> methods = new HashSet<Method>();
+	private static Set<Method> neutralMethods = new HashSet<Method>();
 
 	/**
 	 * Write replacement method used to properly serialize this class.
@@ -62,12 +62,12 @@ class ObjectProxyHandler implements InvocationHandler {
 
 	static {
 		try {
-			methods.add(Object.class.getMethod("equals", new Class<?>[] { Object.class }));
-			methods.add(Object.class.getMethod("hashCode", new Class<?>[] {}));
-			methods.add(Object.class.getMethod("toString", new Class<?>[] {}));
+			neutralMethods.add(Object.class.getMethod("equals", new Class<?>[] { Object.class }));
+			neutralMethods.add(Object.class.getMethod("hashCode", new Class<?>[] {}));
+			neutralMethods.add(Object.class.getMethod("toString", new Class<?>[] {}));
 
 			for (Method m : IObjectProxy.class.getMethods())
-				methods.add(m);
+				neutralMethods.add(m);
 
 			writeReplaceMethod = IObjectProxySerializer.class.getMethod("writeReplace", new Class<?>[] {});
 		} catch (SecurityException e) {
@@ -102,7 +102,7 @@ class ObjectProxyHandler implements InvocationHandler {
 	}
 
 	public Object invoke(Object obj, Method method, Object[] args) throws Throwable {
-		if (methods.contains(method)) {
+		if (neutralMethods.contains(method)) {
 			return method.invoke(proxy, args);
 		}
 
@@ -120,9 +120,21 @@ class ObjectProxyHandler implements InvocationHandler {
 					+ proxy.getMode());
 		}
 
+		/**
+		 * PreSync
+		 */
 		BufferType bufferred;
 		try {
-			bufferred = proxy.preSync(mode);
+			switch (mode) {
+			case READ_ONLY:
+				bufferred = proxy.preRead();
+				break;
+			case WRITE_ONLY:
+				bufferred = proxy.preWrite();
+				break;
+			default:
+				throw new RemoteException("Illegal access type: " + mode);
+			}
 		} catch (RemoteException e) {
 			if (e.getCause() instanceof RollbackForcedException) {
 				throw e.getCause();
@@ -135,21 +147,39 @@ class ObjectProxyHandler implements InvocationHandler {
 			}
 		}
 
+		/**
+		 * Execute method on object or buffer
+		 */
 		Object result = null;
 		switch (bufferred) {
-		case LOG_ONLY:
+		case LOG_BUFFER:
 			proxy.log(method.getName(), method.getParameterTypes(), args);
+			// Note: result == null; Not a huge problem, since this is
+			// write-only.
+			// TODO return some sort of promise/future
 			break;
 		case NONE:
 			method.setAccessible(true);
 			result = method.invoke(proxy.getWrapped(), args);
 			break;
-		case BUFFER:
+		case COPY_BUFFER:
 			method.setAccessible(true);
 			result = method.invoke(proxy.getBuffer(), args);
 		}
 
-		proxy.postSync(mode);
+		/**
+		 * PostSync
+		 */
+		switch (mode) {
+		case READ_ONLY:
+			proxy.postRead();
+			break;
+		case WRITE_ONLY:
+			proxy.postWrite();
+			break;
+		default:
+			throw new RemoteException("Illegal access type: " + mode);
+		}
 
 		return result;
 	}

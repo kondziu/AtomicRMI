@@ -28,11 +28,12 @@ import java.util.UUID;
 import put.atomicrmi.Access.Mode;
 
 /**
- * An implementation of {@link IObjectProxy} interface. It is required to
- * control remote method invocations and implement versioning algorithm.
+ * A write-only object proxy. It uses a log buffer throughout and applies
+ * changes only on commit.
  * 
  * @author Wojciech Mruczkiewicz, Konrad Siek
  */
+// TODO only implement IObjectProxy
 class UpdateObjectProxy extends ObjectProxy {
 
 	private static final long serialVersionUID = 4042112660455555346L;
@@ -43,42 +44,31 @@ class UpdateObjectProxy extends ObjectProxy {
 	}
 
 	@Override
-	public BufferType preSync(Mode accessType) throws RemoteException {
+	public BufferType preRead() {
+		throw new UnsupportedOperationException();
+	}
 
-//		System.out.println("ul16");
+	@Override
+	public void postRead() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public BufferType preWrite() throws RemoteException {
 		object.transactionLock(uid);
-		if (mwv == 0 && mv == 0) {
-//			writeRecorder = new FieldStateRecorder();
-			log = new LinkedList<Invocation>();
-//			try {
-//				buffer = Instrumentation.transform(object.getClass(), object, (InterceptFieldCallback) writeRecorder);
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//				throw new RemoteException(e.getLocalizedMessage(), e.getCause());
-//			}
-		}
+		if (mwv == 0 && mv == 0)
+			logBuffer = new LinkedList<Invocation>();
 
 		mv++;
 		mwv++;
 
-		return BufferType.LOG_ONLY;
+		return BufferType.LOG_BUFFER;
 	}
 
 	@Override
-	public void postSync(Mode accessType) throws RemoteException {
+	public void postWrite() throws RemoteException {
 		object.transactionUnlock(uid);
 	}
-
-	// @Override
-	// public void startTransaction() throws RemoteException {
-	// //TransactionFailureMonitor.getInstance().startMonitoring(this);
-	// //
-	//
-	// mv = 0;
-	// mwv = 0;
-	//
-	// over = false;
-	// }
 
 	@Override
 	public void finishTransaction(boolean restore, boolean readThread) throws RemoteException {
@@ -96,40 +86,42 @@ class UpdateObjectProxy extends ObjectProxy {
 		try {
 			object.waitForCounter(px - 1);
 
-//			System.out.println("ul17");
 			object.transactionLock(uid);
 
-			// Short circuit, if no writes.
-			if (log == null) {
+			/** Short circuit, if no writes. */
+			if (logBuffer == null) {
 				object.transactionUnlock(uid);
 				return;
 			}
 
-			// We have to make a snapshot, else it thinks we didn't read
-			// the object and in effect we don't get cv and rv.
+			/**
+			 * We have to make a snapshot, else it thinks we didn't read the
+			 * object and in effect we don't get cv and rv.
+			 */
+			// TODO fakeSnapshot?
 			snapshot = object.snapshot();
-
-//			writeRecorder.applyChanges(object);
+			
 			applyWriteLog();
 
-			// Prevent recorder from being used again
-			log = null;
+			/** Prevent recorder from being used again */
+			logBuffer = null;
 
-			// Create buffer for accessing objects after release or
-			// remove buffer.
-			buffer = null;
+			/**
+			 * Create buffer for accessing objects after release or remove
+			 * buffer.
+			 */
+			copyBuffer = null;
 
-			// Release object.
+			/** Release object. */
 			object.setCurrentVersion(px);
-			releaseTransaction(); // 29
+			releaseTransaction();
 
 		} catch (Exception e) {
-			// FIXME the client-side should see the exceptions from this thread.
+			// XXX the client-side should see the exceptions from this thread.
 			e.printStackTrace();
 			throw new RuntimeException(e);
 		} finally {
 			object.transactionUnlock(uid);
 		}
-
 	}
 }

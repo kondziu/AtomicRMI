@@ -45,10 +45,8 @@ import put.atomicrmi.Access.Mode;
  */
 public class Transaction extends UnicastRemoteObject implements ITransaction {
 
-	
-	
-
 	/**
+	 * Generated serial version number.
 	 */
 	private static final long serialVersionUID = -1134870682188058024L;
 
@@ -58,66 +56,39 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 */
 	public static final int INF = -1;
 
-	/**
-	 * Transaction state that is set before transaction start.
-	 */
-	public static final int STATE_PREPARING = 1;
-
-	/**
-	 * Transaction state that defines running transaction.
-	 */
-	public static final int STATE_RUNNING = 2;
-
-	/**
-	 * Transaction state that is set after commit.
-	 */
-	public static final int STATE_COMMITED = 3;
-
-	/**
-	 * Transaction state that is set after roll-back.
-	 */
-	public static final int STATE_ROLLEDBACK = 4;
+	enum State {
+		/**
+		 * Transaction state that is set before transaction start.
+		 */
+		PREPARING,
+		/**
+		 * Transaction state that defines running transaction.
+		 */
+		RUNNING,
+		/**
+		 * Transaction state that is set after commit.
+		 */
+		COMMITED,
+		/**
+		 * Transaction state that is set after roll-back.
+		 */
+		ABORTED
+	}
 
 	/**
 	 * Current transaction state.
 	 */
-	protected int state;
+	protected State state;
 
 	/**
 	 * Randomly generated transaction unique identifier.
 	 */
-	protected UUID id;
-
-	// /**
-	// * Reference to remote global lock used only for transaction startup.
-	// */
-	// private ITransactionsLock[] globalLocks;
+	protected final UUID id;
 
 	/**
 	 * List of proxies of the accessed remote objects.
 	 */
-	protected List<IObjectProxy> proxies;
-
-	/**
-	 * This transaction's read set.
-	 * 
-	 * <p>
-	 * It is assumed that read set and write set are disjoint.
-	 */
-//	private Set<IObjectProxy> readonly;
-
-	/**
-	 * This transaction's write set.
-	 * 
-	 * <p>
-	 * It is assumed that read set and write set are disjoint.
-	 */
-//	private Set<IObjectProxy> writeonly;
-
-	/**
-	 * Heartbeater's thread reference.
-	 */
-	protected Thread heartbeatThread;
+	protected final List<IObjectProxy> proxies;
 
 	/**
 	 * Creates new transaction. The required argument is a JavaRMI registry
@@ -131,22 +102,11 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 * 
 	 */
 	public Transaction() throws RemoteException {
-		state = STATE_PREPARING;
+		state = State.PREPARING;
 		id = UUID.randomUUID();
-
-		// for (int i = 0; i < registries.length; i++) {
-		// globalLocks[i] = TransactionsLock.getOrCreate(registries[i]);
-		// }
-		//
-		// // Sorting prevents deadlocks.
-		// Arrays.sort(globalLocks);
 
 		OneHeartbeat.thread.register(id);
 		proxies = new ArrayList<IObjectProxy>();
-
-		// XXX probably redundant
-//		readonly = new HashSet<IObjectProxy>();
-//		writeonly = new HashSet<IObjectProxy>();
 	}
 
 	/**
@@ -163,7 +123,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 * 
 	 * @return current transaction state.
 	 */
-	public int getState() {
+	public State getState() {
 		return state;
 	}
 
@@ -364,7 +324,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 			throw new TransactionException("Invalid upper bound: more writes (" + writes + ") than all calls ("
 					+ (allCalls == INF ? "INF" : allCalls) + ").");
 
-		if (state != STATE_PREPARING)
+		if (state != State.PREPARING)
 			throw new TransactionException("Object access information can be added only in preparation state.");
 
 		try {
@@ -406,18 +366,22 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 
 					transaction.atomic(this);
 
-					if (getState() == STATE_RUNNING)
+					if (getState() == State.RUNNING)
 						commit();
 
 					break;
+
 				} catch (RetryCalledException e) {
 					rollback();
 				} catch (RollbackForcedException e) {
-					// Transaction already rolled-back, no rollback required.
+					// Transaction already aborted no abort required.
 				}
+
 			} catch (RemoteException e) {
-				// Retry caused by system failure. This situation should be
-				// monitored and handled separately.
+				/**
+				 * Retry caused by system failure. This situation should be
+				 * monitored and handled separately.
+				 */
 				System.err.println(e.getMessage());
 				e.printStackTrace();
 				if (++restartsByFailure == 5)
@@ -425,16 +389,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 				rollback();
 			}
 
-			// Wait for heartbeater
-			while (true) {
-				try {
-					heartbeatThread.join();
-					break;
-				} catch (InterruptedException e) {
-				}
-			}
-
-			state = STATE_PREPARING;
+			state = State.PREPARING;
 		}
 	}
 
@@ -448,11 +403,6 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 */
 	public void start() throws TransactionException {
 		try {
-//			heartbeatThread = new Thread(heartbeat, "Heartbeat for " + id);
-//			heartbeatThread.start();
-
-
-			// Arrays.sort(proxies);
 
 			Collections.sort(proxies, comparator);
 
@@ -472,7 +422,7 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 			throw new TransactionException("Unable to initialize transaction.", e);
 		}
 
-		setState(STATE_RUNNING);
+		setState(State.RUNNING);
 	}
 
 	/**
@@ -487,27 +437,20 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 */
 	public void commit() throws TransactionException, RollbackForcedException {
 		if (!waitForSnapshots()) {
-//			System.out.println("FP C1");
+
 			finishProxies(true);
-			setState(STATE_ROLLEDBACK);
-			
-//			synchronized (heartbeat) {
-				OneHeartbeat.thread.remove(id);
-//			}
-			
+			setState(State.ABORTED);
+
+			OneHeartbeat.thread.remove(id);
+
 			throw new RollbackForcedException("Rollback forced during commit.");
 		}
 
-//		System.out.println("FP C2");
 		finishProxies(false);
-		setState(STATE_COMMITED);
+		setState(State.COMMITED);
 
-		// Signal heartbeater to stop.
-//		synchronized (heartbeat) {
+		/** Signal heartbeater to stop. */
 		OneHeartbeat.thread.remove(id);
-//		}
-
-		// heartbeatThread.stop();
 	}
 
 	/**
@@ -521,14 +464,12 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 */
 	public void rollback() throws TransactionException {
 		waitForSnapshots();
-//		System.out.println("FP R");
+
 		finishProxies(true);
-		setState(STATE_ROLLEDBACK);
+		setState(State.ABORTED);
 
-		// Signal heartbeater to stop.
+		/** Signal heartbeater to stop. */
 		OneHeartbeat.thread.remove(id);
-
-		// heartbeatThread.stop();
 	}
 
 	/**
@@ -551,10 +492,8 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	protected boolean waitForSnapshots() {
 		boolean commit = true;
 
-		// TODO parallel for
 		for (IObjectProxy proxy : proxies) {
 			try {
-				// TODO commit = commit && proxy.waitForSnapshots(); ?
 				if (!proxy.waitForSnapshot(false))
 					commit = false;
 			} catch (RemoteException e) {
@@ -589,10 +528,8 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 *            restored or committed.
 	 */
 	protected void finishProxies(boolean restore) {
-		// TODO parallel for
 		for (IObjectProxy proxy : proxies) {
 			try {
-//				System.out.println("T finishing proxies");
 				proxy.finishTransaction(restore, false);
 			} catch (RemoteException e) {
 				// Do nothing. This situation is treated as remote object
@@ -610,18 +547,18 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 *             when transition to this state is invalid at given current
 	 *             transaction state.
 	 */
-	protected void setState(int newState) throws TransactionException {
+	protected void setState(State newState) throws TransactionException {
 		switch (state) {
-		case STATE_PREPARING:
-			if (newState != STATE_RUNNING)
+		case PREPARING:
+			if (newState != State.RUNNING)
 				throw new TransactionException("Invalid transaction state transition.");
 			break;
-		case STATE_RUNNING:
-			if (newState != STATE_COMMITED && newState != STATE_ROLLEDBACK)
+		case RUNNING:
+			if (newState != State.COMMITED && newState != State.ABORTED)
 				throw new TransactionException("Invalid transaction state transition.");
 			break;
-		case STATE_COMMITED:
-		case STATE_ROLLEDBACK:
+		case COMMITED:
+		case ABORTED:
 			throw new TransactionException("Invalid transaction state transition.");
 		}
 
@@ -632,12 +569,10 @@ public class Transaction extends UnicastRemoteObject implements ITransaction {
 	 * A comparator object for sorting remote object proxies by their IDs.
 	 */
 	protected Comparator<IObjectProxy> comparator = new Comparator<IObjectProxy>() {
-//		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public int compare(IObjectProxy a, IObjectProxy b) {
 			try {
 				return a.getUID().compareTo(b.getUID());
 			} catch (RemoteException e) {
-				// Nasty hack
 				throw new RuntimeException(e.getMessage(), e.getCause());
 			}
 		}

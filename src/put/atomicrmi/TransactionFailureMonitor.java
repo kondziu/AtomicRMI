@@ -188,7 +188,7 @@ public class TransactionFailureMonitor extends UnicastRemoteObject implements Ru
 				}
 
 				for (ObjectProxy proxy : failures)
-					proxy.OnFailure();
+					proxy.onFailure();
 			} catch (InterruptedException e) {
 				if (shutdown) {
 					shutdown = false;
@@ -198,5 +198,10 @@ public class TransactionFailureMonitor extends UnicastRemoteObject implements Ru
 				throw new RuntimeException("Unexpected error in failure detector.");
 			}
 		}
+	}
+
+	@Override
+	public UUID getUID() throws RemoteException {
+		return id;
 	}
 }

@@ -19,6 +19,13 @@ import java.util.concurrent.ConcurrentSkipListSet;
  * completed. If this signal is not received on the server-side within the
  * specified time, the server assumes a failure of the client.
  * 
+ * This class runs automatically at start. It is also weakly consistent so a new
+ * monitor might not be immediately seen when first added or immediately removed
+ * (we assume that if a ping or two is missed, the fault detector will not be
+ * Triggered.)
+ * 
+ * The heartbeat does not react if a monitor is inaccessible however.
+ * 
  * @author Konrad Siek, Wojciech Mruczkiewicz
  */
 public class OneHeartbeat extends Thread {
@@ -27,27 +34,43 @@ public class OneHeartbeat extends Thread {
 	 * Delay between notifications.
 	 */
 	private static final long ESTIMATED_DELAY = 5000;
-	
+
+	/**
+	 * The default thread.
+	 */
 	public static final OneHeartbeat thread = new OneHeartbeat("ARMI Hearbeat");
 
-	public static synchronized void emergencyStart() throws Exception {
+	/**
+	 * Start default thread.
+	 */
+	static {
+		thread.setDaemon(true);
+		thread.start();
+	}
+
+	/**
+	 * Restart the thread after an emergency stop.
+	 * 
+	 * @throws Exception
+	 */
+	public final static synchronized void emergencyStart() throws Exception {
 		if (thread.isAlive())
 			return;
 
 		Field field = OneHeartbeat.class.getField("thread");
-
 		field.setAccessible(true);
 		Field modifiersField = Field.class.getDeclaredField("modifiers");
 		modifiersField.setAccessible(true);
 		modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
-
 		field.set(null, new OneHeartbeat("ARMI Heartbeat"));
 	}
 
-	public static synchronized void emergencyStop() {
-		if (!thread.isAlive()) {
+	/**
+	 * Stops the thread.
+	 */
+	public final static synchronized void emergencyStop() {
+		if (!thread.isAlive())
 			return;
-		}
 
 		thread.interrupt();
 
@@ -56,30 +79,37 @@ public class OneHeartbeat extends Thread {
 		// thread.ids.clear();
 	}
 
-	static {
-		thread.setDaemon(true);
-		thread.start();
-	}
-
 	public OneHeartbeat(String name) {
 		super(name);
+
+		monitors = new ConcurrentHashMap<Object, Queue<ITransactionFailureMonitor>>();
+		ids = new ConcurrentHashMap<Object, Set<Object>>();
 	}
 
 	private boolean run = true;
 
-	private final Map<Object, Queue<ITransactionFailureMonitor>> monitors = new ConcurrentHashMap<Object, Queue<ITransactionFailureMonitor>>();
-	private final Map<Object, Set<Object>> ids = new ConcurrentHashMap<Object, Set<Object>>();
+	/**
+	 * Map of monitors, where each monitor belongs to a transaction identified
+	 * by the key. A transaction can have several monitors (one per host of any
+	 * remote object that it accesses, basically). This is a weakly consistent
+	 * concurrent structure.
+	 */
+	private final Map<Object, Queue<ITransactionFailureMonitor>> monitors;
 
 	/**
-	 * Controller thread is waiting, as opposed to executing some task.
+	 * Map of monitor identifiers per transaction. This is used not to register
+	 * multiple equivalent monitors for a single transaction. We explicitly use
+	 * monitor identifiers since monitors are RMI remote object stubs and
+	 * therefore cannot be used directly for things like comparison.
 	 */
+	private final Map<Object, Set<Object>> ids;
 
 	@Override
 	public void run() {
 
 		while (run) {
 			/**
-			 * If nobody is doing anything, wait until timeout or until
+			 * If nobody is doing anything, wait until timeout or until an
 			 * interrupt.
 			 */
 			try {
@@ -89,64 +119,65 @@ public class OneHeartbeat extends Thread {
 					break;
 			}
 
+			/**
+			 * Ping everybody on the list.
+			 */
 			for (Object id : monitors.keySet()) {
-				Queue<ITransactionFailureMonitor> queue = monitors.get(id);
+				final Queue<ITransactionFailureMonitor> queue = monitors.get(id);
 
-				for (ITransactionFailureMonitor monitor : queue) {
+				for (ITransactionFailureMonitor monitor : queue)
 					try {
-//						System.err.println("Pinging " + monitor.getId() + " for transaction " + id + " in Heartbeat");
 						monitor.heartbeat(id);
 					} catch (RemoteException e) {
-//						System.err.println("Ignoring " + e.getLocalizedMessage() + " in Heartbeat");
 						e.printStackTrace();
 					}
-				}
 			}
-
-			/**
-			 * Aaand... go back to waiting.
-			 */
 		}
 	}
 
+	/**
+	 * Register a transaction by ID whose heartbeat signals will be sent to
+	 * monitors specified through {@link OneHeartbeat.addFailureMonitor}.
+	 * 
+	 * @param id
+	 *            transaction ID
+	 */
 	public void register(Object id) {
-		// System.err.println("Registering hearbeat for " + id);
 		this.monitors.put(id, new ConcurrentLinkedQueue<ITransactionFailureMonitor>());
 		this.ids.put(id, new ConcurrentSkipListSet<Object>());
 	}
 
+	/**
+	 * Register a monitor for a particular transaction. The hearbeat thread will
+	 * start sending signals to that monitor henceforth.
+	 * 
+	 * @param id
+	 *            transaction ID
+	 * @param monitor
+	 *            monitor reference
+	 * @throws RemoteException
+	 */
 	public void addFailureMonitor(Object id, ITransactionFailureMonitor monitor) throws RemoteException {
-		// System.err.println("Adding hearbeat monitor for " + id + " " +
-		// monitor.getId());
+		final UUID mid = monitor.getUID();
 
-		UUID mid = monitor.getId();
-
-		if (this.ids.get(id).add(mid)) { // returns true if added, false if
-											// already present
-											// System.err.println("Actually adding hearbeat monitor for "
-											// + id + " " + monitor.getId());
+		if (this.ids.get(id).add(mid))
 			this.monitors.get(id).add(monitor);
-		}
-		// else {
-		// System.err.println("Not actually adding hearbeat monitor for " + id +
-		// " " + monitor.getId());
-		// }
 	}
 
+	/**
+	 * Remove all monitors for a particular transaction.
+	 * 
+	 * @param id
+	 *            transaction ID
+	 */
 	public void remove(Object id) {
-//		System.err.println("Remove hearbeat for " + id);
-
 		if (this.monitors.containsKey(id)) {
-			// System.err.println("Actually remove hearbeat for " + id +
-			// " monitors");
-			Queue<ITransactionFailureMonitor> queue = this.monitors.remove(id);
+			final Queue<ITransactionFailureMonitor> queue = this.monitors.remove(id);
 			queue.clear();
 		}
 
 		if (this.ids.containsKey(id)) {
-			// System.err.println("Actually remove hearbeat for " + id +
-			// " ids");
-			Set<Object> set = this.ids.remove(id);
+			final Set<Object> set = this.ids.remove(id);
 			set.clear();
 		}
 	}

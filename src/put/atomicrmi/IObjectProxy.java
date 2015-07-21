@@ -32,18 +32,28 @@ import put.atomicrmi.Access.Mode;
  * @author Wojciech Mruczkiewicz, Konrad Siek
  */
 public interface IObjectProxy extends IdentifiableRemote {
-	
-	enum BufferType {LOG_ONLY, BUFFER, NONE}
+
+	enum BufferType {
+		LOG_BUFFER, COPY_BUFFER, NONE
+	}
 
 	/**
 	 * Gives the remote reference to the remote object that is being wrapped.
-	 * @param bufferred return the actual reference or the buffer.
+	 * 
+	 * @param bufferred
+	 *            return the actual reference or the buffer.
 	 * @return reference to wrapped object.
 	 * @throws RemoteException
 	 *             when remote execution fails.
 	 */
 	Object getWrapped() throws RemoteException;
-	
+
+	/**
+	 * Returns the copy buffer of the remote object that is being wrapped.
+	 * 
+	 * @return copy of the wrapped object.
+	 * @throws RemoteException
+	 */
 	Object getBuffer() throws RemoteException;
 
 	/**
@@ -55,35 +65,6 @@ public interface IObjectProxy extends IdentifiableRemote {
 	 *             when remote invocation fails.
 	 */
 	void startTransaction() throws RemoteException;
-
-	/**
-	 * Action performed before every remote method invocation. It should update
-	 * versioning and checkpoint counters appropriately and obtain required
-	 * locks.
-	 * 
-	 * @param accessType
-	 *            type of access: read/write/read-write
-	 * @return <code>true</code> if the preSync determines that a buffer has to
-	 *         be used instead of the actual reference, and <code>false</code>
-	 *         otherwise.
-	 * 
-	 * @throws RemoteException
-	 *             when remote execution fails.
-	 */
-	BufferType preSync(Mode accessType) throws RemoteException;
-
-	/**
-	 * Action performed after every remote method invocation. It should update
-	 * versioning and checkpoint counters appropriately and release appropriate
-	 * locks.
-	 * 
-	 * @param accessType
-	 *            type of access: read/write/read-write
-	 * 
-	 * @throws RemoteException
-	 *             when remote execution fails.
-	 */
-	void postSync(Mode accessType) throws RemoteException;
 
 	/**
 	 * Notifies this remote object to release version counters and allow other
@@ -135,14 +116,14 @@ public interface IObjectProxy extends IdentifiableRemote {
 	void free() throws RemoteException;
 
 	/**
-	 * TODO
+	 * Lock this object.
 	 * 
 	 * @throws RemoteException
 	 */
 	void lock() throws RemoteException;
 
 	/**
-	 * TODO
+	 * Unlock this object.
 	 * 
 	 * @throws RemoteException
 	 */
@@ -156,8 +137,73 @@ public interface IObjectProxy extends IdentifiableRemote {
 	 */
 	Mode getMode() throws RemoteException;
 
-	// XXX
+	/**
+	 * Force object to update its state from its own buffers.
+	 * 
+	 * @throws RemoteException
+	 */
 	void update() throws RemoteException;
 
+	/**
+	 * Admit a method execution into the log buffer.
+	 * 
+	 * @param methodName
+	 *            method name
+	 * @param argTypes
+	 *            argument types
+	 * @param args
+	 *            argument values
+	 * @throws RemoteException
+	 */
 	void log(String methodName, Class<?>[] argTypes, Object[] args) throws RemoteException;
+
+	/**
+	 * Execute pre-read synchronization and preparation.
+	 * 
+	 * Action performed before every read remote method invocation. It should
+	 * update versioning and checkpoint counters appropriately and obtain
+	 * required locks.
+	 * 
+	 * @return a constant indicating which object to use for performing actual
+	 *         operations: a log buffer, a copy buffer, or the actual wrapped
+	 *         object.
+	 * @throws RemoteException
+	 */
+	BufferType preRead() throws RemoteException;
+
+	/**
+	 * Perform pre-write synchronization and preparation.
+	 * 
+	 * Action performed before every write remote method invocation. It should
+	 * update versioning and checkpoint counters appropriately and obtain
+	 * required locks.
+	 * 
+	 * @return a constant indicating which object to use for performing actual
+	 *         operations: a log buffer, a copy buffer, or the actual wrapped
+	 *         object.
+	 * @throws RemoteException
+	 */
+	BufferType preWrite() throws RemoteException;
+
+	/**
+	 * Perform post-read synchronization and potential releasing.
+	 * 
+	 * Action performed after every read remote method invocation. It should
+	 * update versioning and checkpoint counters appropriately and release
+	 * appropriate locks.
+	 * 
+	 * @throws RemoteException
+	 */
+	void postRead() throws RemoteException;
+
+	/**
+	 * Perform post-write synchronization and potential releasing.
+	 * 
+	 * Action performed after every write remote method invocation. It should
+	 * update versioning and checkpoint counters appropriately and release
+	 * appropriate locks.
+	 * 
+	 * @throws RemoteException
+	 */
+	void postWrite() throws RemoteException;
 }

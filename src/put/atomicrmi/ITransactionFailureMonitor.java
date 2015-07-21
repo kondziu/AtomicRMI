@@ -21,9 +21,7 @@
  */
 package put.atomicrmi;
 
-import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.util.UUID;
 
 /**
  * Internal interface for transaction failure detector mechanism. Provides
@@ -31,17 +29,8 @@ import java.util.UUID;
  * 
  * @author Wojciech Mruczkiewicz
  */
-public interface ITransactionFailureMonitor extends Remote {
-
-	/**
-	 * Gives the unique identifier of particular transaction failure monitor.
-	 * 
-	 * @return an unique identifier
-	 * @throws RemoteException
-	 *             when remote execution failed.
-	 */
-	UUID getId() throws RemoteException;
-
+public interface ITransactionFailureMonitor extends IdentifiableRemote {
+	
 	/**
 	 * Sends a signal to transaction failure monitor with information that
 	 * transaction is still alive.

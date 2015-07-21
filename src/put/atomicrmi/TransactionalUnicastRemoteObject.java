@@ -302,7 +302,6 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 * other transactions to start the execution.
 	 */
 	void releaseTransaction() {
-//		System.out.println(Thread.currentThread().getName() + " releasing " + "lv=" + lv.getAvailable() + " + 1");
 		lv.release(1);
 	}
 
@@ -316,7 +315,6 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 */
 	void waitForCounter(long value) throws TransactionException {
 		try {
-//			System.out.println(Thread.currentThread().getName() + " waiting " + value + " lv=" + lv.getAvailable());
 			lv.acquire(value);
 			lv.release(value);
 		} catch (InterruptedException e) {
@@ -346,7 +344,7 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 * @param value
 	 *            the required value of checkpoint counter.
 	 * @throws TransactionException
-	 *             when error occured when waiting for the checkpoint counter.
+	 *             when error occurred when waiting for the checkpoint counter.
 	 */
 	void waitForSnapshot(long value) throws TransactionException {
 		try {
@@ -367,7 +365,7 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 
 	/**
 	 * Terminates the specific transaction. It releases the checkpoint counter
-	 * and performs snapshot rollback if necessary.
+	 * and performs snapshot abort if necessary.
 	 * 
 	 * @param tid
 	 *            transaction identifier.
@@ -380,7 +378,6 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 	 *             when error occurs during snapshot restoration.
 	 */
 	void finishTransaction(Object tid, Snapshot snapshot, boolean restore) throws TransactionException {
-//		System.out.println(Thread.currentThread().getName() + " finishing " + tid);
 		
 		if (snapshot == null) {
 			lt.release(1);
@@ -468,10 +465,6 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 		} catch (IOException e) {
 			throw new TransactionException("Unable to restore snapshot.", e);
 		}
-	}
-
-	public Object getSortingKey() throws RemoteException {
-		return uid;
 	}
 
 	@Override
