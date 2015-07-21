@@ -19,7 +19,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package put.atomicrmi.objects;
+package put.atomicrmi.optsva.objects;
 
 import java.lang.reflect.Method;
 import java.rmi.RemoteException;
@@ -32,10 +32,10 @@ import put.atomicrmi.optsva.Transaction;
 import put.atomicrmi.optsva.TransactionException;
 import put.atomicrmi.optsva.TransactionRef;
 import put.atomicrmi.optsva.Access.Mode;
-import put.atomicrmi.sync.Semaphore;
-import put.atomicrmi.sync.TaskController;
-import put.atomicrmi.sync.TaskController.Task;
-import put.atomicrmi.sync.TransactionFailureMonitorImpl;
+import put.atomicrmi.optsva.sync.Semaphore;
+import put.atomicrmi.optsva.sync.TaskController;
+import put.atomicrmi.optsva.sync.TransactionFailureMonitorImpl;
+import put.atomicrmi.optsva.sync.TaskController.Task;
 
 /**
  * An implementation of {@link ObjectProxy} interface. It is required to

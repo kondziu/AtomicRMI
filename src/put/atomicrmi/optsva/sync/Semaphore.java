@@ -20,7 +20,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package put.atomicrmi.sync;
+package put.atomicrmi.optsva.sync;
 
 /**
  * Simple semaphore supporting long number of permits. Used instead of

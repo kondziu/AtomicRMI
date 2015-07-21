@@ -4,9 +4,9 @@ import java.rmi.RemoteException;
 import java.util.Collections;
 import java.util.concurrent.Callable;
 
-import put.atomicrmi.objects.ObjectProxy;
 import put.atomicrmi.optsva.Access.Mode;
-import put.atomicrmi.sync.Heartbeat;
+import put.atomicrmi.optsva.objects.ObjectProxy;
+import put.atomicrmi.optsva.sync.Heartbeat;
 
 public class Update extends Transaction {
 

@@ -19,26 +19,29 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package put.atomicrmi.objects;
+package put.atomicrmi.optsva.sync;
 
-import java.io.Serializable;
+import java.rmi.RemoteException;
+
+import put.atomicrmi.optsva.Transaction;
+import put.util.ids.IdentifiableRemote;
 
 /**
- * Interface for object proxy serialization replacement. This is necessary in
- * order to properly serialize and deserialize object proxy. During
- * serialization only object proxy instance without {@link ObjectProxyHandler}
- * is written. During deserialization a {@link ObjectProxyHandler} wrapper is
- * created and invocations of {@link ObjectProxyImpl} methods are monitored.
+ * Internal interface for transaction failure detector mechanism. Provides
+ * methods for {@link Transaction} that allows to signal transaction liveness.
  * 
  * @author Wojciech Mruczkiewicz
  */
-public interface ObjectProxySerializer extends Serializable {
-
+public interface TransactionFailureMonitor extends IdentifiableRemote {
+	
 	/**
-	 * Write method replacement. Provides class with a special implementation of
-	 * serialization for {@link ObjectProxyHandler}.
+	 * Sends a signal to transaction failure monitor with information that
+	 * transaction is still alive.
 	 * 
-	 * @return an instance of {@link ObjectProxySerializerImpl}.
+	 * @param id
+	 *            identifier of transaction that signals liveness.
+	 * @throws RemoteException
+	 *             when remote execution failed.
 	 */
-	Object writeReplace();
+	void heartbeat(Object id) throws RemoteException;
 }

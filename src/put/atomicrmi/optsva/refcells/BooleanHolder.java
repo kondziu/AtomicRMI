@@ -19,29 +19,27 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package put.atomicrmi.sync;
-
-import java.rmi.RemoteException;
-
-import put.atomicrmi.optsva.Transaction;
-import put.util.ids.IdentifiableRemote;
+package put.atomicrmi.optsva.refcells;
 
 /**
- * Internal interface for transaction failure detector mechanism. Provides
- * methods for {@link Transaction} that allows to signal transaction liveness.
+ * Wrapper for a single boolean value.
  * 
  * @author Wojciech Mruczkiewicz
  */
-public interface TransactionFailureMonitor extends IdentifiableRemote {
-	
+public class BooleanHolder {
+
 	/**
-	 * Sends a signal to transaction failure monitor with information that
-	 * transaction is still alive.
-	 * 
-	 * @param id
-	 *            identifier of transaction that signals liveness.
-	 * @throws RemoteException
-	 *             when remote execution failed.
+	 * Stored boolean value.
 	 */
-	void heartbeat(Object id) throws RemoteException;
+	public boolean value;
+
+	/**
+	 * Initializes new boolean wrapper.
+	 * 
+	 * @param value
+	 *            initial value stored.
+	 */
+	public BooleanHolder(boolean value) {
+		this.value = value;
+	}
 }

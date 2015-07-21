@@ -19,7 +19,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package put.atomicrmi.sync;
+package put.atomicrmi.optsva.sync;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -29,8 +29,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import put.atomicrmi.objects.ObjectProxyImpl;
-import put.atomicrmi.refcells.BooleanHolder;
+import put.atomicrmi.optsva.objects.ObjectProxyImpl;
+import put.atomicrmi.optsva.refcells.BooleanHolder;
 
 /**
  * Detects failure of transactions that locked some remote object on particular

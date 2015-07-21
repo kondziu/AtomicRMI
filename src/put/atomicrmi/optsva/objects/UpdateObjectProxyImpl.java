@@ -19,7 +19,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package put.atomicrmi.objects;
+package put.atomicrmi.optsva.objects;
 
 import java.rmi.RemoteException;
 import java.util.LinkedList;
@@ -27,8 +27,8 @@ import java.util.UUID;
 
 import put.atomicrmi.optsva.TransactionRef;
 import put.atomicrmi.optsva.Access.Mode;
-import put.atomicrmi.sync.TaskController;
-import put.atomicrmi.sync.TransactionFailureMonitorImpl;
+import put.atomicrmi.optsva.sync.TaskController;
+import put.atomicrmi.optsva.sync.TransactionFailureMonitorImpl;
 
 /**
  * A write-only object proxy. It uses a log buffer throughout and applies

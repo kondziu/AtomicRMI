@@ -19,27 +19,27 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package put.atomicrmi.refcells;
+package put.atomicrmi.optsva.refcells;
 
 /**
- * Wrapper for a single boolean value.
+ * Wrapper for a single long value.
  * 
  * @author Wojciech Mruczkiewicz
  */
-public class BooleanHolder {
+public class LongHolder {
 
 	/**
-	 * Stored boolean value.
+	 * Stored long value.
 	 */
-	public boolean value;
+	public long value;
 
 	/**
-	 * Initializes new boolean wrapper.
+	 * Initializes new long wrapper.
 	 * 
 	 * @param value
 	 *            initial value stored.
 	 */
-	public BooleanHolder(boolean value) {
+	public LongHolder(long value) {
 		this.value = value;
 	}
 }

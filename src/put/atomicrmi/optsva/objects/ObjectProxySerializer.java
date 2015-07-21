@@ -19,27 +19,26 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package put.atomicrmi.refcells;
+package put.atomicrmi.optsva.objects;
+
+import java.io.Serializable;
 
 /**
- * Wrapper for a single long value.
+ * Interface for object proxy serialization replacement. This is necessary in
+ * order to properly serialize and deserialize object proxy. During
+ * serialization only object proxy instance without {@link ObjectProxyHandler}
+ * is written. During deserialization a {@link ObjectProxyHandler} wrapper is
+ * created and invocations of {@link ObjectProxyImpl} methods are monitored.
  * 
  * @author Wojciech Mruczkiewicz
  */
-public class LongHolder {
+public interface ObjectProxySerializer extends Serializable {
 
 	/**
-	 * Stored long value.
-	 */
-	public long value;
-
-	/**
-	 * Initializes new long wrapper.
+	 * Write method replacement. Provides class with a special implementation of
+	 * serialization for {@link ObjectProxyHandler}.
 	 * 
-	 * @param value
-	 *            initial value stored.
+	 * @return an instance of {@link ObjectProxySerializerImpl}.
 	 */
-	public LongHolder(long value) {
-		this.value = value;
-	}
+	Object writeReplace();
 }

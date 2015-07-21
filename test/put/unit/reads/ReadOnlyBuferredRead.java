@@ -7,9 +7,9 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import put.atomicrmi.optsva.Transaction;
-import put.atomicrmi.sync.Heartbeat;
-import put.atomicrmi.sync.TaskController;
-import put.atomicrmi.sync.TransactionFailureMonitorImpl;
+import put.atomicrmi.optsva.sync.Heartbeat;
+import put.atomicrmi.optsva.sync.TaskController;
+import put.atomicrmi.optsva.sync.TransactionFailureMonitorImpl;
 import put.unit.RMITest;
 import put.unit.vars.Variable;
 import edu.umd.cs.mtc.MultithreadedTest;

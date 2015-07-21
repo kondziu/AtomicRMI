@@ -6,8 +6,8 @@ import static put.atomicrmi.optsva.Access.Mode.WRITE_ONLY;
 
 import java.rmi.RemoteException;
 
-import put.atomicrmi.objects.TransactionalUnicastRemoteObject;
 import put.atomicrmi.optsva.Access;
+import put.atomicrmi.optsva.objects.TransactionalUnicastRemoteObject;
 
 public class VariableImpl extends TransactionalUnicastRemoteObject implements Variable, Cloneable {
 

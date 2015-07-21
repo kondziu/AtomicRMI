@@ -19,7 +19,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package put.atomicrmi.objects;
+package put.atomicrmi.optsva.objects;
 
 import java.lang.reflect.Method;
 import java.rmi.RemoteException;
@@ -28,11 +28,11 @@ import java.util.Set;
 
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.InvocationHandler;
-import put.atomicrmi.objects.ObjectProxy.BufferType;
 import put.atomicrmi.optsva.Access;
 import put.atomicrmi.optsva.RollbackForcedException;
 import put.atomicrmi.optsva.TransactionException;
 import put.atomicrmi.optsva.Access.Mode;
+import put.atomicrmi.optsva.objects.ObjectProxy.BufferType;
 
 /**
  * Wrapper used to intercept remote object invocations. This is an

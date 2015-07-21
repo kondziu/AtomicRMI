@@ -19,7 +19,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package put.atomicrmi.objects;
+package put.atomicrmi.optsva.objects;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -38,10 +38,10 @@ import put.atomicrmi.optsva.TransactionException;
 import put.atomicrmi.optsva.TransactionRef;
 import put.atomicrmi.optsva.TransactionalRemoteObject;
 import put.atomicrmi.optsva.Access.Mode;
-import put.atomicrmi.refcells.LongHolder;
-import put.atomicrmi.sync.Semaphore;
-import put.atomicrmi.sync.TransactionFailureMonitor;
-import put.atomicrmi.sync.TransactionFailureMonitorImpl;
+import put.atomicrmi.optsva.refcells.LongHolder;
+import put.atomicrmi.optsva.sync.Semaphore;
+import put.atomicrmi.optsva.sync.TransactionFailureMonitor;
+import put.atomicrmi.optsva.sync.TransactionFailureMonitorImpl;
 
 /**
  * Base class for all remote object implementations that are part of some

@@ -24,10 +24,10 @@ package put.atomicrmi.optsva;
 import java.rmi.RemoteException;
 import java.util.UUID;
 
-import put.atomicrmi.objects.ObjectProxy;
-import put.atomicrmi.objects.TransactionalUnicastRemoteObject;
 import put.atomicrmi.optsva.Access.Mode;
-import put.atomicrmi.sync.TransactionFailureMonitor;
+import put.atomicrmi.optsva.objects.ObjectProxy;
+import put.atomicrmi.optsva.objects.TransactionalUnicastRemoteObject;
+import put.atomicrmi.optsva.sync.TransactionFailureMonitor;
 import put.util.ids.IdentifiableRemote;
 
 /**

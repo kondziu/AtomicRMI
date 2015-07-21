@@ -1,4 +1,4 @@
-package put.atomicrmi.objects;
+package put.atomicrmi.optsva.objects;
 
 /**
  * Stores snapshot of particular remote object together with snapshot

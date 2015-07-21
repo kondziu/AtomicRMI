@@ -1,4 +1,4 @@
-package put.atomicrmi.sync;
+package put.atomicrmi.optsva.sync;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
