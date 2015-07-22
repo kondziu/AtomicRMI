@@ -26,16 +26,16 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.LinkedList;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
 
+import put.atomicrmi.optsva.Access.Mode;
 import put.atomicrmi.optsva.RollbackForcedException;
 import put.atomicrmi.optsva.Transaction;
 import put.atomicrmi.optsva.TransactionException;
 import put.atomicrmi.optsva.TransactionRef;
-import put.atomicrmi.optsva.Access.Mode;
-import put.atomicrmi.optsva.sync.Semaphore;
 import put.atomicrmi.optsva.sync.TaskController;
-import put.atomicrmi.optsva.sync.TransactionFailureMonitorImpl;
 import put.atomicrmi.optsva.sync.TaskController.Task;
+import put.atomicrmi.optsva.sync.TransactionFailureMonitorImpl;
 
 /**
  * An implementation of {@link ObjectProxy} interface. It is required to
@@ -48,18 +48,18 @@ public class ObjectProxyImpl extends UnicastRemoteObject implements ObjectProxy 
 	/**
 	 * A semaphore that is closed until read buffering is completed.
 	 */
-	private transient Semaphore readSemaphore = new Semaphore(0);
+	private transient CountDownLatch readSemaphore = new CountDownLatch(1);
 
 	/**
 	 * A semaphore that is closed until write buffering is completed.
 	 */
-	private transient Semaphore writeSemaphore = new Semaphore(0);
+	private transient CountDownLatch writeSemaphore = new CountDownLatch(1);
 
 	/**
 	 * A semaphore that is closed until separate of committing of a read-only
 	 * object is done.
 	 */
-	private transient Semaphore commitSemaphore = new Semaphore(0);
+	private transient CountDownLatch commitSemaphore = new CountDownLatch(1);
 
 	/**
 	 * A structure for holding information about executed methods for the
@@ -84,8 +84,7 @@ public class ObjectProxyImpl extends UnicastRemoteObject implements ObjectProxy 
 	 * @author Konrad Siek
 	 * 
 	 */
-	// TODO rename to BufferReadOnlyObject.
-	private class ReadTask implements Task {
+	private class BufferReadOnly implements Task {
 		@Override
 		public boolean condition(TaskController controller) throws TransactionException {
 			/** Wait on access condition */
@@ -114,12 +113,12 @@ public class ObjectProxyImpl extends UnicastRemoteObject implements ObjectProxy 
 
 			// TODO there must be something better == more lightweight than
 			// semaphores for this
-			readSemaphore.release(1);
+			readSemaphore.countDown();
 
 			/**
 			 * Start early commitment for the object.
 			 */
-			controller.add(new ReadCommitTask());
+			controller.add(new CommitReadOnlyEarly());
 		}
 	}
 
@@ -129,8 +128,7 @@ public class ObjectProxyImpl extends UnicastRemoteObject implements ObjectProxy 
 	 * 
 	 * @author Konrad Siek
 	 */
-	// TODO rename to CommitReadOnlyObjectEarly.
-	private class ReadCommitTask implements Task {
+	private class CommitReadOnlyEarly implements Task {
 		@Override
 		public boolean condition(TaskController controller) throws Exception {
 			/** Wait on commit condition */
@@ -142,7 +140,7 @@ public class ObjectProxyImpl extends UnicastRemoteObject implements ObjectProxy 
 			readOnlyEarlyCommitSuccesful = waitForSnapshot(true);
 			finishTransaction(!readOnlyEarlyCommitSuccesful, true);
 
-			commitSemaphore.release(1);
+			commitSemaphore.countDown();
 		}
 	}
 
@@ -152,8 +150,7 @@ public class ObjectProxyImpl extends UnicastRemoteObject implements ObjectProxy 
 	 * 
 	 * @author Konrad Siek
 	 */
-	// TODO rename to ApplyBufferredWrites.
-	private class WriteTask implements Task {
+	private class ApplyLogBuffer implements Task {
 		@Override
 		public boolean condition(TaskController controller) throws TransactionException {
 			/** Wait on commit condition */
@@ -204,7 +201,7 @@ public class ObjectProxyImpl extends UnicastRemoteObject implements ObjectProxy 
 			object.setCurrentVersion(px);
 			releaseTransaction();
 
-			writeSemaphore.release(1);
+			writeSemaphore.countDown();
 
 			object.transactionUnlock(uid);
 		}
@@ -374,8 +371,7 @@ public class ObjectProxyImpl extends UnicastRemoteObject implements ObjectProxy 
 		try {
 			// XXX This should have been handled by preRead
 			if (readOnlyThreadUsed) {
-				readSemaphore.acquire(1);
-				readSemaphore.release(1);
+				readSemaphore.await();
 			}
 
 			return copyBuffer;
@@ -499,7 +495,7 @@ public class ObjectProxyImpl extends UnicastRemoteObject implements ObjectProxy 
 				 * thread take car of updating the state after we have access.
 				 */
 				writeSynchronizationThreadExists = true;
-				TaskController.theOneThread.add(new WriteTask());
+				TaskController.theOneThread.add(new ApplyLogBuffer());
 			}
 		}
 
@@ -516,8 +512,7 @@ public class ObjectProxyImpl extends UnicastRemoteObject implements ObjectProxy 
 			 */
 			try {
 				/** Synchronize with the Read Thread */
-				readSemaphore.acquire(1);
-				readSemaphore.release(1);
+				readSemaphore.await();
 			} catch (InterruptedException e) {
 				throw new RemoteException(e.getMessage(), e.getCause());
 			}
@@ -634,8 +629,7 @@ public class ObjectProxyImpl extends UnicastRemoteObject implements ObjectProxy 
 			if (mrv == 0) {
 				try {
 					/** Synchronize with the Write Thread */
-					writeSemaphore.acquire(1);
-					writeSemaphore.release(1);
+					writeSemaphore.await();
 				} catch (InterruptedException e) {
 					// Ignore.
 				}
@@ -673,7 +667,7 @@ public class ObjectProxyImpl extends UnicastRemoteObject implements ObjectProxy 
 	}
 
 	public void finishTransaction(boolean restore, boolean readThread) throws RemoteException {
-		if (!readThread && mode == Mode.READ_ONLY) { // 65
+		if (!readThread && mode == Mode.READ_ONLY) { 
 			/**
 			 * Nothing happens here, since everything is handled by a separate
 			 * thread.
@@ -695,8 +689,7 @@ public class ObjectProxyImpl extends UnicastRemoteObject implements ObjectProxy 
 		if (!readThread && mode == Mode.READ_ONLY) {
 			try {
 				/** Synchronize with the Read Thread */
-				commitSemaphore.acquire(1);
-				commitSemaphore.release(1);
+				commitSemaphore.await();
 			} catch (InterruptedException e) {
 				throw new RemoteException(e.getMessage(), e.getCause());
 			}
@@ -707,8 +700,7 @@ public class ObjectProxyImpl extends UnicastRemoteObject implements ObjectProxy 
 
 			if (writeSynchronizationThreadExists) {
 				try {
-					writeSemaphore.acquire(1);
-					writeSemaphore.release(1);
+					writeSemaphore.await();
 				} catch (InterruptedException e) {
 					// Intentionally left blank.
 				}
@@ -816,7 +808,7 @@ public class ObjectProxyImpl extends UnicastRemoteObject implements ObjectProxy 
 		 * transaction and proxy.
 		 */
 		if (mode == Mode.READ_ONLY)
-			TaskController.theOneThread.add(new ReadTask());
+			TaskController.theOneThread.add(new BufferReadOnly());
 	}
 
 	public UUID getUID() throws RemoteException {
