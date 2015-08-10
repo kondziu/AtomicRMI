@@ -5,7 +5,7 @@ Atomic RMI is a distributed transactional memory system built on top of Java
 RMI. It uses pessimistic versioning concurrency control algorithms to maintain
 consistency.
 
-More information: `K. Siek and P.T. Wojciechowski. Atomic RMI: A Distributed Transactional Memory Framework. IJPP 2015. (Open Access.) <http://link.springer.com/article/10.1007%2Fs10766-015-0361-x>`_ 
+More information: K. Siek and P.T. Wojciechowski. Atomic RMI: A Distributed Transactional Memory Framework. IJPP 2015. (Open Access: http://link.springer.com/article/10.1007%2Fs10766-015-0361-x). 
 
 Branches
 --------
