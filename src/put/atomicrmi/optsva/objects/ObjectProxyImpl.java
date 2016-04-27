@@ -31,6 +31,7 @@ import java.util.concurrent.CountDownLatch;
 import put.atomicrmi.optsva.Access.Mode;
 import put.atomicrmi.optsva.RollbackForcedException;
 import put.atomicrmi.optsva.Transaction;
+import put.atomicrmi.optsva.Transaction.Type;
 import put.atomicrmi.optsva.TransactionException;
 import put.atomicrmi.optsva.TransactionRef;
 import put.atomicrmi.optsva.sync.TaskController;
@@ -312,6 +313,8 @@ public class ObjectProxyImpl extends UnicastRemoteObject implements ObjectProxy 
 	 */
 	private final Mode mode;
 
+	private Type type;
+
 	/**
 	 * Creates the object proxy for given remote object.
 	 * 
@@ -332,7 +335,7 @@ public class ObjectProxyImpl extends UnicastRemoteObject implements ObjectProxy 
 	 *             when remote execution fails.
 	 */
 	public ObjectProxyImpl(TransactionRef transaction, UUID tid, TransactionalUnicastRemoteObject object, long calls, long reads,
-			long writes, Mode mode) throws RemoteException {
+			long writes, Mode mode, Transaction.Type type) throws RemoteException {
 
 		super();
 
@@ -340,6 +343,7 @@ public class ObjectProxyImpl extends UnicastRemoteObject implements ObjectProxy 
 		this.object = object;
 		this.uid = tid;
 		this.mode = mode;
+		this.type = type;
 
 		ub = calls;
 		wub = writes;
@@ -550,6 +554,9 @@ public class ObjectProxyImpl extends UnicastRemoteObject implements ObjectProxy 
 			/** If there were no reads, wait for access and make snapshot. */
 			if (mrv == 0) {
 				object.waitForCounter(px - 1);
+				if (type == Type.Irrevocable) {
+					object.waitForSnapshot(px - 1);
+				}
 				object.transactionLock(uid);
 				snapshot = object.snapshot();
 			} else {
@@ -650,6 +657,9 @@ public class ObjectProxyImpl extends UnicastRemoteObject implements ObjectProxy 
 				// TODO is this necessary?
 				// TODO waiting while in transaction lock - can cause deadlock?
 				object.waitForCounter(px - 1);
+				if (type == Type.Irrevocable) {
+					object.waitForSnapshot(px - 1);
+				}
 				object.setCurrentVersion(px);
 				releaseTransaction();
 			}
@@ -709,6 +719,9 @@ public class ObjectProxyImpl extends UnicastRemoteObject implements ObjectProxy 
 			synchronized (this) {
 				if (logBuffer != null) {
 					object.waitForCounter(px - 1);
+					if (type == Type.Irrevocable) {
+						object.waitForSnapshot(px - 1);
+					}
 
 					object.transactionLock(uid);
 
@@ -782,6 +795,9 @@ public class ObjectProxyImpl extends UnicastRemoteObject implements ObjectProxy 
 	public void free() throws RemoteException {
 		if (mv == 0) {
 			object.waitForCounter(px - 1);
+			if (type == Type.Irrevocable) {
+				object.waitForSnapshot(px - 1);
+			}
 			object.transactionLock(uid);
 			snapshot = object.snapshot();
 		} else

@@ -93,6 +93,12 @@ public class Transaction extends UnicastRemoteObject implements TransactionRef {
 	protected final List<ObjectProxy> proxies;
 
 	/**
+	 * Transaction type: irrevocable or not.
+	 */
+	public static enum Type { None, Irrevocable };
+	final private Type type;
+
+	/**
 	 * Creates new transaction. The required argument is a JavaRMI registry
 	 * instance. It is used to obtain global lock instance.
 	 * 
@@ -106,6 +112,27 @@ public class Transaction extends UnicastRemoteObject implements TransactionRef {
 	public Transaction() throws RemoteException {
 		state = State.PREPARING;
 		id = UUID.randomUUID();
+		type = Type.None;
+
+		Heartbeat.thread.register(id);
+		proxies = new ArrayList<ObjectProxy>();
+	}
+	
+	/**
+	 * Creates new transaction. The required argument is a JavaRMI registry
+	 * instance. It is used to obtain global lock instance.
+	 * 
+	 * @param registries
+	 *            a references to remote registries.
+	 * @throws RemoteException
+	 *             when remote exception occurs during retrieval of remote
+	 *             global lock.
+	 * 
+	 */
+	public Transaction(Type type) throws RemoteException {
+		state = State.PREPARING;
+		id = UUID.randomUUID();
+		this.type = type;
 
 		Heartbeat.thread.register(id);
 		proxies = new ArrayList<ObjectProxy>();
@@ -331,7 +358,7 @@ public class Transaction extends UnicastRemoteObject implements TransactionRef {
 
 		try {
 			TransactionalRemoteObject remote = (TransactionalRemoteObject) obj;
-			ObjectProxy proxy = (ObjectProxy) remote.createProxy(this, id, allCalls, reads, writes, mode);
+			ObjectProxy proxy = (ObjectProxy) remote.createProxy(this, id, allCalls, reads, writes, mode, type);
 			proxies.add(proxy);
 
 			Heartbeat.thread.addFailureMonitor(id, remote.getFailureMonitor());

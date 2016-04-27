@@ -34,6 +34,7 @@ import java.rmi.server.RMIServerSocketFactory;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.UUID;
 
+import put.atomicrmi.optsva.Transaction;
 import put.atomicrmi.optsva.TransactionException;
 import put.atomicrmi.optsva.TransactionRef;
 import put.atomicrmi.optsva.TransactionalRemoteObject;
@@ -132,14 +133,10 @@ public class TransactionalUnicastRemoteObject extends UnicastRemoteObject implem
 		return super.clone();
 	}
 
-	public ObjectProxy createProxy(TransactionRef transaction, UUID tid, long calls, long reads, long writes, Mode mode)
+	public ObjectProxy createProxy(TransactionRef transaction, UUID tid, long calls, long reads, long writes, Mode mode, Transaction.Type type)
 			throws RemoteException {
 		return (ObjectProxy) ObjectProxyHandler.create(new ObjectProxyImpl(transaction, tid, this, calls, reads, writes,
-				mode));
-	}
-
-	public ObjectProxy createUpdateProxy(TransactionRef transaction, UUID tid, long writes) throws RemoteException {
-		return (ObjectProxy) ObjectProxyHandler.create(new UpdateObjectProxyImpl(transaction, tid, this, writes));
+				mode, type));
 	}
 
 	public TransactionFailureMonitor getFailureMonitor() throws RemoteException {
