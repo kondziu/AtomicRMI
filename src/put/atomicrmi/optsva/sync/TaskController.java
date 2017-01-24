@@ -194,6 +194,7 @@ public class TaskController extends Thread {
 					else
 						taskIter.remove();
 				} catch (Exception e) {
+					e.printStackTrace();
 					throw new RuntimeException(e.getMessage(), e.getCause());
 				}
 			}
