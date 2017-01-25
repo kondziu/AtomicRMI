@@ -8,6 +8,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -17,20 +18,30 @@ import java.util.*;
 /**
  * Created by ksiek on 24.01.17.
  */
-public class ActorSystem {
+public class AgentSystem {
     private static final int INF = Transaction.INF;
     private final Registry registry;
 
-    public ActorSystem() throws RemoteException {
+    public AgentSystem() throws RemoteException {
         registry = LocateRegistry.createRegistry(9001);
     }
 
-    public <T> void registerBelief(String id, T value, boolean initiallyTrue) throws RemoteException {
-        registry.rebind(id, new BeliefImpl<>(value, initiallyTrue));
+    public <T> void registerBelief(String id, T value, boolean initiallyTrue) throws RemoteException, IllegalAccessException, NotBoundException, InvocationTargetException, AlreadyBoundException {
+        Belief<T> belief = new BeliefImpl<>(id, value, initiallyTrue);
+        registry.bind(belief.getID(), belief);
+
+        if (initiallyTrue) {
+            trigger(Agent.Trigger.ADD_BELIEF, belief.getID());
+        }
     }
 
-    public <T> void registerGoal(String id, T value, boolean initiallyTrue) throws RemoteException {
-        registry.rebind(id, new GoalImpl<>(value, initiallyTrue));
+    public <T> void registerGoal(String id, T value, boolean initiallyTrue) throws RemoteException, IllegalAccessException, NotBoundException, InvocationTargetException, AlreadyBoundException {
+        Goal<T> goal = new GoalImpl<>(id, value, initiallyTrue);
+        registry.bind(goal.getID(), goal);
+
+        if (initiallyTrue) {
+            trigger(Agent.Trigger.ADD_GOAL, goal.getID());
+        }
     }
 
     public <T> T getFromRegistry(String id) throws RemoteException, NotBoundException {
@@ -170,15 +181,15 @@ public class ActorSystem {
                 /* Trigger. */
                 if(method.getName().equals("setTrue")) {
                     if (object instanceof Belief) {
-                        trigger(Agent.Trigger.ADD_BELIEF, "...");
+                        trigger(Agent.Trigger.ADD_BELIEF, ((Belief) object).getID());
                     } else if (object instanceof Goal) {
-                        trigger(Agent.Trigger.ADD_GOAL, "...");
+                        trigger(Agent.Trigger.ADD_GOAL, ((Goal) object).getID());
                     }
                 } else if(method.getName().equals("setFalse")) {
                     if (object instanceof Belief) {
-                        trigger(Agent.Trigger.REMOVE_BELIEF, "...");
+                        trigger(Agent.Trigger.REMOVE_BELIEF, ((Belief) object).getID());
                     } else if (object instanceof Goal) {
-                        trigger(Agent.Trigger.REMOVE_GOAL, "...");
+                        trigger(Agent.Trigger.REMOVE_GOAL, ((Goal) object).getID());
                     }
                 }
                 return result;
@@ -229,7 +240,7 @@ public class ActorSystem {
                     System.out.println(agent + " -> " + method.getName() + " registered as a plan for trigger (" + event.term() + ", " + event.type() + ")");
                 }
             } else {
-                System.out.println(method.getName() + " is not a plan.");
+                System.out.println(method.getName() + " is not a plan");
             }
         }
     }
@@ -257,9 +268,9 @@ public class ActorSystem {
     }
 
 
-    public static void main(String[] args) throws RemoteException, NotBoundException, InvocationTargetException, IllegalAccessException {
+    public static void main(String[] args) throws RemoteException, NotBoundException, InvocationTargetException, IllegalAccessException, AlreadyBoundException {
         /* Create agent system. */
-        ActorSystem agentSystem = new ActorSystem();
+        AgentSystem agentSystem = new AgentSystem();
 
         /* Initialize universe. */
         agentSystem.registerBelief("X", 0, true);
@@ -274,7 +285,7 @@ public class ActorSystem {
 
         /* Register plans and their triggers. */
         agentSystem.register(agent1);
-        //agentSystem.register(agent2);
+        agentSystem.register(agent2);
 
         /* Start the system. */
         agentSystem.trigger(Agent.Trigger.ADD_GOAL, "G1");

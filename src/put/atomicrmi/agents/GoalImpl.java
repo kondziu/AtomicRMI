@@ -9,13 +9,18 @@ import java.rmi.RemoteException;
  * Created by ksiek on 24.01.17.
  */
 public class GoalImpl<T> extends TransactionalUnicastRemoteObject implements Goal<T>, Cloneable {
+    private final String id;
     private T value;
     private boolean predicate;
 
-    protected GoalImpl(T value, boolean initiallyTrue) throws RemoteException {
+    protected GoalImpl(String id, T value, boolean initiallyTrue) throws RemoteException {
         this.value = value;
         this.predicate = initiallyTrue;
+        this.id = id;
     }
+
+    @Override
+    public String getID() throws RemoteException { return id; }
 
     @Override
     public T read() {

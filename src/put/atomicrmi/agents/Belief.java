@@ -10,6 +10,9 @@ import java.rmi.RemoteException;
  * Created by ksiek on 24.01.17.
  */
 public interface Belief<T> extends Remote {
+    @Access(Access.Mode.NONTRANSACTIONAL)
+    String getID() throws RemoteException;
+
     @Access(Access.Mode.READ_ONLY)
     T read() throws RemoteException;
 

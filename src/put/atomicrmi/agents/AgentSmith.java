@@ -6,7 +6,7 @@ package put.atomicrmi.agents;
  */
 public class AgentSmith implements Agent {
     @Triggers({
-            @Event(type=Trigger.ADD_GOAL, term="G1")
+            @Event(type=Trigger.REMOVE_GOAL, term="G1")
     })
     @Context({"X", "Y", "Z"})
     @Execution(
@@ -15,26 +15,41 @@ public class AgentSmith implements Agent {
                 @AccessBelief(belief="Y", reads=1, writes=1),
             },
             goals = {
-                @AccessGoal(goal="G1", reads=1, writes=1)
+                @AccessGoal(goal="G2", reads=0, writes=1)
             }
     )
-    public void plan(Belief x, Belief y, Goal g1) throws Exception {
-        System.out.println("Executing plan \"plan\"");
+    public void planA(Belief x, Belief y, Goal g2) throws Exception {
+        System.out.println("Smith executing plan \"planA\"");
+
         x.read();
         x.write(1);
-
         y.read();
         y.write(1);
 
-        if(g1.isTrue()) {
-            g1.setFalse();
-        } else {
-            g1.setTrue();
-        }
-        System.out.println("Done executing plan \"plan\"");
+        g2.setTrue();
+        System.out.println("Smith done executing plan \"planA\"");
     }
 
-    public void notAPLan() {
+    @Triggers({
+            @Event(type=Trigger.ADD_GOAL, term="G2")
+    })
+    @Context({"X", "Y"})
+    @Execution(
+            beliefs={
+                    @AccessBelief(belief="X", reads=0, writes=1),
+                    @AccessBelief(belief="Y", reads=0, writes=1),
+            },
+            goals = {
+                    @AccessGoal(goal="G2", reads=0, writes=1)
+            }
+    )
+    public void planB(Belief x, Belief y, Goal g2) throws Exception {
+        System.out.println("Smith executing plan \"planB\"");
 
+        x.write(2);
+        y.write(2);
+
+        g2.setFalse();
+        System.out.println("Smith done executing plan \"planB\"");
     }
 }
