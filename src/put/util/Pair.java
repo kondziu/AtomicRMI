@@ -10,8 +10,8 @@ public class Pair<L, R> {
 		this.right = right;
 	}
 
-	final private L left;
-	final private R right;
+	final public L left;
+	final public R right;
 
 	// public L getLeft() {
 	// return left;
