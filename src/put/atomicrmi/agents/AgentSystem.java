@@ -26,22 +26,20 @@ public class AgentSystem {
         registry = LocateRegistry.createRegistry(9001);
     }
 
-    public <T> void registerBelief(String id, T value, boolean initiallyTrue) throws RemoteException, IllegalAccessException, NotBoundException, InvocationTargetException, AlreadyBoundException {
+    public <T> void registerBelief(String id, T value, boolean initiallyTrue) throws RemoteException, IllegalAccessException, NotBoundException, InvocationTargetException {
         Belief<T> belief = new BeliefImpl<>(id, value, initiallyTrue);
-        registry.bind(belief.getID(), belief);
+        registry.rebind(belief.getID(), belief);
 
-        if (initiallyTrue) {
-            trigger(Agent.Trigger.ADD_BELIEF, belief.getID());
-        }
+        trigger(initiallyTrue ? Agent.Trigger.ADD_BELIEF : Agent.Trigger.REMOVE_BELIEF, belief.getID());
+
     }
 
-    public <T> void registerGoal(String id, T value, boolean initiallyTrue) throws RemoteException, IllegalAccessException, NotBoundException, InvocationTargetException, AlreadyBoundException {
+    public <T> void registerGoal(String id, T value, boolean initiallyTrue) throws RemoteException, IllegalAccessException, NotBoundException, InvocationTargetException {
         Goal<T> goal = new GoalImpl<>(id, value, initiallyTrue);
-        registry.bind(goal.getID(), goal);
+        registry.rebind(goal.getID(), goal);
 
-        if (initiallyTrue) {
-            trigger(Agent.Trigger.ADD_GOAL, goal.getID());
-        }
+        trigger(initiallyTrue ? Agent.Trigger.ADD_GOAL : Agent.Trigger.REMOVE_GOAL, goal.getID());
+
     }
 
     public <T> T getFromRegistry(String id) throws RemoteException, NotBoundException {
@@ -120,12 +118,11 @@ public class AgentSystem {
         }
 
         /* Add triggers. */
-        for (int i = 0; i < goals.length; i++) {
-            goals[i] = addTriggers(goals[i]);
-        }
-//        for (int i = 0; i < beliefs.length; i++) {
-//            beliefs[i] = addTriggers(beliefs[i]);
-//        }
+        for (int i = 0; i < goals.length; i++)
+            goals[i] = (Goal) Proxy.newProxyInstance(goals[i].getClass().getClassLoader(), new Class[] {Goal.class}, new TriggerProxy(goals[i]));
+
+        for (int i = 0; i < beliefs.length; i++)
+            beliefs[i] = (Belief) Proxy.newProxyInstance(beliefs[i].getClass().getClassLoader(), new Class[] {Belief.class}, new TriggerProxy(beliefs[i]));
 
         try {
             transaction.start();
@@ -177,7 +174,6 @@ public class AgentSystem {
                 boolean b = true;
                 Object result = method.invoke(object, args);
 
-                System.out.println("executed " + method.getName());
                 /* Trigger. */
                 if(method.getName().equals("setTrue")) {
                     if (object instanceof Belief) {
@@ -199,12 +195,6 @@ public class AgentSystem {
                 throw e;
             }
         }
-    }
-
-    private Goal addTriggers(Goal goal) {
-        Goal proxy = (Goal) Proxy.newProxyInstance(goal.getClass().getClassLoader(), new Class[] {Goal.class}, new TriggerProxy(goal));
-        return proxy;
-
     }
 
     private boolean checkBeliefs(List<Belief> contextBeliefs) throws RemoteException {
@@ -268,7 +258,7 @@ public class AgentSystem {
     }
 
 
-    public static void main(String[] args) throws RemoteException, NotBoundException, InvocationTargetException, IllegalAccessException, AlreadyBoundException {
+    public static void main(String[] args) throws Exception {
         /* Create agent system. */
         AgentSystem agentSystem = new AgentSystem();
 
@@ -290,6 +280,8 @@ public class AgentSystem {
         /* Start the system. */
         agentSystem.trigger(Agent.Trigger.ADD_GOAL, "G1");
 
-        System.out.println("done");
+        Thread.sleep(10000);
+        System.out.println("Re-register goal");
+        agentSystem.registerGoal("G2", 0, true);
     }
 }
