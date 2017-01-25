@@ -15,11 +15,11 @@ import java.util.*;
 /**
  * Created by ksiek on 24.01.17.
  */
-public class Eval {
+public class ActorSystem {
     private static final int INF = Transaction.INF;
     private final Registry registry;
 
-    public Eval() throws RemoteException {
+    public ActorSystem() throws RemoteException {
         registry = LocateRegistry.createRegistry(9001);
     }
 
@@ -210,7 +210,7 @@ public class Eval {
 
     public static void main(String[] args) throws RemoteException, NotBoundException, InvocationTargetException, IllegalAccessException {
         /* Create agent system. */
-        Eval agentSystem = new Eval();
+        ActorSystem agentSystem = new ActorSystem();
 
         /* Initialize universe. */
         agentSystem.registerBelief("X", 0, true);
