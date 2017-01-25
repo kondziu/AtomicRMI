@@ -4,8 +4,10 @@ import put.atomicrmi.optsva.RollbackForcedException;
 import put.atomicrmi.optsva.Transaction;
 import put.util.Pair;
 
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -42,17 +44,6 @@ public class ActorSystem {
         for (int i = 0; i < id.length; i++)
             objects.add((T) registry.lookup(id[i]));
         return objects;
-    }
-
-    public void evaluatePlan(Agent agent, String plan) throws RemoteException, NotBoundException, InvocationTargetException, IllegalAccessException {
-        Method[] methods = agent.getClass().getMethods();
-        for (Method method : methods) {
-            if (method.getName() != plan)
-                continue;
-            evaluatePlan(agent, method);
-            return;
-        }
-        throw new RuntimeException("Plan " + plan + " not found in agent class " + agent.getClass().getCanonicalName() + ".");
     }
 
     public Object evaluatePlan(Agent agent, Method method) throws RemoteException, NotBoundException, InvocationTargetException, IllegalAccessException {
@@ -117,6 +108,14 @@ public class ActorSystem {
             }
         }
 
+        /* Add triggers. */
+        for (int i = 0; i < goals.length; i++) {
+            goals[i] = addTriggers(goals[i]);
+        }
+//        for (int i = 0; i < beliefs.length; i++) {
+//            beliefs[i] = addTriggers(beliefs[i]);
+//        }
+
         try {
             transaction.start();
             System.out.println("Starting transaction for " + agent + " -> " + method.getName());
@@ -147,6 +146,53 @@ public class ActorSystem {
             System.out.println("Forced abort on transaction for " + agent + " -> " + method.getName());
             return null;
         }
+
+    }
+
+    public class TriggerProxy implements InvocationHandler {
+        private final Object object;
+
+        public TriggerProxy(Object object) {
+            this.object = object;
+        }
+        
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            try {
+                System.out.println(method.getName() + " " + args);
+                for(int i = 0 ; args != null && i < args.length; i++) {
+                    System.out.println("arg " + i + ": " + args[i]);
+                }
+                boolean b = true;
+                Object result = method.invoke(object, args);
+
+                System.out.println("executed " + method.getName());
+                /* Trigger. */
+                if(method.getName().equals("setTrue")) {
+                    if (object instanceof Belief) {
+                        trigger(Agent.Trigger.ADD_BELIEF, "...");
+                    } else if (object instanceof Goal) {
+                        trigger(Agent.Trigger.ADD_GOAL, "...");
+                    }
+                } else if(method.getName().equals("setFalse")) {
+                    if (object instanceof Belief) {
+                        trigger(Agent.Trigger.REMOVE_BELIEF, "...");
+                    } else if (object instanceof Goal) {
+                        trigger(Agent.Trigger.REMOVE_GOAL, "...");
+                    }
+                }
+                return result;
+            } catch (InvocationTargetException e) {
+                throw e.getTargetException();
+            } catch (Exception e) {
+                throw e;
+            }
+        }
+    }
+
+    private Goal addTriggers(Goal goal) {
+        Goal proxy = (Goal) Proxy.newProxyInstance(goal.getClass().getClassLoader(), new Class[] {Goal.class}, new TriggerProxy(goal));
+        return proxy;
 
     }
 
@@ -190,7 +236,9 @@ public class ActorSystem {
 
     public void trigger(Agent.Trigger trigger, String term) throws RemoteException, InvocationTargetException, IllegalAccessException, NotBoundException {
         Set<Pair<Agent, Method>> plans = registeredPlans.get(new Pair<>(trigger, term));
-        System.out.println(plans);
+        System.out.println("Triggering (" + trigger + "," + term + ") -> " + plans);
+        if (plans == null)
+            return;
         for (Pair<Agent, Method> pair : plans) {
             final Agent agent = pair.left;
             final Method method = pair.right;
@@ -200,6 +248,7 @@ public class ActorSystem {
                     try {
                         evaluatePlan(agent, method);
                     } catch(Exception e) {
+                        e.printStackTrace();
                         throw new RuntimeException(e.getMessage(), e.getCause());
                     }
                 }
@@ -217,6 +266,7 @@ public class ActorSystem {
         agentSystem.registerBelief("Y", 0, true);
         agentSystem.registerBelief("Z", 0, true);
         agentSystem.registerGoal("G1", 0, true);
+        agentSystem.registerGoal("G2", 0, false);
 
         /* Initialize agents. */
         Agent agent1 = new AgentCarter();
@@ -224,10 +274,9 @@ public class ActorSystem {
 
         /* Register plans and their triggers. */
         agentSystem.register(agent1);
-        agentSystem.register(agent2);
+        //agentSystem.register(agent2);
 
-        /*************************/
-        //agentSystem.evaluatePlan(agent, "plan");
+        /* Start the system. */
         agentSystem.trigger(Agent.Trigger.ADD_GOAL, "G1");
 
         System.out.println("done");

@@ -135,6 +135,9 @@ public class ObjectProxyHandler implements InvocationHandler {
 			case WRITE_ONLY:
 				bufferred = proxy.preWrite();
 				break;
+			case NONTRANSACTIONAL:
+				bufferred = BufferType.NONE;
+				break;
 			default:
 				throw new RemoteException("Illegal access type: " + mode);
 			}
@@ -180,6 +183,8 @@ public class ObjectProxyHandler implements InvocationHandler {
 		case WRITE_ONLY:
 			proxy.postWrite();
 			break;
+		case NONTRANSACTIONAL:
+			break;
 		default:
 			throw new RemoteException("Illegal access type: " + mode);
 		}
@@ -199,7 +204,7 @@ public class ObjectProxyHandler implements InvocationHandler {
 	 *         declared mode and <code>false</code> otherwise
 	 */
 	private boolean modesAgree(Mode actual, Mode declared) {
-		if (declared == Mode.ANY) {
+		if (declared == Mode.ANY || actual == Mode.NONTRANSACTIONAL) {
 			return true;
 		}
 
