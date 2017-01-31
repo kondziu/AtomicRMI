@@ -9,12 +9,12 @@ import java.rmi.RemoteException;
 /**
  * Created by ksiek on 24.01.17.
  */
-public class BeliefImpl<T> extends TransactionalUnicastRemoteObject implements Belief<T>, Serializable, Cloneable {
+public class BeliefImpl extends TransactionalUnicastRemoteObject implements Belief, Serializable, Cloneable {
     private final String id;
-    private T value;
+    private String value;
     private boolean predicate;
 
-    protected BeliefImpl(String id, T value, boolean initiallyTrue) throws RemoteException {
+    protected BeliefImpl(String id, String value, boolean initiallyTrue) throws RemoteException {
         this.value = value;
         this.predicate = initiallyTrue;
         this.id = id;
@@ -24,12 +24,12 @@ public class BeliefImpl<T> extends TransactionalUnicastRemoteObject implements B
     public String getID() throws RemoteException { return id; }
 
     @Override
-    public T read() {
+    public String read() {
         return value;
     }
 
     @Override
-    public void write(T value) {
+    public void write(String value) {
         this.value = value;
     }
 

@@ -22,7 +22,7 @@ public class AgentCarter implements Agent {
                 @AccessGoal(goal="G1", reads=1, writes=1)
             }
     )
-    public void planA(Belief x, Belief y, Belief z, Goal g1) throws Exception {
+    public void planA(AgentSystem system, Belief x, Belief y, Belief z, Goal g1) throws Exception {
         System.out.println("Carter executing plan \"planA\"");
         x.read();
 
@@ -52,7 +52,7 @@ public class AgentCarter implements Agent {
                     @AccessGoal(goal="G2", reads=0, writes=1)
             }
     )
-    public void planB(Belief x, Belief y, Goal g2) throws Exception {
+    public void planB(AgentSystem system, Belief x, Belief y, Goal g2) throws Exception {
         System.out.println("Carter executing plan \"planB\"");
 
         x.write(2);

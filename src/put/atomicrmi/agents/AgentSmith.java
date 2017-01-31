@@ -18,7 +18,7 @@ public class AgentSmith implements Agent {
                 @AccessGoal(goal="G2", reads=0, writes=1)
             }
     )
-    public void planA(Belief x, Belief y, Goal g2) throws Exception {
+    public void planA(AgentSystem system, Belief x, Belief y, Goal g2) throws Exception {
         System.out.println("Smith executing plan \"planA\"");
 
         x.read();
@@ -43,13 +43,15 @@ public class AgentSmith implements Agent {
                     @AccessGoal(goal="G2", reads=0, writes=1)
             }
     )
-    public void planB(Belief x, Belief y, Goal g2) throws Exception {
+    public void planB(AgentSystem system, Belief x, Belief y, Goal g2) throws Exception {
         System.out.println("Smith executing plan \"planB\"");
 
         x.write(2);
         y.write(2);
 
         g2.setFalse();
+
+        system.registerGoal("G3", 0, true);
         System.out.println("Smith done executing plan \"planB\"");
     }
 }
